@@ -101,18 +101,22 @@ namespace ProperFlanking
     {
         static bool Prefix(RuleCalculateAttackBonus __instance, RulebookEventContext context)
         {
-            var m_InnerRule = Harmony12.Traverse.Create(__instance).Field("m_InnerRule").GetValue<RuleCalculateAttackBonusWithoutTarget>();
+            var tr = Harmony12.Traverse.Create(__instance);
+            var m_InnerRule = tr.Field("m_InnerRule").GetValue<RuleCalculateAttackBonusWithoutTarget>();
             int Result;
             Result = Rulebook.Trigger<RuleCalculateAttackBonusWithoutTarget>(m_InnerRule).Result;
+            tr.Property("Result").SetValue(Result);
             if (UnitPartConcealment.Calculate(__instance.Target, __instance.Initiator) == Concealment.Total)
             {
                 __instance.ConcealmentBonus = 2;
                   Result += __instance.ConcealmentBonus;
+                tr.Property("Result").SetValue(Result);
             }
             if (Flanking.isFlankedBy(__instance.Target, __instance.Initiator) && __instance.Weapon.Blueprint.IsMelee)
             {
                 __instance.FlankingBonus = 2;
                 Result += __instance.FlankingBonus;
+                tr.Property("Result").SetValue(Result);
             }
             if (__instance.Weapon.Blueprint.IsRanged && !__instance.IgnoreRangedPenalty)
             {
@@ -122,16 +126,16 @@ namespace ProperFlanking
                     {
                         __instance.ShootIntoCombatBonus = -4;
                         Result += __instance.ShootIntoCombatBonus;
+                        tr.Property("Result").SetValue(Result);
                         break;
                     }
                 }
             }
-            Harmony12.Traverse.Create(__instance).Property("Result").SetValue(Result);
             if (!__instance.Initiator.IsPlayerFaction || Game.Instance.Player.Difficulty.TrueDeath)
                 return false;
             int num = Math.Max(0, (int)__instance.Initiator.Stats.BaseAttackBonus - __instance.AttackBonusPenalty - Result - 2);
             Result += num;
-            Harmony12.Traverse.Create(__instance).Property("Result").SetValue(Result);
+            tr.Property("Result").SetValue(Result);
             if (num <= 0)
                 return false;
             __instance.AddTemporaryModifier(__instance.Initiator.Stats.AdditionalAttackBonus.AddModifier(num, (GameLogicComponent)null, ModifierDescriptor.Difficulty));
@@ -149,15 +153,37 @@ namespace ProperFlanking
             var tr = Harmony12.Traverse.Create(__instance);
             AttackResult Result;
             if (!__instance.WeaponStats.IsTriggererd)
+            {
                 Rulebook.Trigger<RuleCalculateWeaponStats>(__instance.WeaponStats);
+            }
             bool flag1 = __instance.Target.Descriptor.State.HasCondition(UnitCondition.Confusion);
             bool flag2 = !__instance.Target.IsEnemy(__instance.Initiator) && !__instance.Target.Faction.Neutral && !flag1;
             if (__instance.Initiator == __instance.Target || __instance.AttackType.IsTouch() && flag2)
+            {
                 __instance.AutoHit = true;
+            }
             if (__instance.AutoHit)
             {
                 Result = AttackResult.Hit;
                 tr.Property("Result").SetValue(Result);
+                tr.Property("IsCriticalConfirmed").SetValue(__instance.AutoCriticalThreat && __instance.AutoCriticalConfirmation);
+                if (__instance.IsSneakAttack || __instance.IsCriticalConfirmed || __instance.PreciseStrike > 0)
+                {
+                    int? nullable = __instance.Target.Get<UnitPartFortification>()?.Value;
+                    tr.Property("FortificationChance").SetValue(!nullable.HasValue ? 0 : nullable.Value);
+                    if (__instance.TargetUseFortification)
+                    {
+                        tr.Property("FortificationRoll").SetValue(RulebookEvent.Dice.D100);
+                        if (!__instance.FortificationOvercomed)
+                        {
+                            tr.Property("FortificationNegatesSneakAttack").SetValue(__instance.IsSneakAttack);
+                            tr.Property("FortificationNegatesCriticalHit").SetValue(__instance.IsCriticalConfirmed);
+                            tr.Property("IsSneakAttack").SetValue(false);
+                            tr.Property("IsCriticalConfirmed").SetValue(false);
+                            __instance.PreciseStrike = 0;
+                        }
+                    }
+                }
             }
             else if (__instance.AutoMiss)
             {
@@ -176,7 +202,6 @@ namespace ProperFlanking
                 Result = !flag3 ? __instance.Target.Stats.AC.SelectMissReason(__instance.IsTargetFlatFooted, __instance.AttackType.IsTouch()) : AttackResult.Hit;
                 tr.Property("Result").SetValue(Result);
                 var is_flanked = Flanking.isFlankedBy(__instance.Target, __instance.Initiator);
-
                 tr.Property("IsSneakAttack").SetValue(__instance.IsHit && !__instance.ImmuneToSneakAttack && (__instance.IsTargetFlatFooted || is_flanked) && (int)__instance.Initiator.Stats.SneakAttack > 0);
                 CriticalHitPower critsOnParty = Game.Instance.Player.Difficulty.CritsOnParty;
                 tr.Property("IsCriticalRoll").SetValue(flag3 && !__instance.ImmuneToCriticalHit && (__instance.Roll >= __instance.WeaponStats.CriticalEdge || __instance.AutoCriticalThreat) && (!__instance.Target.IsPlayerFaction || critsOnParty == CriticalHitPower.Weak || critsOnParty == CriticalHitPower.Normal));
@@ -236,12 +261,12 @@ namespace ProperFlanking
                 __instance.Parry.Trigger(context);
                 if (__instance.Parry.Roll + __instance.Parry.AttackBonus > __instance.Roll + __instance.AttackBonus)
                 {
-                    Result = AttackResult.Parried; tr.Property("Result").SetValue(Result);
+                    Result = AttackResult.Parried;
                     tr.Property("Result").SetValue(Result);
                 }
             }
             tr.Property("Result").SetValue(Result);
-            tr.Property("IsSneakAttack").SetValue(tr.Property("IsSneakAttack").GetValue<bool>() & __instance.IsHit);
+            tr.Property("IsSneakAttack").SetValue(tr.Property("IsSneakAttack").GetValue<bool>() && __instance.IsHit);
             EventBus.RaiseEvent<IAttackHandler>((Action<IAttackHandler>)(h => h.HandleAttackHitRoll(__instance)));
             return false;
         }
@@ -400,14 +425,14 @@ namespace ProperFlanking
 
             var engaged_array = unit.CombatState.EngagedBy.ToArray();
 
-            if (!engaged_array.Contains(attacker) || !isAttackingInMelee(unit, attacker))
+            if (!engaged_array.Contains(attacker) || !isAttacking(unit, attacker))
             {
                 return false;
             }
             var attacker_position = attacker.Position - unit_position;
             for (int i = 0; i < engaged_array.Length; i++)
             {
-                if (engaged_array[i] == attacker || !isAttackingInMelee(unit, engaged_array[i]))
+                if (engaged_array[i] == attacker || !isAttacking(unit, engaged_array[i]))
                 {
                     continue;
                 }
@@ -434,9 +459,9 @@ namespace ProperFlanking
         }
 
 
-        static bool isAttackingInMelee(UnitEntityData unit, UnitEntityData attacker)
+        static bool isAttacking(UnitEntityData unit, UnitEntityData attacker)
         {
-            return attacker.Commands.AnyCommandTargets(unit) && attacker.Body.PrimaryHand.Weapon.Blueprint.IsMelee;
+            return attacker.Commands.AnyCommandTargets(unit);
         }
 
 
