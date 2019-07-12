@@ -121,6 +121,7 @@
   <ItemGroup>
     <Compile Include="Flanking.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="ManualPatches.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="info.json">

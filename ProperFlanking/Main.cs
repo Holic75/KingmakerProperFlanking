@@ -44,6 +44,19 @@ namespace ProperFlanking
                 Main.DebugLog("Loading Proper Flanking");
                 var harmony = Harmony12.HarmonyInstance.Create(modEntry.Info.Id);
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
+
+                Type CoordinatedShotAttackBonusType = Type.GetType("CallOfTheWild.NewMechanics.CoordinatedShotAttackBonus, CallOfTheWild");
+                if (CoordinatedShotAttackBonusType != null)
+                {
+                    logger.Log("Found CallOfTheWild.NewMechanics.CoordinatedShotAttackBonus, patching...");
+                    harmony.Patch(Harmony12.AccessTools.Method(CoordinatedShotAttackBonusType, "OnEventAboutToTrigger"),
+                                   prefix: new Harmony12.HarmonyMethod(typeof(ProperFlanking.ManualPatching.CoordinatedShotAttcakBonus_OnEventAboutToTrigger_Patch), "Prefix")
+                                 );
+                }
+                else
+                {
+                    logger.Log("CallOfTheWild.NewMechanics.CoordinatedShotAttackBonus not found.");
+                }
             }
             catch (Exception ex)
             {
