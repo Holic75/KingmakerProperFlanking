@@ -34,7 +34,7 @@ namespace ProperFlanking
                 foreach (UnitEntityData unitEntityData in evt.Target.CombatState.EngagedBy)
                 {
                     if ((unitEntityData.Descriptor.HasFact(coordinated_shot_fact) || solo_tactics)
-                        && unitEntityData != owner.Unit)
+                        && unitEntityData != owner.Unit && !Cover.hasCoverDueFrom(evt.Target, unitEntityData, owner.Unit, evt.Weapon))
                     {
                         bonus = Math.Max(bonus, (Flanking.isFlankedBy(evt.Target, unitEntityData) ? attack_bonus + additional_flank_bonus : attack_bonus));
                     }

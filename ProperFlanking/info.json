@@ -7,5 +7,5 @@
   "Requirements": [],
   "AssemblyName": "ProperFlanking.dll",
   "HomePage": "https://www.nexusmods.com/pathfinderkingmaker/mods/116/",
-  "EntryMethod": "ProperFlanking.Main.Load"
+  "EntryMethod": "Main.Load"
 }

@@ -65,6 +65,7 @@
   <ItemGroup>
     <Reference Include="0Harmony12">
       <HintPath>..\..\..\Users\DenisPc\Downloads\UnityModManager-21-0-13-1-1551447200\UnityModManager\0Harmony12.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\Assembly-CSharp.dll</HintPath>
@@ -112,6 +113,7 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>C:\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\Newtonsoft.Json.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityModManager">
       <HintPath>..\..\..\Users\DenisPc\Downloads\UnityModManager-21-0-13-1-1551447200\UnityModManager\UnityModManager.dll</HintPath>
@@ -119,9 +121,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common.cs" />
     <Compile Include="Flanking.cs" />
+    <Compile Include="Helpers.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="ManualPatches.cs" />
+    <Compile Include="NewMechanics.cs" />
+    <Compile Include="SaveCompatibility.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="info.json">
@@ -130,6 +136,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Repository.json" />
+    <None Include="settings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

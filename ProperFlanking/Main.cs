@@ -15,18 +15,36 @@ using Newtonsoft.Json;
 using System.IO;
 using Newtonsoft.Json.Linq;
 
-namespace ProperFlanking
+
+public class Main
 {
-    public class Main
+    public class Settings
     {
-        public static UnityModManagerNet.UnityModManager.ModEntry.ModLogger logger;
-        internal static LibraryScriptableObject library;
+        public bool ignore_cover { get; }
 
-        static readonly Dictionary<Type, bool> typesPatched = new Dictionary<Type, bool>();
-        static readonly List<String> failedPatches = new List<String>();
-        static readonly List<String> failedLoading = new List<String>();
+        public Settings()
+        {
 
-        [System.Diagnostics.Conditional("DEBUG")]
+            using (StreamReader settings_file = File.OpenText("Mods/ProperFlanking/settings.json"))
+            using (JsonTextReader reader = new JsonTextReader(settings_file))
+            {
+                JObject jo = (JObject)JToken.ReadFrom(reader);
+                ignore_cover = (bool)jo["ignore_cover"];
+            }
+        }
+    }
+
+    public static UnityModManagerNet.UnityModManager.ModEntry.ModLogger logger;
+    internal static LibraryScriptableObject library;
+
+    static readonly Dictionary<Type, bool> typesPatched = new Dictionary<Type, bool>();
+    static readonly List<String> failedPatches = new List<String>();
+    static readonly List<String> failedLoading = new List<String>();
+    static public Settings settings = new Settings();
+
+
+
+    [System.Diagnostics.Conditional("DEBUG")]
         public static void DebugLog(string msg)
         {
             if (logger != null) logger.Log(msg);
@@ -42,9 +60,10 @@ namespace ProperFlanking
             {
                 logger = modEntry.Logger;
                 Main.DebugLog("Loading Proper Flanking");
+                
                 var harmony = Harmony12.HarmonyInstance.Create(modEntry.Info.Id);
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
-
+                //patch coordinated shot
                 Type CoordinatedShotAttackBonusType = Type.GetType("CallOfTheWild.NewMechanics.CoordinatedShotAttackBonus, CallOfTheWild");
                 if (CoordinatedShotAttackBonusType != null)
                 {
@@ -66,11 +85,29 @@ namespace ProperFlanking
             return true;
         }
 
+        [Harmony12.HarmonyPatch(typeof(LibraryScriptableObject), "LoadDictionary")]
+        [Harmony12.HarmonyPatch(typeof(LibraryScriptableObject), "LoadDictionary", new Type[0])]
+        static class LibraryScriptableObject_LoadDictionary_Patch
+        {
+            static void Postfix(LibraryScriptableObject __instance)
+            {
+                var self = __instance;
+                if (Main.library != null) return;
+                Main.library = self;
+                try
+                {
+                    ProperFlanking.Cover.load(settings.ignore_cover);
+            }
+                catch (Exception ex)
+                {
+                    Main.DebugError(ex);
+                }
+            }
+        }
+
         internal static Exception Error(String message)
         {
             logger?.Log(message);
             return new InvalidOperationException(message);
         }
-
-    }
 }
