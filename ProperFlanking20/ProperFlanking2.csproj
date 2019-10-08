@@ -4,15 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{48829ABA-45B3-45A0-9AFF-D8A51C29FD88}</ProjectGuid>
+    <ProjectGuid>{A9776188-FD5C-45DC-A8D7-0E6FD886A022}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ProperFlanking</RootNamespace>
-    <AssemblyName>ProperFlanking</AssemblyName>
+    <RootNamespace>ProperFlanking20</RootNamespace>
+    <AssemblyName>ProperFlanking20</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,40 +21,26 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\ProperFlanking\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug Install|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugInstall|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>C:\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Mods\ProperFlanking\</OutputPath>
+    <OutputPath>C:\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Mods\ProperFlanking2\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>portable</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug Install 1.3|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>C:\GOG Games\Pathfinder Kingmaker\Mods\ProperFlanking\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>portable</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseInstall|AnyCPU'">
-    <OutputPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Mods\ProperFlanking\</OutputPath>
+    <OutputPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Mods\ProperFlanking2\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -71,11 +56,26 @@
       <HintPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="CallOfTheWild">
+      <HintPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Mods\CallOfTheWild\CallOfTheWild.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\UnityEngine.dll</HintPath>
@@ -89,12 +89,20 @@
       <HintPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
       <HintPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.JSONSerializeModule">
       <HintPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.Networking">
+      <HintPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\UnityEngine.Networking.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
@@ -106,13 +114,11 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>C:\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\UnityEngine.UI.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>C:\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\Newtonsoft.Json.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="UnityEngine.UNETModule">
+      <HintPath>..\..\..\GOG Games\PathfinderKingmaker2.0\Pathfinder Kingmaker\Kingmaker_Data\Managed\UnityEngine.UNETModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityModManager">
@@ -121,21 +127,38 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common.cs" />
+    <Compile Include="Cover.cs" />
+    <Compile Include="CoverSpecial.cs" />
     <Compile Include="Flanking.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="ManualPatches.cs" />
+    <Compile Include="NewFeats.cs" />
     <Compile Include="NewMechanics.cs" />
-    <Compile Include="SaveCompatibility.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="FlankingSpecial.cs" />
+    <Compile Include="QuickDraw.cs" />
+    <Compile Include="UnloadCTT.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="info.json">
+    <Content Include="blueprints.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Repository.json" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="info.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="settings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

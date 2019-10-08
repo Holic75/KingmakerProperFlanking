@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.438
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProperFlanking2", "ProperFlanking20\ProperFlanking2.csproj", "{A9776188-FD5C-45DC-A8D7-0E6FD886A022}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		DebugInstall|Any CPU = DebugInstall|Any CPU
+		Release|Any CPU = Release|Any CPU
+		ReleaseInstall|Any CPU = ReleaseInstall|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A9776188-FD5C-45DC-A8D7-0E6FD886A022}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9776188-FD5C-45DC-A8D7-0E6FD886A022}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9776188-FD5C-45DC-A8D7-0E6FD886A022}.DebugInstall|Any CPU.ActiveCfg = DebugInstall|Any CPU
+		{A9776188-FD5C-45DC-A8D7-0E6FD886A022}.DebugInstall|Any CPU.Build.0 = DebugInstall|Any CPU
+		{A9776188-FD5C-45DC-A8D7-0E6FD886A022}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9776188-FD5C-45DC-A8D7-0E6FD886A022}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9776188-FD5C-45DC-A8D7-0E6FD886A022}.ReleaseInstall|Any CPU.ActiveCfg = ReleaseInstall|Any CPU
+		{A9776188-FD5C-45DC-A8D7-0E6FD886A022}.ReleaseInstall|Any CPU.Build.0 = ReleaseInstall|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5224C77E-20CB-4248-AFD7-0D11FEFD43B0}
+	EndGlobalSection
+EndGlobal

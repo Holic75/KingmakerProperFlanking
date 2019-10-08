@@ -1,9 +1,18 @@
-# Proper Flanking
+# Proper Flanking 2
 
 This is a mod for Pathfinder:Kingmaker that replaces original game flanking mechanics to that of pnp pathfinder.
+
 It also adds soft cover mechanics (can be disabled in your_game_folder/Mods/ProperFlanking/settings.json) and few related feats:
 - Phalanx Formation
 - Low Profile
+- Quick Draw
+- Pack Flanking
+- Gang Up
+- Enfialding Fire
+- Friendly Fire Maneuvers
+
+It is not compatible with Closer To Tabletop mod, but it can replace it without breaking your saves.
+It requires Call of the Wild 1.37.
 
 Install
 - Download and install Unity Mod Manager﻿﻿ 0.13.0 or later
