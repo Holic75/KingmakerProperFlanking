@@ -164,4 +164,7 @@
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(ProjectDir)/Icons" "$(TargetDir)/Icons" /e /y /i /r</PostBuildEvent>
+  </PropertyGroup>
 </Project>

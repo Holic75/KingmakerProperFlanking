@@ -8,8 +8,11 @@ It also adds soft cover mechanics (can be disabled in your_game_folder/Mods/Prop
 - Quick Draw
 - Pack Flanking
 - Gang Up
-- Enfialding Fire
+- Enfilading Fire
 - Friendly Fire Maneuvers
+- Improved Feint
+- Greater Feint
+- Ranged Feint
 
 It is not compatible with Closer To Tabletop mod, but it can replace it without breaking your saves.
 It requires Call of the Wild 1.37.

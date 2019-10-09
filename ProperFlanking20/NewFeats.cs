@@ -11,6 +11,7 @@ using Kingmaker.RuleSystem;
 using Kingmaker.Enums;
 using Kingmaker.Blueprints.Classes.Prerequisites;
 using Kingmaker.EntitySystem.Stats;
+using Kingmaker.UnitLogic.Abilities.Blueprints;
 
 namespace ProperFlanking20
 {
@@ -25,6 +26,11 @@ namespace ProperFlanking20
         static public BlueprintFeature friendly_fire_maneuvers;
         static public BlueprintFeature low_profile;
 
+        static public BlueprintFeature improved_feint;
+        static public BlueprintAbility improved_feint_ability;
+        static public BlueprintFeature greater_feint;
+        static public BlueprintFeature ranged_feint;
+
 
         internal static void load()
         {
@@ -37,7 +43,97 @@ namespace ProperFlanking20
             createGangUp();
             createFriendlyFireManeuvers();
             createEnfiladingFire();
+
+            createFeintFeats();
         }
+
+
+        static void createFeintFeats()
+        {
+            var combat_expertise = library.Get<BlueprintFeature>("4c44724ffa8844f4d9bedb5bb27d144a");
+            ranged_feint = CallOfTheWild.Helpers.CreateFeature("RangedFeintFeature",
+                                                               "Ranged Feint",
+                                                               "You can feint with a ranged weapon by throwing a thrown weapon or firing one arrow, bolt, bullet, or other piece of ammunition; this feint takes the same action as normal to feint, but depending on your weapon, you might have to reload or draw another weapon afterward. When you successfully use a ranged feint, you deny that enemy its Dexterity bonus to AC against your ranged attacks as well as your melee attacks for the same duration as normal. If your feints normally deny a foe its Dexterity bonus to AC against attacks other than your own, this applies only against others’ melee attacks.",
+                                                               "",
+                                                               null,
+                                                               FeatureGroup.Feat,
+                                                               CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 2),
+                                                               CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.SkillPersuasion, 2)
+                                                               );
+            ranged_feint.Groups = ranged_feint.Groups.AddToArray(FeatureGroup.CombatFeat);
+
+            greater_feint = CallOfTheWild.Helpers.CreateFeature("GreaterFeintFeature",
+                                                               "Greater Feint",
+                                                               "Whenever you use feint to cause an opponent to lose his Dexterity bonus, he loses that bonus until the beginning of your next turn, in addition to losing his Dexterity bonus against your next attack.",
+                                                               "",
+                                                               null,
+                                                               FeatureGroup.Feat,
+                                                               CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 6),
+                                                               CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
+                                                               CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise)
+                                                               );
+            greater_feint.Groups = greater_feint.Groups.AddToArray(FeatureGroup.CombatFeat);
+
+            var buff = CallOfTheWild.Helpers.CreateBuff("FeintBuff",
+                                                        "Feint",
+                                                        "Your opponent is consedered flat-footed against your next melee attack.",
+                                                        "",
+                                                        CallOfTheWild.LoadIcons.Image2Sprite.Create(@"AbilityIcons/Feint.png"),
+                                                        null,
+                                                        CallOfTheWild.Helpers.Create<NewMechanics.FlatFootedAgainstCaster>(f => { f.remove_after_attack = true; f.ranged_allowed_fact = ranged_feint; })
+                                                        );
+
+            var greater_buff = CallOfTheWild.Helpers.CreateBuff("GreaterFeintBuff",
+                                            "Greater Feint",
+                                            "Your opponent is consedered flat-footed against melee attacks.",
+                                            "",
+                                            CallOfTheWild.LoadIcons.Image2Sprite.Create(@"AbilityIcons/Feint.png"),
+                                            null,
+                                            CallOfTheWild.Helpers.Create<NewMechanics.FlatFootedAgainstAttacType>(f => f.allowed_attack_types = new AttackType[] { AttackType.Melee, AttackType.Touch }),
+                                            CallOfTheWild.Helpers.Create<NewMechanics.FlatFootedAgainstCaster>(f => { f.remove_after_attack = false; f.ranged_allowed_fact = ranged_feint; })
+                                            );
+
+            var action = CallOfTheWild.Helpers.CreateConditional(CallOfTheWild.Common.createContextConditionCasterHasFact(greater_feint),
+                                                                CallOfTheWild.Common.createContextActionApplyBuff(greater_buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 9),
+                                                                CallOfTheWild.Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 9)
+                                                                );
+            var action_list = CallOfTheWild.Helpers.CreateActionList(action);
+            improved_feint_ability = CallOfTheWild.Helpers.CreateAbility("ImprovedFeintAbility",
+                                                                         "Feint",
+                                                                         "You can feint as a move action. To feint, make a Bluff skill check. The DC of this check is equal to 10 + your opponent’s base attack bonus + your opponent’s Wisdom modifier. If your opponent is trained in Sense Motive, the DC is instead equal to 10 + your opponent’s Sense Motive bonus, if higher. If successful, the next melee attack you make against the target does not allow him to use his Dexterity bonus to AC (if any). This attack must be made on or before your next turn.",
+                                                                         "",
+                                                                         buff.Icon,
+                                                                         AbilityType.Special,
+                                                                         Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Move,
+                                                                         AbilityRange.Weapon,
+                                                                         "Your next attack or until end of your next turn",
+                                                                         "",
+                                                                         CallOfTheWild.Helpers.CreateRunActions(CallOfTheWild.Helpers.Create<NewMechanics.ContextFeintSkillCheck>(c => c.Success = action_list)),
+                                                                         CallOfTheWild.Helpers.Create<NewMechanics.AbilityCasterMainWeaponIsMeleeUnlessHasFact>(a => a.ranged_allowed_fact = ranged_feint)
+                                                                         );
+            improved_feint_ability.setMiscAbilityParametersSingleTargetRangedHarmful(works_on_allies: true,
+                                                                                     animation: Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Special);
+            
+            improved_feint = CallOfTheWild.Helpers.CreateFeature("ImprovedFeintFeature",
+                                                   "Improved Feint",
+                                                   improved_feint_ability.Description,
+                                                   "",
+                                                   null,
+                                                   FeatureGroup.Feat,
+                                                   CallOfTheWild.Helpers.CreateAddFact(improved_feint_ability),
+                                                   CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
+                                                   CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise)
+                                                   );
+
+            improved_feint.Groups = improved_feint.Groups.AddToArray(FeatureGroup.CombatFeat);
+
+            greater_feint.AddComponent(improved_feint.PrerequisiteFeature());
+            ranged_feint.AddComponent(improved_feint.PrerequisiteFeature());
+
+            library.AddCombatFeats(improved_feint, greater_feint, ranged_feint);
+        }
+
+
 
 
         static void createLowProfile()
@@ -180,10 +276,7 @@ namespace ProperFlanking20
                                                                     CallOfTheWild.Helpers.Create<NewMechanics.TeamworkBonusAgainstFlanked>(t => t.allowed_types = new AttackType[] { AttackType.Ranged, AttackType.RangedTouch }),
                                                                     CallOfTheWild.Helpers.PrerequisiteFeature(point_blank_shot),
                                                                     CallOfTheWild.Helpers.PrerequisiteFeature(precise_shot),
-                                                                    CallOfTheWild.Helpers.Create<NewMechanics.PrerequisiteFeatFromGroup>(f => { f.group = FeatureGroup.TeamworkFeat;
-                                                                                                                                                f.description = "one other teamwork feat";
-                                                                                                                                              }
-                                                                                                                                        )
+                                                                    CallOfTheWild.Helpers.Create<NewMechanics.PrerequisiteFeatFromGroup>(f => f.group = FeatureGroup.TeamworkFeat)
                                                                 );
 
             enfilading_fire.Groups = enfilading_fire.Groups.AddToArray(FeatureGroup.CombatFeat, FeatureGroup.TeamworkFeat);

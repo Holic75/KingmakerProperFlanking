@@ -3,13 +3,22 @@ using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Classes.Prerequisites;
 using Kingmaker.Blueprints.Facts;
+using Kingmaker.Blueprints.Root;
+using Kingmaker.ElementsSystem;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.EntitySystem.Stats;
 using Kingmaker.Enums;
+using Kingmaker.PubSubSystem;
+using Kingmaker.RuleSystem;
 using Kingmaker.RuleSystem.Rules;
 using Kingmaker.UnitLogic;
+using Kingmaker.UnitLogic.Abilities.Blueprints;
+using Kingmaker.UnitLogic.Abilities.Components.Base;
+using Kingmaker.UnitLogic.Buffs.Blueprints;
+using Kingmaker.UnitLogic.Buffs.Components;
 using Kingmaker.UnitLogic.Class.LevelUp;
 using Kingmaker.UnitLogic.Mechanics;
+using Kingmaker.UnitLogic.Mechanics.Actions;
 using Kingmaker.Utility;
 using System;
 using System.Collections.Generic;
@@ -92,10 +101,182 @@ namespace ProperFlanking20.NewMechanics
     }
 
 
+    [AllowedOn(typeof(BlueprintBuff))]
+    public class FlatFootedAgainstCaster : BuffLogic, ITargetRulebookHandler<RuleCheckTargetFlatFooted>, ITargetRulebookHandler<RuleAttackWithWeaponResolve>, ITargetRulebookHandler<RuleAttackWithWeapon>
+    {
+        public bool remove_after_attack;
+        public BlueprintUnitFact ranged_allowed_fact;
+
+        private bool allowed = false;
+
+        public void OnEventAboutToTrigger(RuleCheckTargetFlatFooted evt)
+        {
+            if (allowed && evt.Initiator == this.Context?.MaybeCaster)
+            {
+                evt.ForceFlatFooted = true;
+            }
+        }
+
+        public void OnEventAboutToTrigger(RuleAttackWithWeaponResolve evt)
+        {
+        }
+
+        public void OnEventAboutToTrigger(RuleAttackWithWeapon evt)
+        {
+            if (evt.Weapon.Blueprint.IsMelee
+                ||(evt.Initiator != null && ranged_allowed_fact != null && evt.Initiator.Descriptor.HasFact(ranged_allowed_fact)))
+            {
+                allowed = true;
+            }
+        }
+
+        public void OnEventDidTrigger(RuleCheckTargetFlatFooted evt)
+        {
+        }
+
+        public void OnEventDidTrigger(RuleAttackWithWeaponResolve evt)
+        {
+            allowed = false;
+            if (!remove_after_attack)
+            {
+                return;
+            }
+
+            if (evt.Initiator == this.Fact.MaybeContext?.MaybeCaster)
+            {
+                this.Buff.Remove();
+            }
+        }
+
+        public void OnEventDidTrigger(RuleAttackWithWeapon evt)
+        {
+        }
+    }
+
+
+    [AllowedOn(typeof(BlueprintBuff))]
+    public class FlatFootedAgainstAttacType: BuffLogic, ITargetRulebookHandler<RuleCheckTargetFlatFooted>, ITargetRulebookHandler<RuleAttackWithWeaponResolve>, ITargetRulebookHandler<RuleAttackWithWeapon>
+    {
+        public bool remove_after_attack;
+        public AttackType[] allowed_attack_types;
+
+        private bool allowed = false;
+
+        public void OnEventAboutToTrigger(RuleCheckTargetFlatFooted evt)
+        {
+            if (allowed)
+            {
+                evt.ForceFlatFooted = true;
+            }
+        }
+
+        public void OnEventAboutToTrigger(RuleAttackWithWeaponResolve evt)
+        {
+        }
+
+        public void OnEventAboutToTrigger(RuleAttackWithWeapon evt)
+        {
+            if (allowed_attack_types.Empty() || allowed_attack_types.Contains(evt.Weapon.Blueprint.AttackType))
+            {
+                allowed = true;
+            }
+        }
+
+        public void OnEventDidTrigger(RuleCheckTargetFlatFooted evt)
+        {
+        }
+
+        public void OnEventDidTrigger(RuleAttackWithWeaponResolve evt)
+        {
+            allowed = false;
+            if (!remove_after_attack)
+            {
+                return;
+            }
+
+            if (evt.Initiator == this.Fact.MaybeContext?.MaybeCaster)
+            {
+                this.Buff.Remove();
+            }
+        }
+
+        public void OnEventDidTrigger(RuleAttackWithWeapon evt)
+        {
+        }
+    }
+
+
+    public class ContextFeintSkillCheck : ContextAction
+    {
+        public ActionList Success;
+        public ActionList Failure;
+
+        public override string GetCaption()
+        {
+            return "Feint check";
+        }
+
+        public override void RunAction()
+        {
+            if (this.Target.Unit == null)
+            {
+                UberDebug.LogError((object)"Target unit is missing", (object[])Array.Empty<object>());
+            }
+            else if (this.Context.MaybeCaster == null)
+            {
+                UberDebug.LogError((object)"Caster is missing", (object[])Array.Empty<object>());
+            }
+            else
+            {
+                int dc_bab = this.Target.Unit.Descriptor.Stats.BaseAttackBonus.ModifiedValue + this.Target.Unit.Descriptor.Stats.Wisdom.Bonus;
+                int dc_sense_motive = (this.Target.Unit.Descriptor.Stats.SkillPerception.BaseValue > 0) ? this.Target.Unit.Descriptor.Stats.SkillPerception.ModifiedValue : 0;
+
+                int dc = 10 + Math.Max(dc_bab, dc_sense_motive);
+              
+                if (this.Context.TriggerRule<RuleSkillCheck>(new RuleSkillCheck(this.Context.MaybeCaster, StatType.CheckBluff, dc)
+                {
+                    ShowAnyway = true
+                }).IsPassed)
+                    this.Success.Run();
+                else
+                    this.Failure.Run();
+            }
+        }
+    }
+
+
+    [AllowedOn(typeof(BlueprintAbility))]
+    [AllowMultipleComponents]
+    public class AbilityCasterMainWeaponIsMeleeUnlessHasFact : BlueprintComponent, IAbilityCasterChecker
+    {
+        public BlueprintFeature ranged_allowed_fact;
+
+        public bool CorrectCaster(UnitEntityData caster)
+        {
+            var weapon = caster.Body.PrimaryHand.MaybeWeapon;
+            if (weapon == null)
+            {
+                return true;
+            }
+
+            if (weapon.Blueprint.IsMelee || (ranged_allowed_fact != null && caster.Descriptor.HasFact(ranged_allowed_fact)))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public string GetReason()
+        {
+            return (string)LocalizedTexts.Instance.Reasons.SpecificWeaponRequired;
+        }
+    }
+
+
     class PrerequisiteFeatFromGroup: Prerequisite
     {
         public FeatureGroup group;
-        public string description;
 
         public override bool Check([CanBeNull] FeatureSelectionState selectionState, [NotNull] UnitDescriptor unit, [NotNull] LevelUpState state)
         {
@@ -104,9 +285,14 @@ namespace ProperFlanking20.NewMechanics
 
         public override string GetUIText()
         {
-            return description;
+            string group_string = string.Concat(group.ToString().Select(x => Char.IsUpper(x) ? " " + char.ToLower(x) : x.ToString()));
+
+            return "One" + group_string;
         }
     }
+
+
+    
 
 
     class PrerequisiteCharacterSize : Prerequisite
