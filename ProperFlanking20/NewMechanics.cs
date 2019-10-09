@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using CallOfTheWild;
+using JetBrains.Annotations;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Classes.Prerequisites;
@@ -210,6 +211,13 @@ namespace ProperFlanking20.NewMechanics
     {
         public ActionList Success;
         public ActionList Failure;
+        static BlueprintFeature[] single_penalty_facts = new BlueprintFeature[] {Main.library.Get<BlueprintFeature>("455ac88e22f55804ab87c2467deff1d6"), //dragons
+                                                                                 Main.library.Get<BlueprintFeature>("625827490ea69d84d8e599a33929fdc6"), //magical beasts
+                                                                                };
+
+        static BlueprintFeature[] double_penalty_facts = new BlueprintFeature[] {Main.library.Get<BlueprintFeature>("a95311b3dc996964cbaa30ff9965aaf6"), //animals
+                                                                                };
+
 
         public override string GetCaption()
         {
@@ -231,7 +239,19 @@ namespace ProperFlanking20.NewMechanics
                 int dc_bab = this.Target.Unit.Descriptor.Stats.BaseAttackBonus.ModifiedValue + this.Target.Unit.Descriptor.Stats.Wisdom.Bonus;
                 int dc_sense_motive = (this.Target.Unit.Descriptor.Stats.SkillPerception.BaseValue > 0) ? this.Target.Unit.Descriptor.Stats.SkillPerception.ModifiedValue : 0;
 
+
                 int dc = 10 + Math.Max(dc_bab, dc_sense_motive);
+
+
+                
+                if (targetHasFactFromList(double_penalty_facts))
+                {
+                    dc += 8;
+                }
+                else if (targetHasFactFromList(single_penalty_facts))
+                {
+                    dc += 4;
+                }
               
                 if (this.Context.TriggerRule<RuleSkillCheck>(new RuleSkillCheck(this.Context.MaybeCaster, StatType.CheckBluff, dc)
                 {
@@ -241,6 +261,18 @@ namespace ProperFlanking20.NewMechanics
                 else
                     this.Failure.Run();
             }
+        }
+
+        private bool targetHasFactFromList(params BlueprintFeature[] facts)
+        {
+            foreach (var f in facts)
+            {
+                if (this.Target.Unit.Descriptor.HasFact(f))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 

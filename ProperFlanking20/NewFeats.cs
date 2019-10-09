@@ -98,9 +98,15 @@ namespace ProperFlanking20
                                                                 CallOfTheWild.Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 9)
                                                                 );
             var action_list = CallOfTheWild.Helpers.CreateActionList(action);
+
+            var vermin = library.Get<BlueprintFeature>("09478937695300944a179530664e42ec");
+            var construct = library.Get<BlueprintFeature>("fd389783027d63343b4a5634bd81645f");
+            var aberration = library.Get<BlueprintFeature>("3bec99efd9a363242a6c8d9957b75e91");
+            var plant = library.Get<BlueprintFeature>("706e61781d692a042b35941f14bc41c5");
             improved_feint_ability = CallOfTheWild.Helpers.CreateAbility("ImprovedFeintAbility",
                                                                          "Feint",
-                                                                         "You can feint as a move action. To feint, make a Bluff skill check. The DC of this check is equal to 10 + your opponent’s base attack bonus + your opponent’s Wisdom modifier. If your opponent is trained in Sense Motive, the DC is instead equal to 10 + your opponent’s Sense Motive bonus, if higher. If successful, the next melee attack you make against the target does not allow him to use his Dexterity bonus to AC (if any). This attack must be made on or before your next turn.",
+                                                                         "You can feint as a move action. To feint, make a Bluff skill check. The DC of this check is equal to 10 + your opponent’s base attack bonus + your opponent’s Wisdom modifier. If your opponent is trained in Sense Motive, the DC is instead equal to 10 + your opponent’s Sense Motive bonus, if higher. If successful, the next melee attack you make against the target does not allow him to use his Dexterity bonus to AC (if any). This attack must be made on or before your next turn.\n"
+                                                                         + "When feinting against a non - humanoid DC increases by 4. Against a creature of animal Intelligence (1 or 2), by 8. Against a creature lacking an Intelligence score, it’s impossible. Feinting in combat does not provoke attacks of opportunity.",
                                                                          "",
                                                                          buff.Icon,
                                                                          AbilityType.Special,
@@ -109,7 +115,8 @@ namespace ProperFlanking20
                                                                          "Your next attack or until end of your next turn",
                                                                          "",
                                                                          CallOfTheWild.Helpers.CreateRunActions(CallOfTheWild.Helpers.Create<NewMechanics.ContextFeintSkillCheck>(c => c.Success = action_list)),
-                                                                         CallOfTheWild.Helpers.Create<NewMechanics.AbilityCasterMainWeaponIsMeleeUnlessHasFact>(a => a.ranged_allowed_fact = ranged_feint)
+                                                                         CallOfTheWild.Helpers.Create<NewMechanics.AbilityCasterMainWeaponIsMeleeUnlessHasFact>(a => a.ranged_allowed_fact = ranged_feint),
+                                                                         CallOfTheWild.Common.createAbilityTargetHasFact(true, vermin, construct, aberration, plant)
                                                                          );
             improved_feint_ability.setMiscAbilityParametersSingleTargetRangedHarmful(works_on_allies: true,
                                                                                      animation: Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Special);
