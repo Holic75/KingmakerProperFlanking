@@ -37,7 +37,7 @@ namespace ProperFlanking20
             createLowProfile();
             createPhalanxFormation();
             createQuickDraw();
-            fixImprovedPreciseShotDescription();
+            fixImprovedPreciseShot();
 
             createPackFlanking();
             createGangUp();
@@ -196,10 +196,11 @@ namespace ProperFlanking20
         }
 
 
-        static void fixImprovedPreciseShotDescription()
+        static void fixImprovedPreciseShot()
         {
             var improved_precise_shot = library.Get<BlueprintFeature>("46f970a6b9b5d2346b10892673fe6e74");
-            improved_precise_shot.SetDescription("our ranged attacks ignore the AC bonus granted to targets by anything less than total cover, and the miss chance granted to targets by anything less than total concealment. Total cover and total concealment provide their normal benefits against your ranged attacks.");
+            improved_precise_shot.SetDescription("Your ranged attacks ignore the AC bonus granted to targets by anything less than total cover, and the miss chance granted to targets by anything less than total concealment. Total cover and total concealment provide their normal benefits against your ranged attacks.");
+            improved_precise_shot.AddComponent(CallOfTheWild.Helpers.Create<CoverSpecial.IgnoreCoverForAttackType>(i => i.allowed_types = new AttackType[] { AttackType.Ranged, AttackType.RangedTouch }));
         }
 
 

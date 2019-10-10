@@ -28,6 +28,10 @@ namespace ProperFlanking20.QuickDraw
         public void removeBuff(Fact buff)
         {
             buffs.Remove(buff);
+            if (buffs.Empty())
+            {
+                this.Owner.Remove<UnitPartQuickDraw>();
+            }
         }
 
         public bool active()
@@ -39,12 +43,12 @@ namespace ProperFlanking20.QuickDraw
 
     public class QuickDraw : OwnedGameLogicComponent<UnitDescriptor>
     {
-        public override void OnFactActivate()
+        public override void OnTurnOn()
         {
             this.Owner.Ensure<UnitPartQuickDraw>().addBuff(this.Fact);
         }
 
-        public override void OnFactDeactivate()
+        public override void OnTurnOff()
         {
             this.Owner.Ensure<UnitPartQuickDraw>().removeBuff(this.Fact);
         }

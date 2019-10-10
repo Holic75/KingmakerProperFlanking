@@ -1,5 +1,6 @@
 ﻿using Kingmaker.EntitySystem.Entities;
 using Kingmaker.Items;
+using Kingmaker.RuleSystem;
 using Kingmaker.UnitLogic;
 using System;
 using System.Collections.Generic;
@@ -14,14 +15,9 @@ namespace ProperFlanking20.CoverSpecial
     {
         public Kingmaker.RuleSystem.AttackType[] allowed_types;
 
-        public override bool ignoresCover(ItemEntityWeapon weapon)
+        public override bool ignoresCover(AttackType attack_type)
         {
-            if (weapon == null)
-            {
-                return false;
-            }
-
-            return allowed_types.Contains(weapon.Blueprint.AttackType);
+            return allowed_types.Contains(attack_type);
         }
     }
 
@@ -29,7 +25,7 @@ namespace ProperFlanking20.CoverSpecial
 
     public class DoesNotProvideCover : Cover.SpecialProvideNoCover
     {
-        public override bool doesNotProvideCoverToFrom(UnitEntityData target, UnitEntityData attacker, ItemEntityWeapon weapon)
+        public override bool doesNotProvideCoverToFrom(UnitEntityData target, UnitEntityData attacker, AttackType attack_type)
         {
             return true;
         }
@@ -41,7 +37,7 @@ namespace ProperFlanking20.CoverSpecial
     {
         bool teamwork = true;
 
-        public override bool doesNotProvideCoverToFrom(UnitEntityData target, UnitEntityData attacker, ItemEntityWeapon weapon)
+        public override bool doesNotProvideCoverToFrom(UnitEntityData target, UnitEntityData attacker, AttackType attack_type)
         {
             return ((teamwork && (bool)attacker.Descriptor.State.Features.SoloTactics) || attacker.Descriptor.HasFact(this.Fact)) && attacker.IsAlly(this.Owner.Unit);
         }

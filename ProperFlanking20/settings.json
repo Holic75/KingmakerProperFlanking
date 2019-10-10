@@ -1,3 +1,4 @@
 {
-	  "soft_cover_penalty": -4
+  "soft_cover_ac_bonus": 4,
+  "partial_soft_cover_ac_bonus": 2
 }

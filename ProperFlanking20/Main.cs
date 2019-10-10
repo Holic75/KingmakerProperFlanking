@@ -21,7 +21,8 @@ namespace ProperFlanking20
     {
         internal class Settings
         {
-            internal int soft_cover_penalty { get; }
+            internal int soft_cover_ac_bonus { get; }
+            internal int partial_soft_cover_ac_bonus { get; }
 
             internal Settings()
             {
@@ -30,7 +31,8 @@ namespace ProperFlanking20
                 using (JsonTextReader reader = new JsonTextReader(settings_file))
                 {
                     JObject jo = (JObject)JToken.ReadFrom(reader);
-                    soft_cover_penalty = (int)jo["soft_cover_penalty"];
+                    soft_cover_ac_bonus = (int)jo["soft_cover_ac_bonus"];
+                    partial_soft_cover_ac_bonus = (int)jo["partial_soft_cover_ac_bonus"];
                 }
             }
         }
@@ -92,7 +94,7 @@ namespace ProperFlanking20
 #endif
                     CallOfTheWild.Helpers.GuidStorage.load(Properties.Resources.blueprints, allow_guid_generation);
 
-                    ProperFlanking20.Cover.load(Main.settings.soft_cover_penalty);
+                    ProperFlanking20.Cover.load(Main.settings.soft_cover_ac_bonus, Main.settings.partial_soft_cover_ac_bonus);
                     ProperFlanking20.NewFeats.load();
                     ProperFlanking20.UnloadCTT.run();
 #if DEBUG

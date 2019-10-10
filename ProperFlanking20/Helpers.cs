@@ -11,10 +11,10 @@ namespace ProperFlanking20
 {
     public class Helpers
     {
-        public static bool isCircleIntersectedByLine(Vector3 o, float r2, Vector3 a, Vector3 b)
+        public static bool isCircleIntersectedByLine(Vector2 o, float r2, Vector2 a, Vector2 b)
         {
-            var ao = (o - a).To2D();
-            var ab = (b - a).To2D();
+            var ao = (o - a);
+            var ab = (b - a);
             float norm_ab = (float)Math.Sqrt(Vector2.Dot(ab, ab));
             float proj = Vector2.Dot(ao, ab) / norm_ab;
             if (proj > norm_ab || proj < 0.0f)

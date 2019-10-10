@@ -130,8 +130,9 @@ namespace ProperFlanking20
 
             foreach (UnitEntityData unitEntityData in evt.Target.CombatState.EngagedBy)
             {
+                AttackType attack_type = evt.Weapon == null ? AttackType.Melee : evt.Weapon.Blueprint.AttackType;
                 if ((unitEntityData.Descriptor.HasFact(coordinated_shot_fact) || solo_tactics)
-                    && unitEntityData != owner.Unit && !unitEntityData.providesCoverToFrom(evt.Target, owner.Unit, evt.Weapon))
+                    && unitEntityData != owner.Unit && unitEntityData.providesCoverToFrom(evt.Target, owner.Unit, attack_type) == Cover.CoverType.None)
                 {
                     bonus = Math.Max(bonus, (evt.Target.isFlankedByAttacker(unitEntityData) ? attack_bonus + additional_flank_bonus : attack_bonus));
                 }
@@ -289,12 +290,12 @@ namespace ProperFlanking20
     {
         public abstract class  SpecialFlanking: OwnedGameLogicComponent<UnitDescriptor>
         {
-            public override void OnFactActivate()
+            public override void OnTurnOn()
             {
                 this.Owner.Ensure<UnitPartSpecialFlanking>().addBuff(this.Fact);
             }
 
-            public override void OnFactDeactivate()
+            public override void OnTurnOff()
             {
                 this.Owner.Ensure<UnitPartSpecialFlanking>().removeBuff(this.Fact);
             }
@@ -302,23 +303,8 @@ namespace ProperFlanking20
             abstract public bool isFlanking(UnitEntityData target);
         }
 
-        public class UnitPartSpecialFlanking : UnitPart
+        public class UnitPartSpecialFlanking : CallOfTheWild.AdditiveUnitPart
         {
-            [JsonProperty]
-            private List<Fact> buffs = new List<Fact>();
-
-            public void addBuff(Fact buff)
-            {
-                buffs.Add(buff);
-            }
-
-
-            public void removeBuff(Fact buff)
-            {
-                buffs.Remove(buff);
-            }
-
-
             public bool hasBuff(BlueprintFact blueprint)
             {
                 return buffs.Any(b => b.Blueprint == blueprint);
@@ -399,7 +385,7 @@ namespace ProperFlanking20
                 }
 
                 //geometrical flanking
-                if (Helpers.isCircleIntersectedByLine(unit_position, unit_radius2, attacker.Position, engaged_array[i].Position))
+                if (Helpers.isCircleIntersectedByLine(unit_position.To2D(), unit_radius2, attacker.Position.To2D(), engaged_array[i].Position.To2D()))
                 {
 #if DEBUG
                     Main.logger.Log($"{attacker.CharacterName} and {engaged_array[i].CharacterName} are flanking {unit.CharacterName} due to geometry");
