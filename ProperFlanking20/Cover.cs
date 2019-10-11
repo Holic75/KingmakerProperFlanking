@@ -269,9 +269,9 @@ namespace ProperFlanking20
                 return CoverType.None;
             }
             else 
-            { //check geoemtry
+            { //check geometry
                 var cover_r = Helpers.unitSizeToDiameter(cover.Descriptor.State.Size).Feet().Meters / 2.0f * 0.9f;
-                var unit_r = Helpers.unitSizeToDiameter(cover.Descriptor.State.Size).Feet().Meters / 2.0f;
+                var unit_r = Helpers.unitSizeToDiameter(unit.Descriptor.State.Size).Feet().Meters / 2.0f;
                 var unit_center = unit.Position.To2D();
                
                 Cover.CoverType current_cover = CoverType.None;
