@@ -210,11 +210,14 @@ namespace ProperFlanking20
             }
             var c = (unit.Position + attacker.Position) / 2.0f;
             var r = (unit.Position - attacker.Position) / 2.0f;
-            //account for units inside circle
-            var norm_r = r.normalized;
-            var unit_radius = Helpers.unitSizeToDiameter(unit.Descriptor.State.Size).Feet().Meters / 2.0f;
-            r = r - norm_r * unit_radius;
-            c = c - norm_r * unit_radius;
+            if (attack_type == AttackType.Melee || attack_type == AttackType.Touch)
+            {
+                //account for units inside circle
+                var norm_r = r.normalized;
+                var unit_radius = Helpers.unitSizeToDiameter(unit.Descriptor.State.Size).Feet().Meters / 2.0f;
+                r = r - norm_r * unit_radius;
+                c = c - norm_r * unit_radius;
+            }
 
             float radius = (float)Math.Sqrt(Vector3.Dot(r, r));
             var units_around = GameHelper.GetTargetsAround(c, radius, true);
@@ -289,8 +292,8 @@ namespace ProperFlanking20
                 }
 
                 n = new Vector2(-n.y, n.x).normalized;
-                var unit_left = unit_center + unit_r * 0.5f * n;
-                var unit_right = unit_center - unit_r * 0.5f * n;
+                var unit_left = unit_center + unit_r * 0.75f * n;
+                var unit_right = unit_center - unit_r * 0.75f * n;
                 if (Helpers.isCircleIntersectedByLine(cover.Position.To2D(), cover_r * cover_r, attacker.Position.To2D(), unit_left))
                 {
                     current_cover = current_cover | CoverType.Left;
