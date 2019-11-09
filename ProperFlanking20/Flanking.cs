@@ -177,6 +177,35 @@ namespace ProperFlanking20
     }
 
 
+    [Harmony12.HarmonyPatch(typeof(FlankedAttackBonus))]
+    [Harmony12.HarmonyPatch("OnEventAboutToTrigger", Harmony12.MethodType.Normal)]
+    class FlankedAttackBonus__OnEventAboutToTrigger__Patch
+    {
+        static bool Prefix(FlankedAttackBonus __instance, RuleCalculateAttackBonus evt)
+        {
+            bool isFlatFooted = Rulebook.Trigger<RuleCheckTargetFlatFooted>(new RuleCheckTargetFlatFooted(evt.Initiator, evt.Target)).IsFlatFooted;
+
+            bool is_flanked = false;
+
+            foreach (var u in evt.Target.CombatState.EngagedBy)
+            {
+                is_flanked = evt.Target.isFlankedByAttacker(u);
+                if (is_flanked)
+                {
+                    break;
+                }
+            }
+
+            if (is_flanked || isFlatFooted)
+            {
+                evt.AddBonus(__instance.AttackBonus * __instance.Fact.GetRank(), __instance.Fact);
+            }
+                
+            return false;
+        }
+    }
+
+
     [Harmony12.HarmonyPatch(typeof(OutflankProvokeAttack))]
     [Harmony12.HarmonyPatch("OnEventDidTrigger", Harmony12.MethodType.Normal)]
     class OutflankProvokeAttack__OnEventDidTrigger__Patch
@@ -246,22 +275,6 @@ namespace ProperFlanking20
             return false;
         }
     }
-
-
-    [Harmony12.HarmonyPatch(typeof(FlankedAttackBonus))]
-    [Harmony12.HarmonyPatch("OnEventAboutToTrigger", Harmony12.MethodType.Normal)]
-    class FlankedAttackBonus__OnEventAboutToTrigger__Patch
-    {
-        static bool Prefix(FlankedAttackBonus __instance, RuleCalculateAttackBonus evt)
-        {
-            bool isFlatFooted = Rulebook.Trigger<RuleCheckTargetFlatFooted>(new RuleCheckTargetFlatFooted(evt.Initiator, evt.Target)).IsFlatFooted;
-            if (!evt.Target.isFlankedByAttacker(evt.Initiator) && !isFlatFooted)
-                return false;
-            evt.AddBonus(__instance.AttackBonus * __instance.Fact.GetRank(), __instance.Fact);
-            return false;
-        }
-    }
-
 
 
     [Harmony12.HarmonyPatch(typeof(BackToBack))]
