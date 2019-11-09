@@ -107,11 +107,11 @@ namespace ProperFlanking20
 
 
 
-    [Harmony12.HarmonyPatch(typeof(CallOfTheWild.NewMechanics.CoordinatedShotAttackBonus))]
+    [Harmony12.HarmonyPatch(typeof(CallOfTheWild.TeamworkMechanics.CoordinatedShotAttackBonus))]
     [Harmony12.HarmonyPatch("OnEventAboutToTrigger", Harmony12.MethodType.Normal)]
     class CoordinatedShotAttcakBonus_OnEventAboutToTrigger_Patch
     {
-        static bool Prefix(CallOfTheWild.NewMechanics.CoordinatedShotAttackBonus __instance, RuleCalculateAttackBonus evt)
+        static bool Prefix(CallOfTheWild.TeamworkMechanics.CoordinatedShotAttackBonus __instance, RuleCalculateAttackBonus evt)
         {
             if (evt.Weapon == null)
             {
