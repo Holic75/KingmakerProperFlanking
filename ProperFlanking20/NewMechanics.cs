@@ -239,11 +239,8 @@ namespace ProperFlanking20.NewMechanics
                 int dc_bab = this.Target.Unit.Descriptor.Stats.BaseAttackBonus.ModifiedValue + this.Target.Unit.Descriptor.Stats.Wisdom.Bonus;
                 int dc_sense_motive = (this.Target.Unit.Descriptor.Stats.SkillPerception.BaseValue > 0) ? this.Target.Unit.Descriptor.Stats.SkillPerception.ModifiedValue : 0;
 
-
                 int dc = 10 + Math.Max(dc_bab, dc_sense_motive);
 
-
-                
                 if (targetHasFactFromList(double_penalty_facts))
                 {
                     dc += 8;

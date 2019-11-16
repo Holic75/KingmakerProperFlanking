@@ -12,6 +12,13 @@ using Kingmaker.Enums;
 using Kingmaker.Blueprints.Classes.Prerequisites;
 using Kingmaker.EntitySystem.Stats;
 using Kingmaker.UnitLogic.Abilities.Blueprints;
+using Kingmaker.UnitLogic.ActivatableAbilities;
+using Kingmaker.UnitLogic.Mechanics.Components;
+using Kingmaker.UnitLogic.Mechanics.Properties;
+using Kingmaker.UnitLogic.Buffs.Blueprints;
+using Kingmaker.Blueprints.Classes.Selection;
+using Kingmaker.UnitLogic.Abilities.Components;
+using Kingmaker.UnitLogic.Abilities.Components.TargetCheckers;
 
 namespace ProperFlanking20
 {
@@ -31,6 +38,11 @@ namespace ProperFlanking20
         static public BlueprintFeature greater_feint;
         static public BlueprintFeature ranged_feint;
 
+        static public BlueprintFeature swordplay_style;
+        static public BlueprintActivatableAbility swordplay_style_ability;
+        static public BlueprintFeature swordplay_upset;
+        static public BlueprintFeature swordplay_deflection;
+
 
         internal static void load()
         {
@@ -45,6 +57,101 @@ namespace ProperFlanking20
             createEnfiladingFire();
 
             createFeintFeats();
+
+            createSwordplayStyle();
+        }
+
+
+        static void createSwordplayStyle()
+        {
+            var combat_expertise_buff = library.Get<BlueprintBuff>("e81cd772a7311554090e413ea28ceea1");
+            var fight_defensively_buff = library.Get<BlueprintBuff>("6ffd93355fb3bcf4592a5d976b1d32a9");
+
+            var combat_expertise = library.Get<BlueprintFeature>("4c44724ffa8844f4d9bedb5bb27d144a");
+            var icon = CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/SwordplayStyle.png");
+            var buff = CallOfTheWild.Helpers.CreateBuff("SwordplayStyleEffectBuff",
+                                                        "Swordplay style",
+                                                        "While using this style, wielding  a weapon from heavy or light blades fighter weapon group, and fighting defensively or using either the total defense action or the Combat Expertise feat, you gain a +1 shield bonus to your Armor Class. In addition, you do not take the penalty on melee attacks from Combat Expertise on the first attack roll you make each turn. You still take the penalty on additional attacks, including attacks of opportunity.",
+                                                        "",
+                                                        icon,
+                                                        null,
+                                                        CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.ACBonusIfHasFacts>(a =>
+                                                                                                                                    {
+                                                                                                                                        a.Bonus = 1;
+                                                                                                                                        a.Descriptor = ModifierDescriptor.Shield;
+                                                                                                                                        a.CheckedFacts = new Kingmaker.Blueprints.Facts.BlueprintUnitFact[] { fight_defensively_buff, combat_expertise_buff };
+                                                                                                                                    }
+                                                                                                                                    ),
+                                                        CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.AttackBonusOnAttackInitiationIfHasFact>(a =>
+                                                                                                                                                       {
+                                                                                                                                                           a.CheckedFact = combat_expertise_buff;
+                                                                                                                                                           a.Bonus = CallOfTheWild.Helpers.CreateContextValue(AbilityRankType.Default);
+                                                                                                                                                           a.OnlyFirstAttack = true;
+                                                                                                                                                           a.WeaponAttackTypes = new AttackType[] { AttackType.Melee };
+                                                                                                                                                       }
+                                                                                                                                                       ),
+                                                        CallOfTheWild.Helpers.CreateContextRankConfig(baseValueType: ContextRankBaseValueType.CustomProperty,
+                                                                                                      progression: ContextRankProgression.AsIs, stepLevel: 1,
+                                                                                                      customProperty: library.Get<BlueprintUnitProperty>("8a63b06d20838954e97eb444f805ec89")) //combat expertise custom property
+                                                       );
+
+            WeaponCategory[] categories = new WeaponCategory[] {WeaponCategory.BastardSword, WeaponCategory.Dagger, WeaponCategory.DoubleSword, WeaponCategory.DuelingSword, WeaponCategory.ElvenCurvedBlade,
+                                                                WeaponCategory.Estoc, WeaponCategory.Falcata, WeaponCategory.Falchion, WeaponCategory.Kama, WeaponCategory.Kukri,
+                                                                WeaponCategory.Longsword, WeaponCategory.Rapier, WeaponCategory.Sai, WeaponCategory.Scimitar, WeaponCategory.Shortsword,
+                                                               WeaponCategory.Starknife, WeaponCategory.Scythe, WeaponCategory.Sickle};
+
+            swordplay_style_ability = CallOfTheWild.Helpers.CreateActivatableAbility("SwordplayStyleActivatableAbility",
+                                                                                     buff.Name,
+                                                                                     buff.Description,
+                                                                                     "",
+                                                                                     buff.Icon,
+                                                                                     buff,
+                                                                                     AbilityActivationType.Immediately,
+                                                                                     Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
+                                                                                     null,
+                                                                                     CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.ActivatableAbilityMainWeaponCategoryAllowed>(a => a.categories = categories)
+                                                                                     );
+            swordplay_style_ability.Group = ActivatableAbilityGroup.CombatStyle;
+
+            swordplay_style = Common.ActivatableAbilityToFeature(swordplay_style_ability, false);
+            swordplay_style.Groups = new FeatureGroup[] { FeatureGroup.Feat, FeatureGroup.CombatFeat, FeatureGroup.StyleFeat };
+            swordplay_style.AddComponents(CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise),
+                                          CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 3)
+                                          );
+
+            var weapon_focus = library.Get<BlueprintParametrizedFeature>("1e1f627d26ad36f43bbd26cc2bf8ac7e");
+            foreach (var c in categories)
+            {
+                swordplay_style.AddComponent(CallOfTheWild.Common.createPrerequisiteParametrizedFeatureWeapon(weapon_focus, c, any: true));
+            }
+            
+            swordplay_upset = CallOfTheWild.Helpers.CreateFeature("SwordplayUpsetFeature",
+                                                                  "Swordplay Upset",
+                                                                  "While using Swordplay Style, you can attempt a feint against an opponent that makes a melee attack against you and misses.",
+                                                                  "",
+                                                                  CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/SwordplayUpset.png"),
+                                                                  FeatureGroup.Feat,
+                                                                  CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 5),
+                                                                  CallOfTheWild.Helpers.PrerequisiteFeature(swordplay_style),
+                                                                  CallOfTheWild.Helpers.PrerequisiteFeature(improved_feint)
+                                                                  );
+            swordplay_upset.Groups = swordplay_upset.Groups.AddToArray(FeatureGroup.CombatFeat, FeatureGroup.StyleFeat);
+            var feint_action = CallOfTheWild.Helpers.CreateConditional(Common.createContextConditionHasFacts(false, improved_feint_ability.GetComponent<AbilityTargetHasFact>().CheckedFacts),
+                                                                       null,
+                                                                       improved_feint_ability.GetComponent<AbilityEffectRunAction>().Actions.Actions
+                                                                      );
+
+            buff.AddComponent(CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.ActionOnNearMissIfHasFact>(a =>
+                                                                                                                {
+                                                                                                                    a.checked_fact = swordplay_upset;
+                                                                                                                    a.Action = CallOfTheWild.Helpers.CreateActionList(feint_action);
+                                                                                                                    a.HitAndArmorDifference = 1000;
+                                                                                                                    a.MeleeOnly = true;
+                                                                                                                    a.OnAttacker = true;
+                                                                                                                }
+                                                                                                                )
+                            );
+            library.AddCombatFeats(swordplay_style, swordplay_upset);
         }
 
 

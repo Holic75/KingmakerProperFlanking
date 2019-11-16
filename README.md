@@ -13,9 +13,10 @@ It also adds soft cover mechanics (can be disabled in your_game_folder/Mods/Prop
 - Improved Feint
 - Greater Feint
 - Ranged Feint
+- Swordplay Style and Swordplay Upset
 
 It is not compatible with Closer To Tabletop mod, but it can replace it without breaking your saves.
-It requires at least Call of the Wild 1.42.
+It requires at least Call of the Wild 1.44.
 
 Install
 - Download and install Unity Mod Manager﻿﻿ 0.13.0 or later
