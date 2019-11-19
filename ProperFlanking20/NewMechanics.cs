@@ -9,9 +9,11 @@ using Kingmaker.ElementsSystem;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.EntitySystem.Stats;
 using Kingmaker.Enums;
+using Kingmaker.Items;
 using Kingmaker.PubSubSystem;
 using Kingmaker.RuleSystem;
 using Kingmaker.RuleSystem.Rules;
+using Kingmaker.RuleSystem.Rules.Damage;
 using Kingmaker.UnitLogic;
 using Kingmaker.UnitLogic.Abilities.Blueprints;
 using Kingmaker.UnitLogic.Abilities.Components.Base;
@@ -359,6 +361,84 @@ namespace ProperFlanking20.NewMechanics
             if (or_larger)
                 stringBuilder.Append(" or larger");
             return stringBuilder.ToString();
+        }
+    }
+
+
+
+    [AllowedOn(typeof(BlueprintUnitFact))]
+    [AllowMultipleComponents]
+    public class WildFlanking : OwnedGameLogicComponent<UnitDescriptor>, IInitiatorRulebookHandler<RuleAttackWithWeapon>, IRulebookHandler<RuleAttackWithWeapon>, IInitiatorRulebookHandler<RuleCalculateDamage>, IGlobalRulebookSubscriber
+    {
+        public BlueprintUnitFact wild_flanking_mark;
+        private UnitEntityData unit = null;
+        private int damage;
+        public BlueprintFeature GreaterPowerAttackBlueprint;
+
+        public void OnEventAboutToTrigger(RuleAttackWithWeapon evt)
+        {
+            if (!evt.Weapon.Blueprint.IsMelee || ! evt.Target.isFlankedByAttacker(evt.Initiator))
+            {
+                unit = null;
+            }
+
+            foreach (var u in evt.Target.CombatState.EngagedBy)
+            {
+                if (u != evt.Initiator && u.Buffs.HasFact(wild_flanking_mark) && evt.Target.isFlankedByAttacker(u))
+                {
+                    unit = u;
+                    damage = getPowerAttackBonus(this.Owner.Unit, evt.Weapon);
+                    break;
+                }
+            }
+        }
+
+        public void OnEventAboutToTrigger(RuleCalculateDamage evt)
+        {
+            if (unit != null)
+            {
+                evt.DamageBundle.First?.AddBonusTargetRelated(damage);
+            }
+        }
+
+        public void OnEventDidTrigger(RuleAttackWithWeapon evt)
+        {
+            if (unit == null)
+            {
+                return;
+            }
+            var unit_attack_roll = Rulebook.Trigger<RuleAttackRoll>(new RuleAttackRoll(evt.Initiator, unit, evt.WeaponStats, evt.AttackBonusPenalty));
+            if (unit_attack_roll.IsHit)
+            {
+                var damage_base = evt.Weapon.Blueprint.DamageType.GetDamageDescriptor(new DiceFormula(), damage).CreateDamage();
+                RuleDealDamage rule = new RuleDealDamage(this.Owner.Unit, unit, new DamageBundle(damage_base));
+                Rulebook.Trigger<RuleDealDamage>(rule);
+            }
+            unit = null;
+        }
+
+        public void OnEventDidTrigger(RuleCalculateDamage evt)
+        {
+
+        }
+
+
+        private int getPowerAttackBonus(UnitEntityData unit, ItemEntityWeapon weapon)
+        {
+            if (weapon == null || unit == null)
+            {
+                return 0;
+            }
+
+            int dmg = 1 + unit.Descriptor.Stats.BaseAttackBonus.ModifiedValue / 4;
+
+            if (weapon.Blueprint.Type.IsLight && !weapon.Blueprint.IsUnarmed && !weapon.Blueprint.IsNatural || weapon.IsSecondary)
+                return dmg / 2;
+            if (!weapon.HoldInTwoHands)
+                return dmg;
+            if (unit.Descriptor.HasFact((BlueprintUnitFact)this.GreaterPowerAttackBlueprint))
+                return dmg * 2;
+            return dmg * 3 / 2;
         }
     }
 }

@@ -19,6 +19,7 @@ using Kingmaker.UnitLogic.Buffs.Blueprints;
 using Kingmaker.Blueprints.Classes.Selection;
 using Kingmaker.UnitLogic.Abilities.Components;
 using Kingmaker.UnitLogic.Abilities.Components.TargetCheckers;
+using Kingmaker.UnitLogic.FactLogic;
 
 namespace ProperFlanking20
 {
@@ -41,7 +42,7 @@ namespace ProperFlanking20
         static public BlueprintFeature swordplay_style;
         static public BlueprintActivatableAbility swordplay_style_ability;
         static public BlueprintFeature swordplay_upset;
-        static public BlueprintFeature swordplay_deflection;
+        static public BlueprintFeature wild_flanking;
 
 
         internal static void load()
@@ -59,6 +60,58 @@ namespace ProperFlanking20
             createFeintFeats();
 
             createSwordplayStyle();
+
+            createWildFlanking();
+        }
+
+
+        static void createWildFlanking()
+        {
+            var icon = CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/WildFlanking.png");
+            wild_flanking = CallOfTheWild.Helpers.CreateFeature("WildFlankingFeature",
+                                                                "Wild Flanking",
+                                                                "When you are flanking an opponent with an ally who also possesses this feat, you can throw yourself into your attacks in such a way that your opponent takes extra damage, at the risk of these attacks striking your ally as well. When you choose to use this feat, check the results of your attack roll against both your opponent’s AC and your ally’s AC. If you hit your opponent, you deal bonus damage as though you were using Power Attack. If you hit your ally, the ally takes no damage from your attack except this bonus damage. It is possible to hit both your enemy and your abettor with one attack. Extra damage from this feat stacks with Power Attack.",
+                                                                "",
+                                                                icon,
+                                                                FeatureGroup.Feat,
+                                                                CallOfTheWild.Helpers.PrerequisiteFeature(library.Get<BlueprintFeature>("9972f33f977fc724c838e59641b2fca5")),
+                                                                CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 4)
+                                                               );
+
+            var buff = CallOfTheWild.Helpers.CreateBuff("WildFlankingBuff",
+                                                          wild_flanking.Name,
+                                                          wild_flanking.Description,
+                                                          "",
+                                                          wild_flanking.Icon,
+                                                          null,
+                                                          CallOfTheWild.Helpers.Create<UniqueBuff>());
+
+            var apply_buff = Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(1), dispellable: false);
+            var ability = CallOfTheWild.Helpers.CreateAbility("WildFlankingAbility",
+                                                        wild_flanking.Name,
+                                                        wild_flanking.Description,
+                                                        "",
+                                                        wild_flanking.Icon,
+                                                        AbilityType.Special,
+                                                        Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
+                                                        AbilityRange.Close,
+                                                        "",
+                                                        "",
+                                                        CallOfTheWild.Helpers.CreateRunActions(apply_buff),
+                                                        CallOfTheWild.Helpers.Create<CallOfTheWild.TeamworkMechanics.AbilityTargetHasFactOrCasterHasSoloTactics>(a => a.fact = wild_flanking)
+                                                        );
+            ability.setMiscAbilityParametersSingleTargetRangedFriendly();
+            wild_flanking.AddComponents(CallOfTheWild.Helpers.CreateAddFact(ability),
+                                        CallOfTheWild.Helpers.Create<NewMechanics.WildFlanking>(w =>
+                                                                                                {
+                                                                                                    w.GreaterPowerAttackBlueprint = library.Get<BlueprintFeature>("1b058a5ce1de415449a0f105c55b5f8b"); //2h fighter power attack
+                                                                                                    w.wild_flanking_mark = buff;
+                                                                                                }
+                                                                                                )
+                                        );
+            wild_flanking.Groups = wild_flanking.Groups.AddToArray(FeatureGroup.CombatFeat, FeatureGroup.TeamworkFeat);
+            library.AddCombatFeats(wild_flanking);
+            CallOfTheWild.Common.addTemworkFeats(wild_flanking);
         }
 
 
