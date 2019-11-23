@@ -126,9 +126,11 @@ namespace ProperFlanking20.NewMechanics
 
         public void OnEventAboutToTrigger(RuleAttackWithWeapon evt)
         {
+            Main.logger.Log("feint_check");
             if (evt.Weapon.Blueprint.IsMelee
                 ||(evt.Initiator != null && ranged_allowed_fact != null && evt.Initiator.Descriptor.HasFact(ranged_allowed_fact)))
             {
+                Main.logger.Log("feint_check_ok");
                 allowed = true;
             }
         }
@@ -368,7 +370,7 @@ namespace ProperFlanking20.NewMechanics
 
     [AllowedOn(typeof(BlueprintUnitFact))]
     [AllowMultipleComponents]
-    public class WildFlanking : OwnedGameLogicComponent<UnitDescriptor>, IInitiatorRulebookHandler<RuleAttackWithWeapon>, IRulebookHandler<RuleAttackWithWeapon>, IInitiatorRulebookHandler<RuleCalculateDamage>, IGlobalRulebookSubscriber
+    public class WildFlanking : OwnedGameLogicComponent<UnitDescriptor>, IInitiatorRulebookHandler<RuleAttackWithWeapon>, IInitiatorRulebookHandler<RuleCalculateDamage>
     {
         public BlueprintUnitFact wild_flanking_mark;
         private UnitEntityData unit = null;
@@ -395,6 +397,7 @@ namespace ProperFlanking20.NewMechanics
 
         public void OnEventAboutToTrigger(RuleCalculateDamage evt)
         {
+            //will be applied to both: attacker and partner
             if (unit != null)
             {
                 evt.DamageBundle.First?.AddBonusTargetRelated(damage);
@@ -410,7 +413,7 @@ namespace ProperFlanking20.NewMechanics
             var unit_attack_roll = Rulebook.Trigger<RuleAttackRoll>(new RuleAttackRoll(evt.Initiator, unit, evt.WeaponStats, evt.AttackBonusPenalty));
             if (unit_attack_roll.IsHit)
             {
-                var damage_base = evt.Weapon.Blueprint.DamageType.GetDamageDescriptor(new DiceFormula(), damage).CreateDamage();
+                var damage_base = evt.Weapon.Blueprint.DamageType.CreateDamage(DiceFormula.Zero, 0);//we write 0 damage here, since bonus damage is added in OnEventAboutToTrigger(RuleCalculateDamage evt)
                 RuleDealDamage rule = new RuleDealDamage(this.Owner.Unit, unit, new DamageBundle(damage_base));
                 Rulebook.Trigger<RuleDealDamage>(rule);
             }
@@ -430,7 +433,7 @@ namespace ProperFlanking20.NewMechanics
                 return 0;
             }
 
-            int dmg = 1 + unit.Descriptor.Stats.BaseAttackBonus.ModifiedValue / 4;
+            int dmg = 2*(1 + unit.Descriptor.Stats.BaseAttackBonus.ModifiedValue / 4);
 
             if (weapon.Blueprint.Type.IsLight && !weapon.Blueprint.IsUnarmed && !weapon.Blueprint.IsNatural || weapon.IsSecondary)
                 return dmg / 2;

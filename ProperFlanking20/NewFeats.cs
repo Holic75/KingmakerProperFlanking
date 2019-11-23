@@ -79,7 +79,7 @@ namespace ProperFlanking20
                                                                );
 
             var buff = CallOfTheWild.Helpers.CreateBuff("WildFlankingBuff",
-                                                          wild_flanking.Name,
+                                                          wild_flanking.Name + " Partner",
                                                           wild_flanking.Description,
                                                           "",
                                                           wild_flanking.Icon,
@@ -88,7 +88,7 @@ namespace ProperFlanking20
 
             var apply_buff = Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(1), dispellable: false);
             var ability = CallOfTheWild.Helpers.CreateAbility("WildFlankingAbility",
-                                                        wild_flanking.Name,
+                                                        "Select " + wild_flanking.Name + " Partner",
                                                         wild_flanking.Description,
                                                         "",
                                                         wild_flanking.Icon,
