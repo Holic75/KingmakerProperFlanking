@@ -126,11 +126,11 @@ namespace ProperFlanking20.NewMechanics
 
         public void OnEventAboutToTrigger(RuleAttackWithWeapon evt)
         {
-            Main.logger.Log("feint_check");
+            //Main.logger.Log("feint_check");
             if (evt.Weapon.Blueprint.IsMelee
                 ||(evt.Initiator != null && ranged_allowed_fact != null && evt.Initiator.Descriptor.HasFact(ranged_allowed_fact)))
             {
-                Main.logger.Log("feint_check_ok");
+                //Main.logger.Log("feint_check_ok");
                 allowed = true;
             }
         }
