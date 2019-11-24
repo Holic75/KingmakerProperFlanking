@@ -47,6 +47,7 @@ namespace ProperFlanking20
 
         internal static void load()
         {
+            fixBuffsCover();
             createLowProfile();
             createPhalanxFormation();
             createQuickDraw();
@@ -62,6 +63,15 @@ namespace ProperFlanking20
             createSwordplayStyle();
 
             createWildFlanking();
+        }
+
+        static void fixBuffsCover()
+        {
+            //do not apply cover for certain melee attacks which might be initiated by game as attacks from range, but which are actually not
+            var no_cover = CallOfTheWild.Helpers.Create<CoverSpecial.IgnoreCoverForAttackType>(i => i.allowed_types = new AttackType[] { AttackType.Melee, AttackType.Touch });
+            CallOfTheWild.NewSpells.bladed_dash.AddComponent(no_cover);
+            var charge_buff = library.Get<BlueprintBuff>("f36da144a379d534cad8e21667079066");
+            charge_buff.AddComponent(no_cover);
         }
 
 
