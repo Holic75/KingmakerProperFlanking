@@ -275,7 +275,7 @@ namespace ProperFlanking20
             var plant = library.Get<BlueprintFeature>("706e61781d692a042b35941f14bc41c5");
             improved_feint_ability = CallOfTheWild.Helpers.CreateAbility("ImprovedFeintAbility",
                                                                          "Feint",
-                                                                         "You can feint as a move action. To feint, make a Bluff skill check. The DC of this check is equal to 10 + your opponent’s base attack bonus + your opponent’s Wisdom modifier. If your opponent is trained in Sense Motive, the DC is instead equal to 10 + your opponent’s Sense Motive bonus, if higher. If successful, the next melee attack you make against the target does not allow him to use his Dexterity bonus to AC (if any). This attack must be made on or before your next turn.\n"
+                                                                         "You can feint as a move action. To feint, make a Bluff skill check. The DC of this check is equal to 10 + your opponent’s base attack bonus + your opponent’s Wisdom modifier. If successful, the next melee attack you make against the target does not allow him to use his Dexterity bonus to AC (if any). This attack must be made on or before your next turn.\n"
                                                                          + "When feinting against a non - humanoid DC increases by 4. Against a creature of animal Intelligence (1 or 2), by 8. Against a creature lacking an Intelligence score, it’s impossible. Feinting in combat does not provoke attacks of opportunity.",
                                                                          "",
                                                                          buff.Icon,

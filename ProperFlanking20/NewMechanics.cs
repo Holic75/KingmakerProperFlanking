@@ -105,7 +105,7 @@ namespace ProperFlanking20.NewMechanics
 
 
     [AllowedOn(typeof(BlueprintBuff))]
-    public class FlatFootedAgainstCaster : BuffLogic, ITargetRulebookHandler<RuleCheckTargetFlatFooted>, ITargetRulebookHandler<RuleAttackWithWeaponResolve>, ITargetRulebookHandler<RuleAttackWithWeapon>
+    public class FlatFootedAgainstCaster : BuffLogic, ITargetRulebookHandler<RuleCheckTargetFlatFooted>,  ITargetRulebookHandler<RuleAttackRoll>
     {
         public bool remove_after_attack;
         public BlueprintUnitFact ranged_allowed_fact;
@@ -120,17 +120,12 @@ namespace ProperFlanking20.NewMechanics
             }
         }
 
-        public void OnEventAboutToTrigger(RuleAttackWithWeaponResolve evt)
-        {
-        }
 
-        public void OnEventAboutToTrigger(RuleAttackWithWeapon evt)
+        public void OnEventAboutToTrigger(RuleAttackRoll evt)
         {
-            //Main.logger.Log("feint_check");
             if (evt.Weapon.Blueprint.IsMelee
                 ||(evt.Initiator != null && ranged_allowed_fact != null && evt.Initiator.Descriptor.HasFact(ranged_allowed_fact)))
             {
-                //Main.logger.Log("feint_check_ok");
                 allowed = true;
             }
         }
@@ -139,7 +134,7 @@ namespace ProperFlanking20.NewMechanics
         {
         }
 
-        public void OnEventDidTrigger(RuleAttackWithWeaponResolve evt)
+        public void OnEventDidTrigger(RuleAttackRoll evt)
         {
             allowed = false;
             if (!remove_after_attack)
@@ -152,15 +147,11 @@ namespace ProperFlanking20.NewMechanics
                 this.Buff.Remove();
             }
         }
-
-        public void OnEventDidTrigger(RuleAttackWithWeapon evt)
-        {
-        }
     }
 
 
     [AllowedOn(typeof(BlueprintBuff))]
-    public class FlatFootedAgainstAttacType: BuffLogic, ITargetRulebookHandler<RuleCheckTargetFlatFooted>, ITargetRulebookHandler<RuleAttackWithWeaponResolve>, ITargetRulebookHandler<RuleAttackWithWeapon>
+    public class FlatFootedAgainstAttacType: BuffLogic, ITargetRulebookHandler<RuleCheckTargetFlatFooted>, ITargetRulebookHandler<RuleAttackRoll>
     {
         public bool remove_after_attack;
         public AttackType[] allowed_attack_types;
@@ -175,11 +166,7 @@ namespace ProperFlanking20.NewMechanics
             }
         }
 
-        public void OnEventAboutToTrigger(RuleAttackWithWeaponResolve evt)
-        {
-        }
-
-        public void OnEventAboutToTrigger(RuleAttackWithWeapon evt)
+        public void OnEventAboutToTrigger(RuleAttackRoll evt)
         {
             if (allowed_attack_types.Empty() || allowed_attack_types.Contains(evt.Weapon.Blueprint.AttackType))
             {
@@ -191,7 +178,7 @@ namespace ProperFlanking20.NewMechanics
         {
         }
 
-        public void OnEventDidTrigger(RuleAttackWithWeaponResolve evt)
+        public void OnEventDidTrigger(RuleAttackRoll evt)
         {
             allowed = false;
             if (!remove_after_attack)
@@ -203,10 +190,6 @@ namespace ProperFlanking20.NewMechanics
             {
                 this.Buff.Remove();
             }
-        }
-
-        public void OnEventDidTrigger(RuleAttackWithWeapon evt)
-        {
         }
     }
 
@@ -243,7 +226,8 @@ namespace ProperFlanking20.NewMechanics
                 int dc_bab = this.Target.Unit.Descriptor.Stats.BaseAttackBonus.ModifiedValue + this.Target.Unit.Descriptor.Stats.Wisdom.Bonus;
                 int dc_sense_motive = (this.Target.Unit.Descriptor.Stats.SkillPerception.BaseValue > 0) ? this.Target.Unit.Descriptor.Stats.SkillPerception.ModifiedValue : 0;
 
-                int dc = 10 + Math.Max(dc_bab, dc_sense_motive);
+                //int dc = 10 + Math.Max(dc_bab, dc_sense_motive);
+                int dc = 10 + dc_bab;
 
                 if (targetHasFactFromList(double_penalty_facts))
                 {
