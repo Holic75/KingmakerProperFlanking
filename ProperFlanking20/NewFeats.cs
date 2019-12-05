@@ -20,6 +20,7 @@ using Kingmaker.Blueprints.Classes.Selection;
 using Kingmaker.UnitLogic.Abilities.Components;
 using Kingmaker.UnitLogic.Abilities.Components.TargetCheckers;
 using Kingmaker.UnitLogic.FactLogic;
+using Kingmaker.ElementsSystem;
 
 namespace ProperFlanking20
 {
@@ -38,6 +39,8 @@ namespace ProperFlanking20
         static public BlueprintAbility improved_feint_ability;
         static public BlueprintFeature greater_feint;
         static public BlueprintFeature ranged_feint;
+        static public BlueprintFeature two_weapon_feint;
+        static public BlueprintFeature improved_two_weapon_feint;
 
         static public BlueprintFeature swordplay_style;
         static public BlueprintActivatableAbility swordplay_style_ability;
@@ -264,8 +267,8 @@ namespace ProperFlanking20
                                             );
 
             var action = CallOfTheWild.Helpers.CreateConditional(CallOfTheWild.Common.createContextConditionCasterHasFact(greater_feint),
-                                                                CallOfTheWild.Common.createContextActionApplyBuff(greater_buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 9),
-                                                                CallOfTheWild.Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 9)
+                                                                CallOfTheWild.Common.createContextActionApplyBuff(greater_buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 6),
+                                                                CallOfTheWild.Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 6)
                                                                 );
             var action_list = CallOfTheWild.Helpers.CreateActionList(action);
 
@@ -308,6 +311,60 @@ namespace ProperFlanking20
             ranged_feint.AddComponent(improved_feint.PrerequisiteFeature());
 
             library.AddCombatFeats(improved_feint, greater_feint, ranged_feint);
+
+            //two weapon feint
+            var two_weapon_fighting = library.Get<BlueprintFeature>("ac8aaf29054f5b74eb18f2af950e752d");
+            var improved_two_weapon_fighting = library.Get<BlueprintFeature>("9af88f3ed8a017b45a6837eab7437629");
+            improved_two_weapon_feint = CallOfTheWild.Helpers.CreateFeature("ImprovedTwoWeaponFeintFeature",
+                                                   "Improved Two-Weapon Feint",
+                                                   "While using Two-Weapon Fighting to make melee attacks, you can forgo your first primary-hand melee attack to make a Bluff check to feint an opponent. If you successfully feint, that opponent is denied his Dexterity bonus to AC until the end of your turn.",
+                                                   "",
+                                                   CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/TwoWeaponFeintImproved.png"),
+                                                   FeatureGroup.Feat,
+                                                   CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Dexterity, 15),
+                                                   CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
+                                                   CallOfTheWild.Helpers.PrerequisiteFeature(two_weapon_fighting),
+                                                   CallOfTheWild.Helpers.PrerequisiteFeature(improved_two_weapon_fighting),
+                                                   CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise)
+                                                   );
+            improved_two_weapon_feint.Groups = improved_two_weapon_feint.Groups.AddToArray(FeatureGroup.CombatFeat);
+
+            var twf_action = CallOfTheWild.Helpers.CreateConditional(CallOfTheWild.Helpers.CreateConditionsCheckerOr( CallOfTheWild.Common.createContextConditionCasterHasFact(greater_feint), CallOfTheWild.Common.createContextConditionCasterHasFact(improved_two_weapon_feint)),
+                                                                    CallOfTheWild.Common.createContextActionApplyBuff(greater_buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 6),
+                                                                    CallOfTheWild.Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 6)
+                                                                    );
+            var twf_action_list = CallOfTheWild.Helpers.CreateActionList(twf_action);
+            var twf_feint_buff = CallOfTheWild.Helpers.CreateBuff("TwoWeaponFeintBuff",
+                                                                  "Two Weapon Feint",
+                                                                  "While using Two-Weapon Fighting to make melee attacks, you can forgo your first primary-hand melee attack to make a Bluff check to feint an opponent.",
+                                                                  "",
+                                                                  CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/TwoWeaponFeint.png"),
+                                                                  null,
+                                                                  CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.ForceMissAttackAndPerformAction>(f => { f.action = twf_action_list; f.OnlyFirstAttack = true; f.OnlyFullAttack = true; })
+                                                                  );
+
+            var twf_feint_ability = CallOfTheWild.Helpers.CreateActivatableAbility("TwoWeaponFeintActivatableAbility",
+                                                                                   twf_feint_buff.Name,
+                                                                                   twf_feint_buff.Description,
+                                                                                   "",
+                                                                                   twf_feint_buff.Icon,
+                                                                                   twf_feint_buff,
+                                                                                   AbilityActivationType.Immediately,
+                                                                                   Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
+                                                                                   null,
+                                                                                   CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.TwoWeaponFightingRestriction>());
+            twf_feint_ability.DeactivateImmediately = true;
+
+            two_weapon_feint = CallOfTheWild.Common.ActivatableAbilityToFeature(twf_feint_ability, false);
+            two_weapon_feint.AddComponents(CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Dexterity, 15),
+                                           CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
+                                           CallOfTheWild.Helpers.PrerequisiteFeature(two_weapon_fighting),
+                                           CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise)
+                                           );
+            two_weapon_feint.Groups = new FeatureGroup[] { FeatureGroup.Feat, FeatureGroup.CombatFeat };
+
+            improved_two_weapon_feint.AddComponent(CallOfTheWild.Helpers.PrerequisiteFeature(two_weapon_feint));
+            library.AddCombatFeats(two_weapon_feint, improved_two_weapon_feint);
         }
 
 
