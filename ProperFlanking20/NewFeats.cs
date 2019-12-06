@@ -47,6 +47,8 @@ namespace ProperFlanking20
         static public BlueprintFeature swordplay_upset;
         static public BlueprintFeature wild_flanking;
 
+        static public BlueprintFeature quick_dirty_trick;
+
 
         internal static void load()
         {
@@ -66,7 +68,97 @@ namespace ProperFlanking20
             createSwordplayStyle();
 
             createWildFlanking();
+            createManeuverAsAttack();
+            createQuickDirtyTrick();
         }
+
+
+        static void createManeuverAsAttack()
+        {
+            var features = new BlueprintFeature[] {library.Get<BlueprintFeature>("0f15c6f70d8fb2b49aa6cc24239cc5fa"), //trip
+                                                   library.Get<BlueprintFeature>("9719015edcbf142409592e2cbaab7fe1"), //sunder
+                                                   library.Get<BlueprintFeature>("25bc9c439ac44fd44ac3b1e58890916f"), //disarm
+                                                  };
+
+            foreach (var f in features)
+            {
+                var ability = f.GetComponent<AddFacts>().Facts[0] as BlueprintAbility;
+                var action = ability.GetComponent<AbilityEffectRunAction>().Actions;
+
+                var buff = CallOfTheWild.Helpers.CreateBuff(ability.name + "ToggleBuff",
+                                                            ability.Name + " (First Attack Replacement)",
+                                                            $"When performing full attack action, if you can make more than one attack, you can replace first attack with {ability.Name} combat maneuver.",
+                                                            "",
+                                                            ability.Icon,
+                                                            null,
+                                                            CallOfTheWild.Helpers.Create<CallOfTheWild.AttackReplacementMechanics.ReplaceAttackWithActionOnFullAttack>(r => r.action = action)
+                                                            );
+
+                var toggle = CallOfTheWild.Helpers.CreateActivatableAbility(ability.name + "ToggleAbility",
+                                                                            buff.Name,
+                                                                            buff.Description,
+                                                                            "",
+                                                                            buff.Icon,
+                                                                            buff,
+                                                                            AbilityActivationType.Immediately,
+                                                                            Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
+                                                                            null);
+                toggle.Group = CallOfTheWild.ActivatableAbilityGroupExtension.AttackReplacement.ToActivatableAbilityGroup();
+                toggle.DeactivateImmediately = true;
+
+                f.AddComponent(CallOfTheWild.Helpers.CreateAddFact(toggle));
+            }
+        }
+
+
+        static void createQuickDirtyTrick()
+        {
+            var combat_expertise = library.Get<BlueprintFeature>("4c44724ffa8844f4d9bedb5bb27d144a");
+            var dirty_trick = library.Get<BlueprintFeature>("ed699d64870044b43bb5a7fbe3f29494");
+            quick_dirty_trick = CallOfTheWild.Helpers.CreateFeature("QuickDirtyTrickFeature",
+                                                                    "Quick Dirty Trick",
+                                                                    "On your turn, you can perform a single dirty trick combat maneuver in place of one of your melee attacks. You must choose the melee attack with the highest base attack bonus to make the dirty trick combat maneuver.",
+                                                                    "",
+                                                                    dirty_trick.Icon,
+                                                                    FeatureGroup.Feat,
+                                                                    CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 6),
+                                                                    CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 6),
+                                                                    CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise),
+                                                                    CallOfTheWild.Helpers.PrerequisiteFeature(dirty_trick)
+                                                                    );
+            quick_dirty_trick.Groups = quick_dirty_trick.Groups.AddToArray(FeatureGroup.CombatFeat);
+            library.AddCombatFeats(quick_dirty_trick);
+
+            foreach (var f in dirty_trick.GetComponent<AddFacts>().Facts)
+            {
+                var ability = f as BlueprintAbility;
+                var action = ability.GetComponent<AbilityEffectRunAction>().Actions;
+
+                var buff = CallOfTheWild.Helpers.CreateBuff(ability.name + "ToggleBuff",
+                                                            ability.Name + " (First Attack Replacement)",
+                                                            $"When performing full attack action, if you can make more than one attack, you can replace first attack with {ability.Name} combat maneuver.",
+                                                            "",
+                                                            ability.Icon,
+                                                            null,
+                                                            CallOfTheWild.Helpers.Create<CallOfTheWild.AttackReplacementMechanics.ReplaceAttackWithActionOnFullAttack>(r => r.action = action)
+                                                            );
+
+                var toggle = CallOfTheWild.Helpers.CreateActivatableAbility(ability.name + "ToggleAbility",
+                                                                            buff.Name,
+                                                                            buff.Description,
+                                                                            "",
+                                                                            buff.Icon,
+                                                                            buff,
+                                                                            AbilityActivationType.Immediately,
+                                                                            Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
+                                                                            null);
+                toggle.Group = CallOfTheWild.ActivatableAbilityGroupExtension.AttackReplacement.ToActivatableAbilityGroup();
+                toggle.DeactivateImmediately = true;
+
+                quick_dirty_trick.AddComponent(CallOfTheWild.Helpers.CreateAddFact(toggle));
+            }
+        }
+
 
         static void fixBuffsCover()
         {
@@ -333,14 +425,15 @@ namespace ProperFlanking20
                                                                     CallOfTheWild.Common.createContextActionApplyBuff(greater_buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 6),
                                                                     CallOfTheWild.Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 6)
                                                                     );
-            var twf_action_list = CallOfTheWild.Helpers.CreateActionList(twf_action);
+            var twf_feint_action = CallOfTheWild.Helpers.Create<NewMechanics.ContextFeintSkillCheck>(c => c.Success = CallOfTheWild.Helpers.CreateActionList(twf_action));
+            var twf_feint_action_list = CallOfTheWild.Helpers.CreateActionList(twf_feint_action);
             var twf_feint_buff = CallOfTheWild.Helpers.CreateBuff("TwoWeaponFeintBuff",
                                                                   "Two Weapon Feint",
                                                                   "While using Two-Weapon Fighting to make melee attacks, you can forgo your first primary-hand melee attack to make a Bluff check to feint an opponent.",
                                                                   "",
                                                                   CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/TwoWeaponFeint.png"),
                                                                   null,
-                                                                  CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.ForceMissAttackAndPerformAction>(f => { f.action = twf_action_list; f.OnlyFirstAttack = true; f.OnlyFullAttack = true; })
+                                                                  CallOfTheWild.Helpers.Create<CallOfTheWild.AttackReplacementMechanics.ReplaceAttackWithActionOnFullAttack>(f => f.action = twf_feint_action_list)
                                                                   );
 
             var twf_feint_ability = CallOfTheWild.Helpers.CreateActivatableAbility("TwoWeaponFeintActivatableAbility",
@@ -354,6 +447,7 @@ namespace ProperFlanking20
                                                                                    null,
                                                                                    CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.TwoWeaponFightingRestriction>());
             twf_feint_ability.DeactivateImmediately = true;
+            twf_feint_ability.Group = CallOfTheWild.ActivatableAbilityGroupExtension.AttackReplacement.ToActivatableAbilityGroup();
 
             two_weapon_feint = CallOfTheWild.Common.ActivatableAbilityToFeature(twf_feint_ability, false);
             two_weapon_feint.AddComponents(CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Dexterity, 15),
