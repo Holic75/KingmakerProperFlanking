@@ -48,6 +48,7 @@ namespace ProperFlanking20
         static public BlueprintFeature wild_flanking;
 
         static public BlueprintFeature quick_dirty_trick;
+        static public BlueprintFeature dirty_fighting;
 
 
         internal static void load()
@@ -70,6 +71,55 @@ namespace ProperFlanking20
             createWildFlanking();
             createManeuverAsAttack();
             createQuickDirtyTrick();
+
+            createDirtyFighting();
+        }
+
+
+        static void createDirtyFighting()
+        {
+            var icon = CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/DirtyFighting.png");
+            dirty_fighting = CallOfTheWild.Helpers.CreateFeature("DirtyFightingFeature",
+                                                                 "Dirty Fighting",
+                                                                 "When you attempt a combat maneuver check against a foe you are flanking, you receive +2 bonus to combat maneuver check.\n" +
+                                                                 "Special: This feat counts as having Dex 13, Int 13, Combat Expertise, and Improved Unarmed Strike for the purposes of meeting the prerequisites of the various improved combat maneuver feats, as well as feats that require those improved combat maneuver feats as prerequisites.",
+                                                                 "",
+                                                                 icon,
+                                                                 FeatureGroup.Feat,
+                                                                 CallOfTheWild.Helpers.Create<NewMechanics.CMBBonusAgainstFlanked>(c => c.Value = 2)
+                                                                 );
+            dirty_fighting.Groups = dirty_fighting.Groups.AddToArray(FeatureGroup.CombatFeat);
+            library.AddCombatFeats(dirty_fighting);
+
+            var improved_unarmed_strike = library.Get<BlueprintFeature>("7812ad3672a4b9a4fb894ea402095167");
+            var combat_expertise = library.Get<BlueprintFeature>("4c44724ffa8844f4d9bedb5bb27d144a");
+
+            string[] maneuver_features_guids = new string[] { "0f15c6f70d8fb2b49aa6cc24239cc5fa", //improved trip
+                                                            "4cc71ae82bdd85b40b3cfe6697bb7949", //greater trip
+                                                            "25bc9c439ac44fd44ac3b1e58890916f", //improved disarm
+                                                            "ed699d64870044b43bb5a7fbe3f29494", //improved dirty trick
+                                                            "52c6b07a68940af41b270b3710682dc7", //greater Dirty trick
+                                                            "63d8e3a9ab4d72e4081a7862d7246a79", //greater disarm
+                                                            CallOfTheWild.NewFeats.felling_smash.AssetGuid,
+                                                            quick_dirty_trick.AssetGuid
+                                                          };
+
+            var dirty_fighting_prereq = CallOfTheWild.Helpers.PrerequisiteFeature(dirty_fighting);
+            foreach (var guid in maneuver_features_guids)
+            {
+                var f = library.Get<BlueprintFeature>(guid);
+                var stat_reqs = f.GetComponents<PrerequisiteStatValue>().Where(p => (p.Stat == StatType.Dexterity || p.Stat == StatType.Intelligence) && p.Value <= 13).ToArray();
+                var feat_reqs = f.GetComponents<PrerequisiteFeature>().Where(p => p.Feature == improved_unarmed_strike || p.Feature == combat_expertise).ToArray();
+                foreach (var sr in stat_reqs)
+                {
+                    f.ReplaceComponent(sr, CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.PrerequsiteOrAlternative>(pa => { pa.base_prerequsite = sr; pa.alternative_prerequsite = dirty_fighting_prereq; pa.Group = sr.Group; }));
+                }
+
+                foreach (var fr in feat_reqs)
+                {
+                    f.ReplaceComponent(fr, CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.PrerequsiteOrAlternative>(pa => { pa.base_prerequsite = fr; pa.alternative_prerequsite = dirty_fighting_prereq; pa.Group = fr.Group; }));
+                }
+            }
         }
 
 

@@ -17,11 +17,12 @@ It also adds soft cover mechanics (can be disabled in your_game_folder/Mods/Prop
 - Wild Flanking
 - Two-Weapon Feint and Improved Two-Weapon Feint
 - Quick Dirty Trick
+- Dirty Fighting
 
 It also adds option to use combat maneuvers as attack (although in a bit lighter way than Closer To Tabletop - only first attack can be replaced and only during full attack action)
 
 It is not compatible with Closer To Tabletop mod, but it can replace it without breaking your saves.
-It requires at least Call of the Wild 1.47.
+It requires at least Call of the Wild 1.48.
 
 Install
 - Download and install Unity Mod Manager﻿﻿ 0.13.0 or later

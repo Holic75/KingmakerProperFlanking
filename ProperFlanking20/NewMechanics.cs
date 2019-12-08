@@ -17,6 +17,7 @@ using Kingmaker.RuleSystem.Rules.Damage;
 using Kingmaker.UnitLogic;
 using Kingmaker.UnitLogic.Abilities.Blueprints;
 using Kingmaker.UnitLogic.Abilities.Components.Base;
+using Kingmaker.UnitLogic.Buffs;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 using Kingmaker.UnitLogic.Buffs.Components;
 using Kingmaker.UnitLogic.Class.LevelUp;
@@ -428,4 +429,39 @@ namespace ProperFlanking20.NewMechanics
             return dmg * 3 / 2;
         }
     }
+
+
+
+
+    [AllowedOn(typeof(BlueprintUnitFact))]
+    [AllowMultipleComponents]
+    public class CMBBonusAgainstFlanked : RuleInitiatorLogicComponent<RuleCombatManeuver>
+    {
+        public ContextValue Value;
+
+        private MechanicsContext Context
+        {
+            get
+            {
+                MechanicsContext context = (this.Fact as Buff)?.Context;
+                if (context != null)
+                    return context;
+                return (this.Fact as Feature)?.Context;
+            }
+        }
+
+        public override void OnEventAboutToTrigger(RuleCombatManeuver evt)
+        {
+            if (!evt.Target.isFlankedByAttacker(evt.Initiator))
+            {
+                return;
+            }
+            evt.AddBonus(this.Value.Calculate(this.Context), this.Fact);
+        }
+
+        public override void OnEventDidTrigger(RuleCombatManeuver evt)
+        {
+        }
+    }
+
 }
