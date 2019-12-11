@@ -127,6 +127,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CombatManeuverBonus.cs" />
     <Compile Include="Cover.cs" />
     <Compile Include="CoverSpecial.cs" />
     <Compile Include="Flanking.cs" />

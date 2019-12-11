@@ -172,7 +172,7 @@ namespace ProperFlanking20
                                                                     dirty_trick.Icon,
                                                                     FeatureGroup.Feat,
                                                                     CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 6),
-                                                                    CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 6),
+                                                                    CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
                                                                     CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise),
                                                                     CallOfTheWild.Helpers.PrerequisiteFeature(dirty_trick)
                                                                     );
