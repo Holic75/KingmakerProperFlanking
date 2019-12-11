@@ -20,6 +20,7 @@ It also adds soft cover mechanics (can be disabled in your_game_folder/Mods/Prop
 - Dirty Fighting
 
 It also adds option to use combat maneuvers as attack (although in a bit lighter way than Closer To Tabletop - only first attack can be replaced and only during full attack action)
+In addition, when using combat maneuver as attack, the CMB is calcualted based off attack bonus for the associated weapon.
 
 It is not compatible with Closer To Tabletop mod, but it can replace it without breaking your saves.
 It requires at least Call of the Wild 1.48.

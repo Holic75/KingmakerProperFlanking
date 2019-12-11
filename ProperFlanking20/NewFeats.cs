@@ -152,7 +152,8 @@ namespace ProperFlanking20
                                                                             buff,
                                                                             AbilityActivationType.Immediately,
                                                                             Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
-                                                                            null);
+                                                                            null,
+                                                                            CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.PrimaryHandMeleeWeaponRestriction>());
                 toggle.Group = CallOfTheWild.ActivatableAbilityGroupExtension.AttackReplacement.ToActivatableAbilityGroup();
                 toggle.DeactivateImmediately = true;
 
@@ -201,7 +202,8 @@ namespace ProperFlanking20
                                                                             buff,
                                                                             AbilityActivationType.Immediately,
                                                                             Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
-                                                                            null);
+                                                                            null,
+                                                                            CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.PrimaryHandMeleeWeaponRestriction>());
                 toggle.Group = CallOfTheWild.ActivatableAbilityGroupExtension.AttackReplacement.ToActivatableAbilityGroup();
                 toggle.DeactivateImmediately = true;
 
