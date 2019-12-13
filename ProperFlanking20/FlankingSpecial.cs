@@ -13,9 +13,7 @@ namespace ProperFlanking20.FlankingSpecial
         public int min_additional_flankers = 2;
 
         public override bool isFlanking(UnitEntityData target)
-        {
-           bool solo_tactics = (bool)this.Owner.State.Features.SoloTactics;
-
+        {         
             var engaged_array = this.Owner.Unit.CombatState.EngagedBy.ToArray();
 
             if (!engaged_array.Contains(this.Owner.Unit) || engaged_array.Length < min_additional_flankers)
@@ -32,10 +30,8 @@ namespace ProperFlanking20.FlankingSpecial
                     continue;
                 }
 
-                if (teammate.Ensure<Flanking.UnitPartSpecialFlanking>().hasBuff(this.Fact.Blueprint) || solo_tactics)
-                {
-                    need_flankers--;
-                }
+                need_flankers--;
+
                 if (need_flankers <= 0)
                 {
                     return true;

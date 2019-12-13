@@ -19,6 +19,9 @@ It also adds soft cover mechanics (can be disabled in your_game_folder/Mods/Prop
 - Quick Dirty Trick
 - Dirty Fighting
 
+New Rogue Talents:
+- Underhanded Trick
+
 It also adds option to use combat maneuvers as attack (although in a bit lighter way than Closer To Tabletop - only first attack can be replaced and only during full attack action)
 In addition, when using combat maneuver as attack, the CMB is calcualted based off attack bonus for the associated weapon.
 

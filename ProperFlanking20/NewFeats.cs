@@ -612,9 +612,9 @@ namespace ProperFlanking20
                                                CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise),
                                                CallOfTheWild.Helpers.PrerequisiteStatValue(Kingmaker.EntitySystem.Stats.StatType.Intelligence, 13));
 
-            gang_up.Groups = gang_up.Groups.AddToArray(FeatureGroup.CombatFeat, FeatureGroup.TeamworkFeat);
+            gang_up.Groups = gang_up.Groups.AddToArray(FeatureGroup.CombatFeat);
             library.AddCombatFeats(gang_up);
-            CallOfTheWild.Common.addTemworkFeats(gang_up);
+            //CallOfTheWild.Common.addTemworkFeats(gang_up);
         }
 
 

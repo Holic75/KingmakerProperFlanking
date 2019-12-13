@@ -96,6 +96,7 @@ namespace ProperFlanking20
 
                     ProperFlanking20.Cover.load(Main.settings.soft_cover_ac_bonus, Main.settings.partial_soft_cover_ac_bonus);
                     ProperFlanking20.NewFeats.load();
+                    ProperFlanking20.RogueTalents.fixRogueTalents();
                     ProperFlanking20.UnloadCTT.run();
 #if DEBUG
                     string guid_file_name = @"C:\Repositories\KingmakerProperFlanking\ProperFlanking20\blueprints.txt";
