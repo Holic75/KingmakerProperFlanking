@@ -26,7 +26,7 @@ It also adds option to use combat maneuvers as attack (although in a bit lighter
 In addition, when using combat maneuver as attack, the CMB is calcualted based off attack bonus for the associated weapon.
 
 It is not compatible with Closer To Tabletop mod, but it can replace it without breaking your saves.
-It requires at least Call of the Wild 1.48.
+It requires at least Call of the Wild 1.49.
 
 Install
 - Download and install Unity Mod Manager﻿﻿ 0.13.0 or later
