@@ -24,7 +24,7 @@ using Kingmaker.ElementsSystem;
 
 namespace ProperFlanking20
 {
-    class NewFeats
+    public class NewFeats
     {
         static LibraryScriptableObject library = Main.library;
         static public BlueprintFeature quick_draw;
@@ -156,7 +156,8 @@ namespace ProperFlanking20
                                                                             CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.PrimaryHandMeleeWeaponRestriction>());
                 toggle.Group = CallOfTheWild.ActivatableAbilityGroupExtension.AttackReplacement.ToActivatableAbilityGroup();
                 toggle.DeactivateImmediately = true;
-
+                toggle.IsOnByDefault = true;
+                toggle.DeactivateIfCombatEnded = true;
                 f.AddComponent(CallOfTheWild.Helpers.CreateAddFact(toggle));
             }
         }
@@ -180,7 +181,7 @@ namespace ProperFlanking20
             quick_dirty_trick.Groups = quick_dirty_trick.Groups.AddToArray(FeatureGroup.CombatFeat);
             library.AddCombatFeats(quick_dirty_trick);
 
-            foreach (var f in dirty_trick.GetComponent<AddFacts>().Facts)
+            foreach (var f in dirty_trick.GetComponent<AddFacts>().Facts.Reverse())
             {
                 var ability = f as BlueprintAbility;
                 var action = ability.GetComponent<AbilityEffectRunAction>().Actions;
@@ -206,7 +207,8 @@ namespace ProperFlanking20
                                                                             CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.PrimaryHandMeleeWeaponRestriction>());
                 toggle.Group = CallOfTheWild.ActivatableAbilityGroupExtension.AttackReplacement.ToActivatableAbilityGroup();
                 toggle.DeactivateImmediately = true;
-
+                toggle.IsOnByDefault = true;
+                toggle.DeactivateIfCombatEnded = true;
                 quick_dirty_trick.AddComponent(CallOfTheWild.Helpers.CreateAddFact(toggle));
             }
         }
@@ -500,6 +502,7 @@ namespace ProperFlanking20
                                                                                    CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.TwoWeaponFightingRestriction>());
             twf_feint_ability.DeactivateImmediately = true;
             twf_feint_ability.Group = CallOfTheWild.ActivatableAbilityGroupExtension.AttackReplacement.ToActivatableAbilityGroup();
+            twf_feint_ability.IsOnByDefault = true;
 
             two_weapon_feint = CallOfTheWild.Common.ActivatableAbilityToFeature(twf_feint_ability, false);
             two_weapon_feint.AddComponents(CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Dexterity, 15),

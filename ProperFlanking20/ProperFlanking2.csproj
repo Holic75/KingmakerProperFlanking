@@ -143,6 +143,7 @@
     </Compile>
     <Compile Include="FlankingSpecial.cs" />
     <Compile Include="QuickDraw.cs" />
+    <Compile Include="ReachWeaponFix.cs" />
     <Compile Include="RogueTalents.cs" />
     <Compile Include="UnloadCTT.cs" />
   </ItemGroup>

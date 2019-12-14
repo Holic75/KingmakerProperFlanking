@@ -11,9 +11,11 @@ using System.Threading.Tasks;
 
 namespace ProperFlanking20
 {
-    class RogueTalents
+    public class RogueTalents
     {
         static LibraryScriptableObject library = Main.library;
+
+        static public BlueprintFeature underhanded;
 
         internal static void fixRogueTalents()
         {
@@ -37,8 +39,9 @@ namespace ProperFlanking20
                                                         FeatureGroup.None
                                                         );
             greater_dirty_trick_allowed.HideInCharacterSheetAndLevelUp = true;
+            greater_dirty_trick_allowed.HideInUI = true;
             var greater_dirty_trick_allowed_prereq = CallOfTheWild.Helpers.PrerequisiteFeature(greater_dirty_trick_allowed);
-            var underhanded = CallOfTheWild.Helpers.CreateFeature("UnderhandedTrickRogueTalentFeature",
+            underhanded = CallOfTheWild.Helpers.CreateFeature("UnderhandedTrickRogueTalentFeature",
                                                                     "Underhanded Trick",
                                                                     "A rogue who selects this talent gains Improved Dirty Trick as a bonus feat, even if she does not meet the prerequisites. At 6th level, she is treated as if she meets all the prerequisites for Greater Dirty Trick (although she must take the feat as normal).",
                                                                     "",
