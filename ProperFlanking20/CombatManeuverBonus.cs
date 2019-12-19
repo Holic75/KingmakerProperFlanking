@@ -1,4 +1,5 @@
-﻿using Kingmaker.EntitySystem.Stats;
+﻿using Kingmaker.EntitySystem.Entities;
+using Kingmaker.EntitySystem.Stats;
 using Kingmaker.Enums;
 using Kingmaker.RuleSystem;
 using Kingmaker.RuleSystem.Rules;
@@ -21,14 +22,36 @@ namespace ProperFlanking20.CombatManeuverBonus
             {
                 return true;
             }
-            //Main.logger.Log("Attack Roll Check");
+
             var attack = Rulebook.CurrentContext.AllEvents.LastOfType<RuleAttackWithWeapon>();
-            if (attack == null || (attack.AttackRoll != null && attack.AttackRoll.IsTriggererd))
+            var maneuver = Rulebook.CurrentContext.AllEvents.LastOfType<RuleCombatManeuver>();
+            if (maneuver == null || !maneuverAsAttack(maneuver.Type, __instance.Initiator))
             {
-                //if maneuver happens after attack roll than it means it is a free attempt or ther is no corresponding attack with weapon than it means it is
-                // a (probably free) attempt and we should use normal cmb here
-                //if maneuver is associated with weapon attack and happens before attack roll than we assume it replaces an attack and thus we just take corresponding attack bonus
-                //
+                return true;
+            }
+
+            var weapon = __instance.Initiator.Body?.PrimaryHand?.MaybeWeapon;
+            var penalty = 0;
+
+            if (attack != null)
+            {
+                weapon = attack.Weapon;
+                if (attack.AttackRoll != null && attack.AttackRoll.IsTriggererd)
+                {
+                    //if maneuver is after attack - it is a free attempt that is using iterative attack bonus
+                    penalty = attack.AttackBonusPenalty;
+                }
+            }
+            else if (!__instance.Initiator.Descriptor.Buffs.HasFact(NewFeats.maneuver_as_attack_buff))
+            {
+                //check if maneuver was initiated by corresponding ability and not by spell
+                return true;
+            }
+
+
+            if (weapon == null || !weapon.Blueprint.IsMelee)
+            {
+                //no maneuvers without weapon or ranged weapon
                 return true;
             }
             // in order to properly get attack bonus we normally need to trigger RuleCalculateAttackBonus
@@ -38,16 +61,15 @@ namespace ProperFlanking20.CombatManeuverBonus
             // as an unfortunate side effect it might trigger something that should not be triggered (like limited use rerolls), so it is not ideal
             // so we make a trick - we patch RuleAttackRoll to always trigger RuleCalculateAttackBonus and than call a fake RuleAttackRoll with auto hit 
             // which does not make a roll
-
-            var attack_roll = new RuleAttackRoll(attack.Initiator, attack.Target, attack.Weapon, 0);
+            
+            var attack_roll = new RuleAttackRoll(maneuver.Initiator, maneuver.Target, weapon, penalty);
             attack_roll.IgnoreConcealment = true;
             attack_roll.AutoHit = true;
             attack_roll.SuspendCombatLog = true;
 
             var AttackBonus = Rulebook.Trigger<RuleAttackRoll>(attack_roll).AttackBonus;
 
-            //var AttackBonus = Rulebook.Trigger<RuleCalculateAttackBonus>(new RuleCalculateAttackBonus(attack.Initiator, attack.Target, attack.Weapon, attack.IsFirstAttack ? 0 : attack.AttackBonusPenalty)).Result;
-            var ResultSizeBonus = __instance.Initiator.Descriptor.State.Size.GetModifiers().CMDAndCMD;
+            var ResultSizeBonus = __instance.Initiator.Descriptor.State.Size.GetModifiers().CMDAndCMD - __instance.Initiator.Descriptor.State.Size.GetModifiers().AttackAndAC;
             var ResultMiscBonus = (int)__instance.Initiator.Stats.AdditionalCMB;
 
             //Main.logger.Log("Attack Detected: " + AttackBonus.ToString());
@@ -58,6 +80,14 @@ namespace ProperFlanking20.CombatManeuverBonus
             var tr = Harmony12.Traverse.Create(__instance);
             tr.Property("Result").SetValue(AttackBonus + ResultSizeBonus + ResultMiscBonus + __instance.AdditionalBonus);
             return false;
+        }
+
+
+        static bool maneuverAsAttack(CombatManeuver maneuver, UnitEntityData unit)
+        {
+            return (maneuver == CombatManeuver.Trip || maneuver == CombatManeuver.Disarm || maneuver == CombatManeuver.SunderArmor)
+                   || ((maneuver == CombatManeuver.DirtyTrickBlind || maneuver == CombatManeuver.DirtyTrickEntangle || maneuver == CombatManeuver.DirtyTrickSickened)
+                      && unit.Descriptor.Progression.Features.HasFact(NewFeats.quick_dirty_trick));
         }
     }
 

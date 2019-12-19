@@ -51,6 +51,9 @@ namespace ProperFlanking20
         static public BlueprintFeature dirty_fighting;
 
 
+        static internal BlueprintBuff maneuver_as_attack_buff;
+
+
         internal static void load()
         {
             fixBuffsCover();
@@ -125,6 +128,18 @@ namespace ProperFlanking20
 
         static void createManeuverAsAttack()
         {
+            maneuver_as_attack_buff = CallOfTheWild.Helpers.CreateBuff("ManeuverAsAttackBuff",
+                                                                         "",
+                                                                         "",
+                                                                         "",
+                                                                         null,
+                                                                         null);
+            maneuver_as_attack_buff.SetBuffFlags(BuffFlags.HiddenInUi);
+
+            var apply_buff = CallOfTheWild.Common.createContextActionApplyBuffToCaster(maneuver_as_attack_buff, CallOfTheWild.Helpers.CreateContextDuration(1), dispellable: false);
+            var remove_buff = CallOfTheWild.Common.createContextActionOnContextCaster(CallOfTheWild.Common.createContextActionRemoveBuffFromCaster(maneuver_as_attack_buff));
+
+
             var features = new BlueprintFeature[] {library.Get<BlueprintFeature>("0f15c6f70d8fb2b49aa6cc24239cc5fa"), //trip
                                                    library.Get<BlueprintFeature>("9719015edcbf142409592e2cbaab7fe1"), //sunder
                                                    library.Get<BlueprintFeature>("25bc9c439ac44fd44ac3b1e58890916f"), //disarm
@@ -159,12 +174,20 @@ namespace ProperFlanking20
                 toggle.IsOnByDefault = true;
                 toggle.DeactivateIfCombatEnded = true;
                 f.AddComponent(CallOfTheWild.Helpers.CreateAddFact(toggle));
+
+                ability.ReplaceComponent<AbilityEffectRunAction>(a => a.Actions = CallOfTheWild.Helpers.CreateActionList(apply_buff, a.Actions.Actions[0], remove_buff));
             }
+
+            var aspect_of_wolf_trip = library.Get<BlueprintAbility>("a4445991c5bb0ca40ac152bb4bf46a3c");
+            aspect_of_wolf_trip.ReplaceComponent<AbilityEffectRunAction>(a => a.Actions = CallOfTheWild.Helpers.CreateActionList(apply_buff, a.Actions.Actions[0], remove_buff));
         }
 
 
         static void createQuickDirtyTrick()
         {
+            var apply_buff = CallOfTheWild.Common.createContextActionApplyBuffToCaster(maneuver_as_attack_buff, CallOfTheWild.Helpers.CreateContextDuration(1), dispellable: false);
+            var remove_buff = CallOfTheWild.Common.createContextActionOnContextCaster(CallOfTheWild.Common.createContextActionRemoveBuffFromCaster(maneuver_as_attack_buff));
+
             var combat_expertise = library.Get<BlueprintFeature>("4c44724ffa8844f4d9bedb5bb27d144a");
             var dirty_trick = library.Get<BlueprintFeature>("ed699d64870044b43bb5a7fbe3f29494");
             quick_dirty_trick = CallOfTheWild.Helpers.CreateFeature("QuickDirtyTrickFeature",
@@ -210,6 +233,7 @@ namespace ProperFlanking20
                 toggle.IsOnByDefault = true;
                 toggle.DeactivateIfCombatEnded = true;
                 quick_dirty_trick.AddComponent(CallOfTheWild.Helpers.CreateAddFact(toggle));
+                ability.ReplaceComponent<AbilityEffectRunAction>(a => a.Actions = CallOfTheWild.Helpers.CreateActionList(apply_buff, a.Actions.Actions[0], remove_buff));
             }
         }
 
