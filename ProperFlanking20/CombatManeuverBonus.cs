@@ -69,7 +69,7 @@ namespace ProperFlanking20.CombatManeuverBonus
 
             var AttackBonus = Rulebook.Trigger<RuleAttackRoll>(attack_roll).AttackBonus;
 
-            var ResultSizeBonus = __instance.Initiator.Descriptor.State.Size.GetModifiers().CMDAndCMD - __instance.Initiator.Descriptor.State.Size.GetModifiers().AttackAndAC;
+            var ResultSizeBonus = __instance.Initiator.Descriptor.State.Size.GetModifiers().CMDAndCMD + __instance.Initiator.Descriptor.State.Size.GetModifiers().AttackAndAC;
             var ResultMiscBonus = (int)__instance.Initiator.Stats.AdditionalCMB;
 
             //Main.logger.Log("Attack Detected: " + AttackBonus.ToString());
