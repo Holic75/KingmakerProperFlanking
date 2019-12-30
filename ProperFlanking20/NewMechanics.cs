@@ -111,10 +111,15 @@ namespace ProperFlanking20.NewMechanics
         public bool remove_after_attack;
         public BlueprintUnitFact ranged_allowed_fact;
 
-        private bool allowed = false;
-
         public void OnEventAboutToTrigger(RuleCheckTargetFlatFooted evt)
         {
+            var attack = Rulebook.CurrentContext.AllEvents.LastOfType<RuleAttackRoll>();
+
+            if (attack == null)
+            {
+                return;
+            }
+            bool allowed = attack.Weapon.Blueprint.IsMelee || (evt.Initiator != null && ranged_allowed_fact != null && evt.Initiator.Descriptor.HasFact(ranged_allowed_fact));
             if (allowed && evt.Initiator == this.Context?.MaybeCaster)
             {
                 evt.ForceFlatFooted = true;
@@ -124,11 +129,7 @@ namespace ProperFlanking20.NewMechanics
 
         public void OnEventAboutToTrigger(RuleAttackRoll evt)
         {
-            if (evt.Weapon.Blueprint.IsMelee
-                ||(evt.Initiator != null && ranged_allowed_fact != null && evt.Initiator.Descriptor.HasFact(ranged_allowed_fact)))
-            {
-                allowed = true;
-            }
+
         }
 
         public void OnEventDidTrigger(RuleCheckTargetFlatFooted evt)
@@ -137,7 +138,6 @@ namespace ProperFlanking20.NewMechanics
 
         public void OnEventDidTrigger(RuleAttackRoll evt)
         {
-            allowed = false;
             if (!remove_after_attack)
             {
                 return;
@@ -157,10 +157,15 @@ namespace ProperFlanking20.NewMechanics
         public bool remove_after_attack;
         public AttackType[] allowed_attack_types;
 
-        private bool allowed = false;
-
         public void OnEventAboutToTrigger(RuleCheckTargetFlatFooted evt)
         {
+            var attack = Rulebook.CurrentContext.AllEvents.LastOfType<RuleAttackRoll>();
+
+            if (attack == null)
+            {
+                return;
+            }
+            bool allowed = allowed_attack_types.Empty() || allowed_attack_types.Contains(attack.Weapon.Blueprint.AttackType);
             if (allowed)
             {
                 evt.ForceFlatFooted = true;
@@ -169,10 +174,7 @@ namespace ProperFlanking20.NewMechanics
 
         public void OnEventAboutToTrigger(RuleAttackRoll evt)
         {
-            if (allowed_attack_types.Empty() || allowed_attack_types.Contains(evt.Weapon.Blueprint.AttackType))
-            {
-                allowed = true;
-            }
+
         }
 
         public void OnEventDidTrigger(RuleCheckTargetFlatFooted evt)
@@ -181,7 +183,6 @@ namespace ProperFlanking20.NewMechanics
 
         public void OnEventDidTrigger(RuleAttackRoll evt)
         {
-            allowed = false;
             if (!remove_after_attack)
             {
                 return;
