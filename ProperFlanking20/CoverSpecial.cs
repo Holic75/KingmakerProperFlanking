@@ -15,7 +15,7 @@ namespace ProperFlanking20.CoverSpecial
     {
         public Kingmaker.RuleSystem.AttackType[] allowed_types;
 
-        public override bool ignoresCover(AttackType attack_type)
+        public override bool ignoresCover(UnitEntityData target, UnitEntityData cover, AttackType attack_type)
         {
             return allowed_types.Contains(attack_type);
         }
@@ -40,6 +40,17 @@ namespace ProperFlanking20.CoverSpecial
         public override bool doesNotProvideCoverToFrom(UnitEntityData target, UnitEntityData attacker, AttackType attack_type)
         {
             return ((teamwork && (bool)attacker.Descriptor.State.Features.SoloTactics) || attacker.Descriptor.HasFact(this.Fact)) && attacker.IsAlly(this.Owner.Unit);
+        }
+    }
+
+
+    public class NoCoverFromFactOwners : Cover.SpecialIgnoreCover
+    {
+        bool teamwork = true;
+
+        public override bool ignoresCover(UnitEntityData target, UnitEntityData cover, AttackType attack_type)
+        {
+            return ((teamwork && (bool)Owner.State.Features.SoloTactics) || cover.Descriptor.HasFact(this.Fact)) && cover.IsAlly(this.Owner.Unit);
         }
     }
 

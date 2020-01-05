@@ -150,14 +150,14 @@ namespace ProperFlanking20
             }
 
 
-            public bool ignoresCover(AttackType attack_type)
+            public bool ignoresCover(UnitEntityData target, UnitEntityData cover, AttackType attack_type)
             {
                 foreach (var b in buffs)
                 {
                     if (b.Blueprint.GetComponent<SpecialIgnoreCover>() != null)
                     {
                         bool result = false;
-                        b.CallComponents<SpecialIgnoreCover>(a => { result = a.ignoresCover(attack_type); });
+                        b.CallComponents<SpecialIgnoreCover>(a => { result = a.ignoresCover(target, cover, attack_type); });
                         if (result)
                         {
                             return true;
@@ -198,16 +198,13 @@ namespace ProperFlanking20
                 this.Owner.Ensure<UnitPartIgnoreCover>().removeBuff(this.Fact);
             }
 
-            abstract public bool ignoresCover(AttackType attack_type);
+            abstract public bool ignoresCover(UnitEntityData target, UnitEntityData cover, AttackType attack_type);
         }
 
         static internal CoverType hasCoverFrom(this UnitEntityData unit, UnitEntityData attacker, AttackType attack_type)
         {
             var current_cover = CoverType.None;
-            if (attacker.Ensure<UnitPartIgnoreCover>().ignoresCover(attack_type))
-            {
-                return current_cover;
-            }
+
             var c = (unit.Position + attacker.Position) / 2.0f;
             var r = (unit.Position - attacker.Position) / 2.0f;
             if (attack_type == AttackType.Melee || attack_type == AttackType.Touch)
@@ -244,6 +241,10 @@ namespace ProperFlanking20
             }
           
             if (cover.Ensure<UnitPartNoCover>().doesNotProvideCoverToFrom(unit, attacker, attack_type))
+            {//check if special cases
+                return CoverType.None;
+            }
+            if (attacker.Ensure<UnitPartIgnoreCover>().ignoresCover(unit, cover, attack_type))
             {//check if special cases
                 return CoverType.None;
             }

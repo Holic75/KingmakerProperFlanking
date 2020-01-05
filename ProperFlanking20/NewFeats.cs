@@ -657,6 +657,7 @@ namespace ProperFlanking20
                                                                            null,
                                                                            FeatureGroup.Feat,
                                                                            CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverToFactOwners>(),
+                                                                           CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverFromFactOwners>(),
                                                                            CallOfTheWild.Helpers.Create<NewMechanics.FriendlyFireSavingThrowBonus>(f => { f.SavingThrow = StatType.SaveReflex;
                                                                                                                                                           f.value = 4;
                                                                                                                                                           f.Descriptor = ModifierDescriptor.Dodge;
