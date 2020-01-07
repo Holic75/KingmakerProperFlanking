@@ -180,6 +180,7 @@ namespace ProperFlanking20
 
             var aspect_of_wolf_trip = library.Get<BlueprintAbility>("a4445991c5bb0ca40ac152bb4bf46a3c");
             aspect_of_wolf_trip.ReplaceComponent<AbilityEffectRunAction>(a => a.Actions = CallOfTheWild.Helpers.CreateActionList(apply_buff, a.Actions.Actions[0], remove_buff));
+            NewSpells.blade_lash.ReplaceComponent<AbilityEffectRunAction>(a => a.Actions = CallOfTheWild.Helpers.CreateActionList(apply_buff, a.Actions.Actions[0], a.Actions.Actions[1], a.Actions.Actions[2], remove_buff));
         }
 
 
