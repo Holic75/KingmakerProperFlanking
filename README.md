@@ -26,7 +26,7 @@ It also adds option to use combat maneuvers as attack (although in a bit lighter
 In addition, when using Trip, Disarm, Sunder or Dirty Trick Maneuvers with Quick Dirty Trick feat CMB will be calculated based on weapon used for maneuver (primary hand weapon if used outside of full attack).
 
 It is not compatible with Closer To Tabletop mod, but it can replace it without breaking your saves.
-It requires at least Call of the Wild 1.49.
+It requires at least Call of the Wild 1.54.
 
 Install
 - Download and install Unity Mod Manager﻿﻿ 0.13.0 or later
