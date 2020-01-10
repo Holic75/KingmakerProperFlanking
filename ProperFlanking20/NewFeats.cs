@@ -21,6 +21,7 @@ using Kingmaker.UnitLogic.Abilities.Components;
 using Kingmaker.UnitLogic.Abilities.Components.TargetCheckers;
 using Kingmaker.UnitLogic.FactLogic;
 using Kingmaker.ElementsSystem;
+using Kingmaker.UnitLogic.Mechanics.Actions;
 
 namespace ProperFlanking20
 {
@@ -133,7 +134,8 @@ namespace ProperFlanking20
                                                                          "",
                                                                          "",
                                                                          null,
-                                                                         null);
+                                                                         null,
+                                                                         CallOfTheWild.Helpers.Create<CombatManeuverBonus.UseWeaponForCombatManeuverLogic>());
             maneuver_as_attack_buff.SetBuffFlags(BuffFlags.HiddenInUi);
 
             var apply_buff = CallOfTheWild.Common.createContextActionApplyBuffToCaster(maneuver_as_attack_buff, CallOfTheWild.Helpers.CreateContextDuration(1), dispellable: false);
@@ -149,14 +151,14 @@ namespace ProperFlanking20
             {
                 var ability = f.GetComponent<AddFacts>().Facts[0] as BlueprintAbility;
                 var action = ability.GetComponent<AbilityEffectRunAction>().Actions;
-
+                var maneuver_type = (action.Actions[0] as ContextActionCombatManeuver).Type;
                 var buff = CallOfTheWild.Helpers.CreateBuff(ability.name + "ToggleBuff",
-                                                            ability.Name + " (First Attack Replacement)",
-                                                            $"When performing full attack action, if you can make more than one attack, you can replace first attack with {ability.Name} combat maneuver.",
+                                                            ability.Name + " (Attack Replacement)",
+                                                            $"When performing standard or full attack action you can replace any attack with {ability.Name} combat maneuver.",
                                                             "",
                                                             ability.Icon,
                                                             null,
-                                                            CallOfTheWild.Helpers.Create<CallOfTheWild.AttackReplacementMechanics.ReplaceAttackWithActionOnFullAttack>(r => r.action = action)
+                                                            CallOfTheWild.Helpers.Create<ManeuverAsAttack.AttackReplacementWithCombatManeuver>(a => a.maneuver = maneuver_type)
                                                             );
 
                 var toggle = CallOfTheWild.Helpers.CreateActivatableAbility(ability.name + "ToggleAbility",
@@ -172,7 +174,7 @@ namespace ProperFlanking20
                 toggle.Group = CallOfTheWild.ActivatableAbilityGroupExtension.AttackReplacement.ToActivatableAbilityGroup();
                 toggle.DeactivateImmediately = true;
                 toggle.IsOnByDefault = true;
-                toggle.DeactivateIfCombatEnded = true;
+                //toggle.DeactivateIfCombatEnded = true;
                 f.AddComponent(CallOfTheWild.Helpers.CreateAddFact(toggle));
 
                 ability.ReplaceComponent<AbilityEffectRunAction>(a => a.Actions = CallOfTheWild.Helpers.CreateActionList(apply_buff, a.Actions.Actions[0], remove_buff));
@@ -186,8 +188,8 @@ namespace ProperFlanking20
 
         static void createQuickDirtyTrick()
         {
-            var apply_buff = CallOfTheWild.Common.createContextActionApplyBuffToCaster(maneuver_as_attack_buff, CallOfTheWild.Helpers.CreateContextDuration(1), dispellable: false);
-            var remove_buff = CallOfTheWild.Common.createContextActionOnContextCaster(CallOfTheWild.Common.createContextActionRemoveBuffFromCaster(maneuver_as_attack_buff));
+            //var apply_buff = CallOfTheWild.Common.createContextActionApplyBuffToCaster(maneuver_as_attack_buff, CallOfTheWild.Helpers.CreateContextDuration(1), dispellable: false);
+            //var remove_buff = CallOfTheWild.Common.createContextActionOnContextCaster(CallOfTheWild.Common.createContextActionRemoveBuffFromCaster(maneuver_as_attack_buff));
 
             var combat_expertise = library.Get<BlueprintFeature>("4c44724ffa8844f4d9bedb5bb27d144a");
             var dirty_trick = library.Get<BlueprintFeature>("ed699d64870044b43bb5a7fbe3f29494");
@@ -209,14 +211,18 @@ namespace ProperFlanking20
             {
                 var ability = f as BlueprintAbility;
                 var action = ability.GetComponent<AbilityEffectRunAction>().Actions;
-
+                var maneuver_type = (action.Actions[0] as ContextActionCombatManeuver).Type;
                 var buff = CallOfTheWild.Helpers.CreateBuff(ability.name + "ToggleBuff",
                                                             ability.Name + " (First Attack Replacement)",
                                                             $"When performing full attack action, if you can make more than one attack, you can replace first attack with {ability.Name} combat maneuver.",
                                                             "",
                                                             ability.Icon,
                                                             null,
-                                                            CallOfTheWild.Helpers.Create<CallOfTheWild.AttackReplacementMechanics.ReplaceAttackWithActionOnFullAttack>(r => r.action = action)
+                                                            CallOfTheWild.Helpers.Create<ManeuverAsAttack.AttackReplacementWithCombatManeuver>(a => { a.maneuver = maneuver_type;
+                                                                                                                                                      a.only_first_attack = true;
+                                                                                                                                                      a.only_full_attack = true;
+                                                                                                                                                    }
+                                                                                                                                               )
                                                             );
 
                 var toggle = CallOfTheWild.Helpers.CreateActivatableAbility(ability.name + "ToggleAbility",
@@ -232,9 +238,9 @@ namespace ProperFlanking20
                 toggle.Group = CallOfTheWild.ActivatableAbilityGroupExtension.AttackReplacement.ToActivatableAbilityGroup();
                 toggle.DeactivateImmediately = true;
                 toggle.IsOnByDefault = true;
-                toggle.DeactivateIfCombatEnded = true;
+                //toggle.DeactivateIfCombatEnded = true;
                 quick_dirty_trick.AddComponent(CallOfTheWild.Helpers.CreateAddFact(toggle));
-                ability.ReplaceComponent<AbilityEffectRunAction>(a => a.Actions = CallOfTheWild.Helpers.CreateActionList(apply_buff, a.Actions.Actions[0], remove_buff));
+                //ability.ReplaceComponent<AbilityEffectRunAction>(a => a.Actions = CallOfTheWild.Helpers.CreateActionList(apply_buff, a.Actions.Actions[0], remove_buff));
             }
         }
 

@@ -95,6 +95,7 @@ namespace ProperFlanking20
                     CallOfTheWild.Helpers.GuidStorage.load(Properties.Resources.blueprints, allow_guid_generation);
 
                     ProperFlanking20.Cover.load(Main.settings.soft_cover_ac_bonus, Main.settings.partial_soft_cover_ac_bonus);
+                    ProperFlanking20.Fixes.fixWeaponTrainingToWorkWithCombatManeuvers();
                     ProperFlanking20.NewFeats.load();
                     ProperFlanking20.RogueTalents.fixRogueTalents();
                     ProperFlanking20.UnloadCTT.run();

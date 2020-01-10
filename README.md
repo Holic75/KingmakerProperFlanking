@@ -22,8 +22,8 @@ It also adds soft cover mechanics (can be disabled in your_game_folder/Mods/Prop
 New Rogue Talents:
 - Underhanded Trick
 
-It also adds option to use combat maneuvers as attack (although in a bit lighter way than Closer To Tabletop - only first attack can be replaced and only during full attack action).
-In addition, when using Trip, Disarm, Sunder or Dirty Trick Maneuvers with Quick Dirty Trick feat CMB will be calculated based on weapon used for maneuver (primary hand weapon if used outside of full attack).
+It also adds option to use combat maneuvers as attacks.
+In addition, when using Trip, Disarm, Sunder or Dirty Trick Maneuvers (as part of full attack with Quick Dirty Trick feat) CMB will be calculated based on weapon used for maneuver (primary hand weapon if used outside of full attack).
 
 It is not compatible with Closer To Tabletop mod, but it can replace it without breaking your saves.
 It requires at least Call of the Wild 1.54.

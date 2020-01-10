@@ -130,9 +130,11 @@
     <Compile Include="CombatManeuverBonus.cs" />
     <Compile Include="Cover.cs" />
     <Compile Include="CoverSpecial.cs" />
+    <Compile Include="Fixes.cs" />
     <Compile Include="Flanking.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="ManeuverAsAttack.cs" />
     <Compile Include="NewFeats.cs" />
     <Compile Include="NewMechanics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

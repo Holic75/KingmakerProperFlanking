@@ -1,8 +1,11 @@
 ﻿using Kingmaker.EntitySystem.Entities;
 using Kingmaker.EntitySystem.Stats;
 using Kingmaker.Enums;
+using Kingmaker.Items;
 using Kingmaker.RuleSystem;
 using Kingmaker.RuleSystem.Rules;
+using Kingmaker.UnitLogic.Buffs.Components;
+using Kingmaker.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +14,64 @@ using System.Threading.Tasks;
 
 namespace ProperFlanking20.CombatManeuverBonus
 {
+    public class UnitPartUseWeaponForCombatManeuver : CallOfTheWild.AdditiveUnitPart
+    {
+        bool forced = false;
+        ItemEntityWeapon weapon = null;
+        int forced_penalty;
+        public bool active()
+        {
+            return forced || !buffs.Empty();
+        }
+
+        public bool isForced()
+        {
+            return forced;
+        }
+
+        public ItemEntityWeapon forcedWeapon()
+        {
+            return weapon;
+        }
+
+
+        public void force(ItemEntityWeapon with_weapon, int penalty)
+        {
+            forced = true;
+            weapon = with_weapon;
+            forced_penalty = penalty;
+        }
+
+
+        public void unForce()
+        {
+            forced = false;
+            weapon = null;
+            forced_penalty = 0;
+        }
+
+
+        public int forcedPenalty()
+        {
+            return forced_penalty;
+        }
+    }
+
+
+    public class UseWeaponForCombatManeuverLogic : BuffLogic
+    {
+        public override void OnTurnOn()
+        {
+            this.Owner.Ensure<UnitPartUseWeaponForCombatManeuver>().addBuff(this.Fact);
+        }
+
+
+        public override void OnTurnOff()
+        {
+            this.Owner.Ensure<UnitPartUseWeaponForCombatManeuver>().removeBuff(this.Fact);
+        }
+    }
+
 
     [Harmony12.HarmonyPatch(typeof(RuleCalculateBaseCMB))]
     [Harmony12.HarmonyPatch("OnTrigger", Harmony12.MethodType.Normal)]
@@ -20,6 +81,7 @@ namespace ProperFlanking20.CombatManeuverBonus
         {
             if (__instance.ReplaceBAB.HasValue)
             {
+                // if bab is replaced it is not an attack (very likely a spell or some other ability)
                 return true;
             }
 
@@ -42,12 +104,19 @@ namespace ProperFlanking20.CombatManeuverBonus
                     penalty = attack.AttackBonusPenalty;
                 }
             }
-            else if (!__instance.Initiator.Descriptor.Buffs.HasFact(NewFeats.maneuver_as_attack_buff))
+            else if (__instance.Initiator.Ensure<UnitPartUseWeaponForCombatManeuver>().active())
             {
-                //check if maneuver was initiated by corresponding ability and not by spell
+                var forced_weapon = __instance.Initiator.Ensure<UnitPartUseWeaponForCombatManeuver>().forcedWeapon();
+                if (forced_weapon != null)
+                {
+                    weapon = forced_weapon;
+                }
+                penalty = __instance.Initiator.Ensure<UnitPartUseWeaponForCombatManeuver>().forcedPenalty();
+            }
+            else
+            {
                 return true;
             }
-
 
             if (weapon == null || !weapon.Blueprint.IsMelee)
             {
