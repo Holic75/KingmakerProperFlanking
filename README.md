@@ -23,7 +23,7 @@ New Rogue Talents:
 - Underhanded Trick
 
 It also adds option to use combat maneuvers as attacks.
-In addition, when using Trip, Disarm, Sunder or Dirty Trick Maneuvers (as part of full attack with Quick Dirty Trick feat) CMB will be calculated based on weapon used for maneuver (primary hand weapon if used outside of full attack).
+In addition, when using Trip, Disarm, Sunder, Bull Rush (as a part of charge) or Dirty Trick combat maneuvers (as part of full attack with Quick Dirty Trick feat) CMB will be calculated based on weapon used for maneuver (primary hand weapon if used outside of full attack).
 
 It is not compatible with Closer To Tabletop mod, but it can replace it without breaking your saves.
 It requires at least Call of the Wild 1.54.

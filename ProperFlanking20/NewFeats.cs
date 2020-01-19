@@ -50,9 +50,10 @@ namespace ProperFlanking20
 
         static public BlueprintFeature quick_dirty_trick;
         static public BlueprintFeature dirty_fighting;
-
+        static public BlueprintFeature paired_opportunists;
 
         static internal BlueprintBuff maneuver_as_attack_buff;
+
 
 
         internal static void load()
@@ -77,6 +78,7 @@ namespace ProperFlanking20
             createQuickDirtyTrick();
 
             createDirtyFighting();
+            createPairedOpportunists();
         }
 
 
@@ -141,24 +143,33 @@ namespace ProperFlanking20
             var apply_buff = CallOfTheWild.Common.createContextActionApplyBuffToCaster(maneuver_as_attack_buff, CallOfTheWild.Helpers.CreateContextDuration(1), dispellable: false);
             var remove_buff = CallOfTheWild.Common.createContextActionOnContextCaster(CallOfTheWild.Common.createContextActionRemoveBuffFromCaster(maneuver_as_attack_buff));
 
-
+            var bull_rush = library.Get<BlueprintFeature>("b3614622866fe7046b787a548bbd7f59");
             var features = new BlueprintFeature[] {library.Get<BlueprintFeature>("0f15c6f70d8fb2b49aa6cc24239cc5fa"), //trip
                                                    library.Get<BlueprintFeature>("9719015edcbf142409592e2cbaab7fe1"), //sunder
                                                    library.Get<BlueprintFeature>("25bc9c439ac44fd44ac3b1e58890916f"), //disarm
+                                                   bull_rush
                                                   };
 
             foreach (var f in features)
             {
+                bool is_bull_rush = f == bull_rush;
                 var ability = f.GetComponent<AddFacts>().Facts[0] as BlueprintAbility;
                 var action = ability.GetComponent<AbilityEffectRunAction>().Actions;
                 var maneuver_type = (action.Actions[0] as ContextActionCombatManeuver).Type;
+                string action_description = is_bull_rush ? "charge you can replace an attack" : "standard or full attack action you can replace any attack";
                 var buff = CallOfTheWild.Helpers.CreateBuff(ability.name + "ToggleBuff",
-                                                            ability.Name + " (Attack Replacement)",
-                                                            $"When performing standard or full attack action you can replace any attack with {ability.Name} combat maneuver.",
+                                                            ability.Name + $" ({(is_bull_rush ? "Charge " : "")}Attack Replacement)",
+                                                            $"When performing {action_description} with {ability.Name} combat maneuver.",
                                                             "",
                                                             ability.Icon,
                                                             null,
-                                                            CallOfTheWild.Helpers.Create<ManeuverAsAttack.AttackReplacementWithCombatManeuver>(a => a.maneuver = maneuver_type)
+                                                            CallOfTheWild.Helpers.Create<ManeuverAsAttack.AttackReplacementWithCombatManeuver>(a =>
+                                                                                                                                              {
+                                                                                                                                                a.maneuver = maneuver_type;
+                                                                                                                                                a.only_first_attack = is_bull_rush;
+                                                                                                                                                a.only_charge = is_bull_rush;
+                                                                                                                                              }
+                                                                                                                                              )
                                                             );
 
                 var toggle = CallOfTheWild.Helpers.CreateActivatableAbility(ability.name + "ToggleAbility",
@@ -177,7 +188,10 @@ namespace ProperFlanking20
                 //toggle.DeactivateIfCombatEnded = true;
                 f.AddComponent(CallOfTheWild.Helpers.CreateAddFact(toggle));
 
-                ability.ReplaceComponent<AbilityEffectRunAction>(a => a.Actions = CallOfTheWild.Helpers.CreateActionList(apply_buff, a.Actions.Actions[0], remove_buff));
+                if (!is_bull_rush)
+                {
+                    ability.ReplaceComponent<AbilityEffectRunAction>(a => a.Actions = CallOfTheWild.Helpers.CreateActionList(apply_buff, a.Actions.Actions[0], remove_buff));
+                }
             }
 
             var aspect_of_wolf_trip = library.Get<BlueprintAbility>("a4445991c5bb0ca40ac152bb4bf46a3c");
@@ -654,7 +668,6 @@ namespace ProperFlanking20
 
         static void createFriendlyFireManeuvers()
         {
-
             var point_blank_shot = library.Get<BlueprintFeature>("0da0c194d6e1d43419eb8d990b28e0ab");
             var precise_shot = library.Get<BlueprintFeature>("8f3d1e6b4be006f4d896081f2f889665");
             friendly_fire_maneuvers = CallOfTheWild.Helpers.CreateFeature("FriendlyFireManeuversFeature",
@@ -701,7 +714,22 @@ namespace ProperFlanking20
         }
 
 
-
+        static void createPairedOpportunists()
+        {
+            var icon = CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/PairedOpportunists.png");
+            paired_opportunists = CallOfTheWild.Helpers.CreateFeature("PairedOpportunistsFeature",
+                                                                    "Paired Opportunists",
+                                                                    "Whenever you are adjacent to an ally who also has this feat, you receive a +4 circumstance bonus on attacks of opportunity against creatures that you both threaten. Enemies that provoke attacks of opportunity from your ally also provoke attacks of opportunity from you so long as you threaten them (even if the situation or an ability would normally deny you the attack of opportunity). This does not allow you to take more than one attack of opportunity against a creature for a given action.",
+                                                                    "04d9fee2f3ec497395aba26230b48d2c",
+                                                                    null,
+                                                                    FeatureGroup.Feat,
+                                                                    CallOfTheWild.Helpers.Create<PairedOpportuists.PairedOpportunistsAttackBonus>(p => { p.bonus = 4; p.descriptor = ModifierDescriptor.Circumstance; })
+                                                                );
+            PairedOpportuists.UnitCombatEngagementController_ForceAttackOfOpportunity_Patch.PairedOpportunistFact = paired_opportunists;
+            paired_opportunists.Groups = paired_opportunists.Groups.AddToArray(FeatureGroup.CombatFeat, FeatureGroup.TeamworkFeat);
+            library.AddCombatFeats(paired_opportunists);
+            CallOfTheWild.Common.addTemworkFeats(paired_opportunists);
+        }
 
     }
 }

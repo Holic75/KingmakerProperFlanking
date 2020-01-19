@@ -61,11 +61,18 @@ namespace ProperFlanking20.ManeuverAsAttack
         public CombatManeuver maneuver;
         public bool only_full_attack = false;
         public bool only_first_attack = false;
+        public bool only_charge = false;
 
         public override bool maybeReplaceAttackWithAction(RuleAttackWithWeapon attack_rule)
         {
             //Main.logger.Log("Checking for replacement with: " + maneuver.ToString() );
             if (!attack_rule.IsFullAttack && only_full_attack)
+            {
+                return false;
+            }
+
+
+            if (!attack_rule.IsCharge && only_charge)
             {
                 return false;
             }
@@ -125,6 +132,10 @@ namespace ProperFlanking20.ManeuverAsAttack
             {
                 if (attack_rule.Target.Descriptor.Buffs.HasFact(BlueprintRoot.Instance.SystemMechanics.DirtyTrickSickenedBuff))
                     return false;
+            }
+            else if (maneuver == CombatManeuver.BullRush)
+            {
+                //no checks should always work ?
             }
             else
             {

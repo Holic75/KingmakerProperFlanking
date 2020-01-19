@@ -141,10 +141,10 @@ namespace ProperFlanking20.CombatManeuverBonus
             var ResultSizeBonus = __instance.Initiator.Descriptor.State.Size.GetModifiers().CMDAndCMD + __instance.Initiator.Descriptor.State.Size.GetModifiers().AttackAndAC;
             var ResultMiscBonus = (int)__instance.Initiator.Stats.AdditionalCMB;
 
-            //Main.logger.Log("Attack Detected: " + AttackBonus.ToString());
-            //Main.logger.Log("Misc: " + ResultMiscBonus.ToString());
-            //Main.logger.Log("Size: " + ResultSizeBonus.ToString());
-            //Main.logger.Log("Additional Bonus: " + __instance.AdditionalBonus.ToString());
+            /*Main.logger.Log("Attack Detected: " + AttackBonus.ToString());
+            Main.logger.Log("Misc: " + ResultMiscBonus.ToString());
+            Main.logger.Log("Size: " + ResultSizeBonus.ToString());
+            Main.logger.Log("Additional Bonus: " + __instance.AdditionalBonus.ToString());*/
 
             var tr = Harmony12.Traverse.Create(__instance);
             tr.Property("Result").SetValue(AttackBonus + ResultSizeBonus + ResultMiscBonus + __instance.AdditionalBonus);
@@ -154,7 +154,7 @@ namespace ProperFlanking20.CombatManeuverBonus
 
         static bool maneuverAsAttack(CombatManeuver maneuver, UnitEntityData unit)
         {
-            return (maneuver == CombatManeuver.Trip || maneuver == CombatManeuver.Disarm || maneuver == CombatManeuver.SunderArmor)
+            return (maneuver == CombatManeuver.Trip || maneuver == CombatManeuver.Disarm || maneuver == CombatManeuver.SunderArmor || maneuver == CombatManeuver.BullRush)
                    || ((maneuver == CombatManeuver.DirtyTrickBlind || maneuver == CombatManeuver.DirtyTrickEntangle || maneuver == CombatManeuver.DirtyTrickSickened)
                       && unit.Descriptor.Progression.Features.HasFact(NewFeats.quick_dirty_trick));
         }
