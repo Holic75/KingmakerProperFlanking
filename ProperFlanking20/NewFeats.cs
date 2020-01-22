@@ -721,7 +721,7 @@ namespace ProperFlanking20
                                                                     "Paired Opportunists",
                                                                     "Whenever you are adjacent to an ally who also has this feat, you receive a +4 circumstance bonus on attacks of opportunity against creatures that you both threaten. Enemies that provoke attacks of opportunity from your ally also provoke attacks of opportunity from you so long as you threaten them (even if the situation or an ability would normally deny you the attack of opportunity). This does not allow you to take more than one attack of opportunity against a creature for a given action.",
                                                                     "04d9fee2f3ec497395aba26230b48d2c",
-                                                                    null,
+                                                                    icon,
                                                                     FeatureGroup.Feat,
                                                                     CallOfTheWild.Helpers.Create<PairedOpportuists.PairedOpportunistsAttackBonus>(p => { p.bonus = 4; p.descriptor = ModifierDescriptor.Circumstance; })
                                                                 );

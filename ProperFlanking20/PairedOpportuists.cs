@@ -35,6 +35,7 @@ namespace ProperFlanking20.PairedOpportuists
 
         static bool hasPair(IList attack_of_opportunity_pairs, UnitEntityData attacker, UnitEntityData target)
         {
+            Main.logger.Log(attack_of_opportunity_pairs.Count.ToString());
             foreach (var aoo_pair in attack_of_opportunity_pairs)
             {
                 var attacker_i = CallOfTheWild.Helpers.GetField<UnitEntityData>(aoo_pair, "Attacker");
@@ -50,30 +51,30 @@ namespace ProperFlanking20.PairedOpportuists
         }
 
 
-        static bool Prefix(UnitCombatEngagementController __instance, UnitEntityData attacker, UnitEntityData target)
+        static void Postfix(UnitCombatEngagementController __instance, UnitEntityData attacker, UnitEntityData target)
         {
-            if (!attacker.CombatState.IsEngage(target))
-                return false;
-
             var tr = Harmony12.Traverse.Create(__instance);
             var m_ForceAttackOfOpportunity = tr.Field("m_ForceAttackOfOpportunity").GetValue<IList>();
-
             //get units adjacent to attacker
-            //check if they have solo tactics with paired opportunist or both attacker and unit have solo opportunist
+            //check if they have solo tactics with paired opportunist or both attacker and unit have paired opportunist
 
             bool attacker_has_paired_ooportunist = attacker.Descriptor.Progression.Features.HasFact(PairedOpportunistFact);
 
             foreach (var u in target.CombatState.EngagedBy)
             {
+                if (u == attacker)
+                {
+                    continue;
+                }
                 if (u.Descriptor.Progression.Features.HasFact(PairedOpportunistFact)
-                     && (attacker_has_paired_ooportunist || u.Descriptor.State.Features.SoloTactics)
-                     && u.DistanceTo(attacker) < u.Corpulence + attacker.Corpulence + 5.Feet().Meters
-                     && !hasPair(m_ForceAttackOfOpportunity, u, target))
+                     && (attacker_has_paired_ooportunist || (bool)u.Descriptor.State.Features.SoloTactics)
+                     && (u.DistanceTo(attacker) < u.Corpulence + attacker.Corpulence + 5.Feet().Meters)
+                     && !hasPair(m_ForceAttackOfOpportunity, u, target)
+                     )
                 {
                     __instance.ForceAttackOfOpportunity(u, target);
                 }
             }
-            return false;
         }
     }
 

@@ -7,6 +7,7 @@ It also adds soft cover mechanics (can be disabled in your_game_folder/Mods/Prop
 - Low Profile
 - Quick Draw
 - Pack Flanking
+- Paired Opportunists
 - Gang Up
 - Enfilading Fire
 - Friendly Fire Maneuvers

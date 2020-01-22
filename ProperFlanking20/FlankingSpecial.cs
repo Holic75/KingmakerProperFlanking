@@ -14,9 +14,9 @@ namespace ProperFlanking20.FlankingSpecial
 
         public override bool isFlanking(UnitEntityData target)
         {         
-            var engaged_array = this.Owner.Unit.CombatState.EngagedBy.ToArray();
+            var engaged_array = target.CombatState.EngagedBy.ToArray();
 
-            if (!engaged_array.Contains(this.Owner.Unit) || engaged_array.Length < min_additional_flankers)
+            if (!engaged_array.Contains(this.Owner.Unit) || engaged_array.Length < min_additional_flankers + 1)
             {
                 return false;
             }

@@ -161,6 +161,22 @@ namespace ProperFlanking20.CombatManeuverBonus
     }
 
 
+    [Harmony12.HarmonyPatch(typeof(RuleCalculateCMD))]
+    [Harmony12.HarmonyPatch("OnTrigger", Harmony12.MethodType.Normal)]
+    class RuleCalculateCMD__OnTrigger__Patch
+    {
+        static void Postfix(RuleCalculateCMD __instance)
+        {
+            //add attacker dependent ac bonuses/penalties
+            var rule_ac = new RuleCalculateAC(__instance.Initiator, __instance.Target, AttackType.Touch);
+            int delta_ac = rule_ac.TargetAC - (__instance.IsTargetFlatFooted ? __instance.Target.Stats.AC.FlatFootedTouch : __instance.Target.Stats.AC.Touch);
+
+            var tr = Harmony12.Traverse.Create(__instance);
+            tr.Property("Result").SetValue(__instance.Result + delta_ac);
+        }
+    }
+
+
     [Harmony12.HarmonyPatch(typeof(RuleAttackRoll))]
     [Harmony12.HarmonyPatch("OnTrigger", Harmony12.MethodType.Normal)]
     class RuleAttackRoll__OnTrigger__Patch
