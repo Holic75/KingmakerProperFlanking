@@ -6,6 +6,7 @@ using Kingmaker.Blueprints.Classes.Prerequisites;
 using Kingmaker.Blueprints.Facts;
 using Kingmaker.Blueprints.Items.Weapons;
 using Kingmaker.Blueprints.Root;
+using Kingmaker.Designers.Mechanics.Facts;
 using Kingmaker.ElementsSystem;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.EntitySystem.Stats;
@@ -470,20 +471,22 @@ namespace ProperFlanking20.NewMechanics
 
     [ComponentName("Weapon group attack bonus")]
     [AllowedOn(typeof(BlueprintUnitFact))]
-    public class WeaponGroupAttackBonus : RuleInitiatorLogicComponent<RuleCalculateAttackBonusWithoutTarget>
+    public class WeaponGroupAttackBonusCompatibleWithCMB : WeaponGroupAttackBonus, IInitiatorRulebookHandler<RuleCalculateAttackBonusWithoutTarget>
     {
-        public WeaponFighterGroup WeaponGroup;
-        public int AttackBonus;
-        public ModifierDescriptor Descriptor;
+        public override void OnEventAboutToTrigger(RuleAttackWithWeapon evt)
+        {
 
-        public override void OnEventAboutToTrigger(RuleCalculateAttackBonusWithoutTarget evt)
+        }
+
+
+        public void OnEventAboutToTrigger(RuleCalculateAttackBonusWithoutTarget evt)
         {
             if (evt.Weapon == null || evt.Weapon.Blueprint.FighterGroup != this.WeaponGroup)
                 return;
             evt.AddTemporaryModifier(evt.Initiator.Stats.AdditionalAttackBonus.AddModifier(this.AttackBonus * this.Fact.GetRank(), (GameLogicComponent)this, this.Descriptor));
         }
 
-        public override void OnEventDidTrigger(RuleCalculateAttackBonusWithoutTarget evt)
+        public void OnEventDidTrigger(RuleCalculateAttackBonusWithoutTarget evt)
         {
         }
     }

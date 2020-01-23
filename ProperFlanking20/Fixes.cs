@@ -21,13 +21,14 @@ namespace ProperFlanking20
             foreach (var f in features)
             {
                 var weapon_training = f.GetComponent<WeaponGroupAttackBonus>();
-                f.ReplaceComponent(weapon_training, CallOfTheWild.Helpers.Create<NewMechanics.WeaponGroupAttackBonus>(w =>
-                                                                                                                     {
-                                                                                                                         w.AttackBonus = weapon_training.AttackBonus;
-                                                                                                                         w.WeaponGroup = weapon_training.WeaponGroup;
-                                                                                                                     }
-                                                                                                                     )
-                                  );
+                f.ReplaceComponent(weapon_training, CallOfTheWild.Helpers.Create<NewMechanics.WeaponGroupAttackBonusCompatibleWithCMB>(w =>
+                                                                                                                                         {
+                                                                                                                                             w.AttackBonus = weapon_training.AttackBonus;
+                                                                                                                                             w.WeaponGroup = weapon_training.WeaponGroup;
+                                                                                                                                             w.Descriptor = weapon_training.Descriptor;
+                                                                                                                                         }
+                                                                                                                                         )
+                                                                                                                                      );
             }
         }
     }
