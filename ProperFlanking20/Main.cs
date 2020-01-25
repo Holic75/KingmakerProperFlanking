@@ -98,6 +98,7 @@ namespace ProperFlanking20
                     ProperFlanking20.Fixes.fixWeaponTrainingToWorkWithCombatManeuvers();
                     ProperFlanking20.NewFeats.load();
                     ProperFlanking20.RogueTalents.fixRogueTalents();
+                    ProperFlanking20.Compatibility.load();
                     ProperFlanking20.UnloadCTT.run();
 #if DEBUG
                     string guid_file_name = @"C:\Repositories\KingmakerProperFlanking\ProperFlanking20\blueprints.txt";

@@ -2,6 +2,7 @@
 using Kingmaker.Items;
 using Kingmaker.RuleSystem;
 using Kingmaker.UnitLogic;
+using Kingmaker.UnitLogic.Buffs.Blueprints;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,6 +52,23 @@ namespace ProperFlanking20.CoverSpecial
         public override bool ignoresCover(UnitEntityData target, UnitEntityData cover, AttackType attack_type)
         {
             return ((teamwork && (bool)Owner.State.Features.SoloTactics) || cover.Descriptor.HasFact(this.Fact)) && cover.IsAlly(this.Owner.Unit);
+        }
+    }
+
+
+    public class NoCoverToCasterIfCoverProviderHasBuff : Cover.SpecialIgnoreCover
+    {
+        public BlueprintBuff buff;
+        public override bool ignoresCover(UnitEntityData target, UnitEntityData cover, AttackType attack_type)
+        {
+            foreach (var b in cover.Buffs)
+            {
+                if (b.Blueprint == buff && b.Context.MaybeCaster == this.Owner.Unit)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
