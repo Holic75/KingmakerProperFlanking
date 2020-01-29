@@ -1,4 +1,5 @@
-﻿using Kingmaker.EntitySystem.Entities;
+﻿using Kingmaker.Blueprints.Facts;
+using Kingmaker.EntitySystem.Entities;
 using Kingmaker.Items;
 using Kingmaker.RuleSystem;
 using Kingmaker.UnitLogic;
@@ -56,19 +57,18 @@ namespace ProperFlanking20.CoverSpecial
     }
 
 
-    public class NoCoverToCasterIfCoverProviderHasBuff : Cover.SpecialIgnoreCover
+    public class NoCoverToCasterWithFact : Cover.SpecialProvideNoCover
     {
-        public BlueprintBuff buff;
-        public override bool ignoresCover(UnitEntityData target, UnitEntityData cover, AttackType attack_type)
+        public BlueprintUnitFact fact;
+        public AttackType[] attack_types;
+        public override bool doesNotProvideCoverToFrom(UnitEntityData target, UnitEntityData attacker, AttackType attack_type)
         {
-            foreach (var b in cover.Buffs)
+            if (!attack_types.Contains(attack_type))
             {
-                if (b.Blueprint == buff && b.Context.MaybeCaster == this.Owner.Unit)
-                {
-                    return true;
-                }
+                return false;
             }
-            return false;
+
+            return (this.Fact.MaybeContext.MaybeCaster == attacker && attacker.Descriptor.HasFact(fact));
         }
     }
 
