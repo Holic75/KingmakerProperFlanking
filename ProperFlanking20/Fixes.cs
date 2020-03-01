@@ -1,5 +1,6 @@
 ﻿using CallOfTheWild;
 using Kingmaker.Blueprints;
+using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Classes.Selection;
 using Kingmaker.Designers.Mechanics.Facts;
 using Kingmaker.UnitLogic.Abilities.Blueprints;
@@ -30,6 +31,15 @@ namespace ProperFlanking20
                                                                                                                                          )
                                                                                                                                       );
             }
+        }
+
+        static internal void fixVarnFeats()
+        {
+            var varn_companion = ResourcesLibrary.TryGetBlueprint<BlueprintUnit>("e83a03d50fedd35449042ce73f1b6908");
+            var varn_feature = ResourcesLibrary.TryGetBlueprint<BlueprintFeature>("2babd2d4687b5ee428966322eccfe4b6");
+            var varn_class_levels = varn_feature.GetComponent<AddClassLevels>();
+            varn_class_levels.Selections[2].Features[1] = NewFeats.dirty_fighting;
+            varn_class_levels.Selections[1].Features[0] = RogueTalents.underhanded;
         }
     }
 }

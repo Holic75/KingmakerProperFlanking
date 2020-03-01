@@ -100,6 +100,7 @@ namespace ProperFlanking20
                     ProperFlanking20.RogueTalents.fixRogueTalents();
                     ProperFlanking20.Compatibility.load();
                     ProperFlanking20.UnloadCTT.run();
+                    ProperFlanking20.Fixes.fixVarnFeats();
 #if DEBUG
                     string guid_file_name = @"C:\Repositories\KingmakerProperFlanking\ProperFlanking20\blueprints.txt";
                     CallOfTheWild.Helpers.GuidStorage.dump(guid_file_name);
