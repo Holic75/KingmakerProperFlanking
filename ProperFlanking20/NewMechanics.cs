@@ -66,7 +66,7 @@ namespace ProperFlanking20.NewMechanics
                     continue;
                 }
 
-                if ((unit.Descriptor.HasFact(this.Fact) || solo_tactics) && evt.Target.isFlankedByAttacker(unit))
+                if ((unit.Descriptor.HasFact(this.Fact.Blueprint as BlueprintUnitFact) || solo_tactics) && evt.Target.isFlankedByAttacker(unit))
                 {
                     evt.AddBonus(bonus, this.Fact);
                     return;
@@ -95,7 +95,7 @@ namespace ProperFlanking20.NewMechanics
                 return;
 
             int bonus = value.Calculate(this.Fact.MaybeContext);
-            if (caster.Descriptor.HasFact(this.Fact) || (bool)this.Owner.State.Features.SoloTactics)
+            if (caster.Descriptor.HasFact(this.Fact.Blueprint as BlueprintUnitFact) || (bool)this.Owner.State.Features.SoloTactics)
             {
                 evt.AddTemporaryModifier(evt.Initiator.Stats.GetStat(SavingThrow).AddModifier(bonus * this.Fact.GetRank(), (GameLogicComponent)this, this.Descriptor));
             }

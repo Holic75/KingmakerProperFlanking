@@ -327,7 +327,7 @@ namespace ProperFlanking20
             var combat_expertise = library.Get<BlueprintFeature>("4c44724ffa8844f4d9bedb5bb27d144a");
             var icon = CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/SwordplayStyle.png");
             var buff = CallOfTheWild.Helpers.CreateBuff("SwordplayStyleEffectBuff",
-                                                        "Swordplay style",
+                                                        "Swordplay Style",
                                                         "While using this style, wielding  a weapon from heavy or light blades fighter weapon group, and fighting defensively or using either the total defense action or the Combat Expertise feat, you gain a +1 shield bonus to your Armor Class. In addition, you do not take the penalty on melee attacks from Combat Expertise on the first attack roll you make each turn. You still take the penalty on additional attacks, including attacks of opportunity.",
                                                         "",
                                                         icon,

@@ -41,7 +41,7 @@ namespace ProperFlanking20.CoverSpecial
 
         public override bool doesNotProvideCoverToFrom(UnitEntityData target, UnitEntityData attacker, AttackType attack_type)
         {
-            return ((teamwork && (bool)attacker.Descriptor.State.Features.SoloTactics) || attacker.Descriptor.HasFact(this.Fact)) && attacker.IsAlly(this.Owner.Unit);
+            return ((teamwork && (bool)attacker.Descriptor.State.Features.SoloTactics) || attacker.Descriptor.HasFact(this.Fact.Blueprint as BlueprintUnitFact)) && attacker.IsAlly(this.Owner.Unit);
         }
     }
 
@@ -52,7 +52,7 @@ namespace ProperFlanking20.CoverSpecial
 
         public override bool ignoresCover(UnitEntityData target, UnitEntityData cover, AttackType attack_type)
         {
-            return ((teamwork && (bool)Owner.State.Features.SoloTactics) || cover.Descriptor.HasFact(this.Fact)) && cover.IsAlly(this.Owner.Unit);
+            return ((teamwork && (bool)Owner.State.Features.SoloTactics) || cover.Descriptor.HasFact(this.Fact.Blueprint as BlueprintUnitFact)) && cover.IsAlly(this.Owner.Unit);
         }
     }
 
