@@ -53,7 +53,7 @@ namespace ProperFlanking20
 
             foreach (var prereq in greater_dirty_trick.GetComponents<Prerequisite>().ToArray())
             {
-                greater_dirty_trick.ReplaceComponent(prereq, CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.PrerequsiteOrAlternative>(p => { p.base_prerequsite = prereq; p.alternative_prerequsite = greater_dirty_trick_allowed_prereq; }));
+                greater_dirty_trick.ReplaceComponent(prereq, CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.PrerequsiteOrAlternative>(p => { p.base_prerequsite = prereq; p.alternative_prerequsite = greater_dirty_trick_allowed_prereq; p.Group = prereq.Group; }));
             }
 
             foreach (var rt in rogue_talents)
