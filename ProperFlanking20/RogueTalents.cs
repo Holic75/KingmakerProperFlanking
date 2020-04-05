@@ -25,7 +25,8 @@ namespace ProperFlanking20
             var rogue_talents = new BlueprintFeatureSelection[] {library.Get<BlueprintFeatureSelection>("04430ad24988baa4daa0bcd4f1c7d118"), //slayer 2
                                                                  library.Get<BlueprintFeatureSelection>("43d1b15873e926848be2abf0ea3ad9a8"), //slayer 6
                                                                  library.Get<BlueprintFeatureSelection>("913b9cf25c9536949b43a2651b7ffb66"), //slayer 10
-                                                                 library.Get<BlueprintFeatureSelection>("c074a5d615200494b8f2a9c845799d93") //rogue talents
+                                                                 library.Get<BlueprintFeatureSelection>("c074a5d615200494b8f2a9c845799d93"), //rogue talents
+                                                                 CallOfTheWild.Archetypes.Ninja.ninja_trick
                                                                 };
 
             var dirty_trick = library.Get<BlueprintFeature>("ed699d64870044b43bb5a7fbe3f29494");

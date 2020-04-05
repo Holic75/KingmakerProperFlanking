@@ -409,6 +409,9 @@ namespace ProperFlanking20
                                                                                                                 )
                             );
             library.AddCombatFeats(swordplay_style, swordplay_upset);
+
+            CallOfTheWild.Warpriest.sacred_fist_syle_feat_selection.AllFeatures = CallOfTheWild.Warpriest.sacred_fist_syle_feat_selection.AllFeatures.AddToArray(swordplay_style, swordplay_upset);
+            CallOfTheWild.Archetypes.Ninja.style_master.AllFeatures = CallOfTheWild.Archetypes.Ninja.style_master.AllFeatures.AddToArray(swordplay_style, swordplay_upset);
         }
 
 
