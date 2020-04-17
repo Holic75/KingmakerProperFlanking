@@ -483,7 +483,7 @@ namespace ProperFlanking20.NewMechanics
         {
             if (evt.Weapon == null || evt.Weapon.Blueprint.FighterGroup != this.WeaponGroup)
                 return;
-            evt.AddTemporaryModifier(evt.Initiator.Stats.AdditionalAttackBonus.AddModifier(this.AttackBonus * this.Fact.GetRank(), (GameLogicComponent)this, this.Descriptor));
+            evt.AddBonus(this.AttackBonus * this.Fact.GetRank(), this.Fact);
         }
 
         public void OnEventDidTrigger(RuleCalculateAttackBonusWithoutTarget evt)
