@@ -478,7 +478,6 @@ namespace ProperFlanking20.NewMechanics
 
         }
 
-
         public void OnEventAboutToTrigger(RuleCalculateAttackBonusWithoutTarget evt)
         {
             if (evt.Weapon == null || evt.Weapon.Blueprint.FighterGroup != this.WeaponGroup)
