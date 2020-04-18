@@ -41,5 +41,36 @@ namespace ProperFlanking20
             varn_class_levels.Selections[2].Features[1] = NewFeats.dirty_fighting;
             varn_class_levels.Selections[1].Features[0] = RogueTalents.underhanded;
         }
+
+
+        static internal void fixAldoriSwordlordPrc()
+        {
+            var dueling_mastery = library.Get<BlueprintFeature>("c3a66c1bbd2fb65498b130802d5f183a");
+                                                                 
+            var selection = CallOfTheWild.Helpers.CreateFeatureSelection("AldoriSwordLordQuickDrawSelection",
+                                                                         "Quick Draw",
+                                                                         "An Aldori swordlord gains Quick Draw as a bonus feat. If the character already has this feat, he instead gains Aldori Dueling Mastery. If he already has both feats, he instead gains a Combat feat of his choice as a bonus feat. The swordlord must meet all prerequisites of the selected Combat feat.",
+                                                                         "",
+                                                                         NewFeats.quick_draw.Icon,
+                                                                         FeatureGroup.None);
+
+            var dueling_mastery_selection = CallOfTheWild.Helpers.CreateFeature("AldoriSwordLordQuickDrawDuelingMasteryFeature",
+                                                                                dueling_mastery.Name,
+                                                                                dueling_mastery.Description,
+                                                                                "",
+                                                                                dueling_mastery.Icon,
+                                                                                FeatureGroup.None,
+                                                                                CallOfTheWild.Helpers.PrerequisiteNoFeature(dueling_mastery),
+                                                                                CallOfTheWild.Helpers.PrerequisiteFeature(NewFeats.quick_draw),
+                                                                                CallOfTheWild.Helpers.CreateAddFact(dueling_mastery)
+                                                                                );
+
+            var combat_feat = library.Get<BlueprintFeatureSelection>("41c8486641f7d6d4283ca9dae4147a9f");
+
+            selection.AllFeatures = new BlueprintFeature[] { NewFeats.quick_draw, dueling_mastery_selection, combat_feat };
+
+            var swordlord_prc = library.Get<BlueprintProgression>("71edc73e46794fc44925259322c146e5");
+            swordlord_prc.LevelEntries[0].Features.Add(selection);
+        }
     }
 }

@@ -68,7 +68,9 @@ namespace ProperFlanking20
             Left = 2,
             Right = 4,
             Center = 8,
+            High = 16,
             Full = Right | Left | Center,
+            NoCover = Low | High
         }
 
         public static bool isFull(this CoverType this_type)
@@ -76,9 +78,14 @@ namespace ProperFlanking20
             return (~this_type & CoverType.Full) == 0;
         }
 
+        public static bool isNone(this CoverType this_type)
+        {
+            return (this_type | CoverType.NoCover) == CoverType.NoCover;
+        }
+
         public static bool isPartial(this CoverType this_type)
         {
-            return !this_type.isFull() && this_type != CoverType.None;
+            return !this_type.isFull() && !this_type.isNone();
         }
 
         static internal LibraryScriptableObject library = Main.library;
@@ -213,7 +220,7 @@ namespace ProperFlanking20
                 var norm_r = r.normalized;
                 var unit_radius = Helpers.unitSizeToDiameter(unit.Descriptor.State.Size).Feet().Meters / 2.0f;
                 r = r - norm_r * unit_radius;
-                c = c - norm_r * unit_radius;
+                //c = c - norm_r * unit_radius;
             }
 
             float radius = (float)Math.Sqrt(Vector3.Dot(r, r));
@@ -225,7 +232,7 @@ namespace ProperFlanking20
             foreach (var u in units_around)
             {
                 current_cover = current_cover | u.providesCoverToFrom(unit, attacker, attack_type); //sum covers
-                if (current_cover == CoverType.Full)
+                if (current_cover.isFull())
                 { //full cover is maximum possible cover
                     return current_cover;
                 }
@@ -252,34 +259,34 @@ namespace ProperFlanking20
             {//if unit is at least two size categories smaller than target it does not provide cover
                 return CoverType.None;
             }
-            else if ((int)(attacker.Descriptor.State.Size - cover.Descriptor.State.Size) >= 1)
-            {
-                if (unit.DistanceTo(cover) > (Math.Max(Helpers.unitSizeToDiameter(unit.Descriptor.State.Size), Helpers.unitSizeToDiameter(cover.Descriptor.State.Size)).Feet().Meters / 2.0f + 20.Feet().Meters))
-                {
-                    //if unit is at least at 20 ft from attacker (in pnp 30 ft but ranges are lower in crpg) it does not provide cover [low obstacle]
-                    return CoverType.None;
-                }
-                else if (unit.DistanceTo(cover) > attacker.DistanceTo(cover))
-                {//if unit is closer to attacker than target - it does not provide cover [low obstacle]
-                    return CoverType.None;
-                }
-                else
-                {//partial cover
-                    return CoverType.Low;
-                }
-            }
             else if (cover.Descriptor.State.Prone.Active || cover.Descriptor.State.IsDead || cover.Descriptor.State.IsUnconscious || cover.Descriptor.State.HasCondition(UnitCondition.Sleeping))
             {//units lying on the ground do not provide cover
                 return CoverType.None;
             }
             else 
-            { //check geometry
+            {
+                Cover.CoverType current_cover = CoverType.High;
+                if ((int)(attacker.Descriptor.State.Size - cover.Descriptor.State.Size) >= 1)
+                {
+                    if (unit.DistanceTo(cover) > (Math.Max(Helpers.unitSizeToDiameter(unit.Descriptor.State.Size), Helpers.unitSizeToDiameter(cover.Descriptor.State.Size)).Feet().Meters / 2.0f + 20.Feet().Meters))
+                    {
+                        //if unit is at least at 20 ft from attacker (in pnp 30 ft but ranges are lower in crpg) it does not provide cover [low obstacle]
+                        return CoverType.None;
+                    }
+                    else if (unit.DistanceTo(cover) > attacker.DistanceTo(cover))
+                    {//if unit is closer to attacker than target - it does not provide cover [low obstacle]
+                        return CoverType.None;
+                    }
+                    else
+                    {//partial cover
+                        current_cover = CoverType.Low;
+                    }
+                }
+                //check geometry
                 var cover_r = Helpers.unitSizeToDiameter(cover.Descriptor.State.Size).Feet().Meters / 2.0f * 0.9f;
-                var unit_r = Helpers.unitSizeToDiameter(unit.Descriptor.State.Size).Feet().Meters / 2.0f;
+                var unit_r = 5.Feet().Meters / 2.0f; //assume 5 feet diameter window is needed for shooting
                 var unit_center = unit.Position.To2D();
-               
-                Cover.CoverType current_cover = CoverType.None;
-
+                              
                 if (Helpers.isCircleIntersectedByLine(cover.Position.To2D(), cover_r * cover_r, attacker.Position.To2D(), unit_center))
                 {
                     current_cover = current_cover | CoverType.Center;
