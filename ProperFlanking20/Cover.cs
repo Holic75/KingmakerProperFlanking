@@ -218,7 +218,7 @@ namespace ProperFlanking20
             {
                 //account for units inside circle
                 var norm_r = r.normalized;
-                var unit_radius = Helpers.unitSizeToDiameter(unit.Descriptor.State.Size).Feet().Meters / 2.0f;
+                var unit_radius = unit.View.Corpulence;// Helpers.unitSizeToDiameter(unit.Descriptor.State.Size).Feet().Meters / 2.0f;
                 r = r - norm_r * unit_radius;
                 //c = c - norm_r * unit_radius;
             }
@@ -278,13 +278,13 @@ namespace ProperFlanking20
                         return CoverType.None;
                     }
                     else
-                    {//partial cover
+                    {//possibly partial cover
                         current_cover = CoverType.Low;
                     }
                 }
                 //check geometry
-                var cover_r = Helpers.unitSizeToDiameter(cover.Descriptor.State.Size).Feet().Meters / 2.0f * 0.9f;
-                var unit_r = 5.Feet().Meters / 2.0f; //assume 5 feet diameter window is needed for shooting
+                var cover_r = unit.View.Corpulence; //Helpers.unitSizeToDiameter(cover.Descriptor.State.Size).Feet().Meters / 2.0f * 0.9f;
+                var unit_r = attacker.View.Corpulence; //assume the window required for unimepeded shooting is based on attacker size (i.e smaller units need less space) ?  //5.Feet().Meters / 2.0f; 
                 var unit_center = unit.Position.To2D();
                               
                 if (Helpers.isCircleIntersectedByLine(cover.Position.To2D(), cover_r * cover_r, attacker.Position.To2D(), unit_center))

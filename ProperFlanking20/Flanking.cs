@@ -378,7 +378,7 @@ namespace ProperFlanking20
 
         static internal bool isFlankedByAttackerGeometrically(this UnitEntityData unit, UnitEntityData attacker)
         {
-            float unit_radius = (Helpers.unitSizeToDiameter(unit.Descriptor.State.Size) / 2.0f).Feet().Meters;
+            float unit_radius = unit.View.Corpulence; //(Helpers.unitSizeToDiameter(unit.Descriptor.State.Size) / 2.0f).Feet().Meters;
 
             float unit_radius2 = unit_radius * unit_radius;
             var unit_position = unit.Position;
