@@ -1,4 +1,6 @@
-﻿using Kingmaker.EntitySystem.Entities;
+﻿using CallOfTheWild;
+using Kingmaker.Blueprints.Classes;
+using Kingmaker.EntitySystem.Entities;
 using Kingmaker.EntitySystem.Stats;
 using Kingmaker.Enums;
 using Kingmaker.Items;
@@ -77,6 +79,7 @@ namespace ProperFlanking20.CombatManeuverBonus
     [Harmony12.HarmonyPatch("OnTrigger", Harmony12.MethodType.Normal)]
     class RuleCalculateBaseCMB__OnTrigger__Patch
     {
+        static BlueprintFeature furys_fall = Main.library.Get<BlueprintFeature>("0fc1ed8532168f74a9441bd17ad59e66");
         static bool Prefix(RuleCalculateBaseCMB __instance)
         {
             if (__instance.ReplaceBAB.HasValue)
@@ -138,8 +141,17 @@ namespace ProperFlanking20.CombatManeuverBonus
 
             var AttackBonus = Rulebook.Trigger<RuleAttackRoll>(attack_roll).AttackBonus;
 
-            var ResultSizeBonus = __instance.Initiator.Descriptor.State.Size.GetModifiers().CMDAndCMD + __instance.Initiator.Descriptor.State.Size.GetModifiers().AttackAndAC;
-            var ResultMiscBonus = (int)__instance.Initiator.Stats.AdditionalCMB;
+            var size_bonus = __instance.Initiator.Descriptor.State.Size.GetModifiers().CMDAndCMD + __instance.Initiator.Descriptor.State.Size.GetModifiers().AttackAndAC;
+            var misc_bonus = (int)__instance.Initiator.Stats.AdditionalCMB;
+
+
+            if (attack_roll.AttackBonusRule.AttackBonusStat == StatType.Dexterity
+                && maneuver.Type == CombatManeuver.Trip && maneuver.Initiator.Descriptor.Progression.Features.HasFact(furys_fall)
+                && maneuver.Initiator.Descriptor.Stats.Dexterity.ModifiedValue > maneuver.Initiator.Descriptor.Stats.Strength.ModifiedValue)                
+            {
+                //remove double dexterity bonus
+                misc_bonus -= maneuver.Initiator.Descriptor.Stats.GetStat<ModifiableValueAttributeStat>(StatType.Dexterity).Bonus;
+            }
 
             /*Main.logger.Log("Attack Detected: " + AttackBonus.ToString());
             Main.logger.Log("Misc: " + ResultMiscBonus.ToString());
@@ -147,7 +159,7 @@ namespace ProperFlanking20.CombatManeuverBonus
             Main.logger.Log("Additional Bonus: " + __instance.AdditionalBonus.ToString());*/
 
             var tr = Harmony12.Traverse.Create(__instance);
-            tr.Property("Result").SetValue(AttackBonus + ResultSizeBonus + ResultMiscBonus + __instance.AdditionalBonus);
+            tr.Property("Result").SetValue(AttackBonus + size_bonus + misc_bonus + __instance.AdditionalBonus);
             return false;
         }
 
