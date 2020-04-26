@@ -132,7 +132,7 @@ namespace ProperFlanking20
             {
                 AttackType attack_type = evt.Weapon == null ? AttackType.Melee : evt.Weapon.Blueprint.AttackType;
                 if ((unitEntityData.Descriptor.HasFact(coordinated_shot_fact) || solo_tactics)
-                    && unitEntityData != owner.Unit && unitEntityData.providesCoverToFrom(evt.Target, owner.Unit, attack_type) == Cover.CoverType.None)
+                    && unitEntityData != owner.Unit && unitEntityData.providesCoverToFrom(evt.Target, owner.Unit, attack_type).isNone())
                 {
                     bonus = Math.Max(bonus, (evt.Target.isFlankedByAttacker(unitEntityData) ? attack_bonus + additional_flank_bonus : attack_bonus));
                 }
