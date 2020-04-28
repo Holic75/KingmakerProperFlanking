@@ -136,7 +136,7 @@ namespace ProperFlanking20.CombatManeuverBonus
             
             var attack_roll = new RuleAttackRoll(maneuver.Initiator, maneuver.Target, weapon, penalty);
             attack_roll.IgnoreConcealment = true;
-            attack_roll.AutoHit = true;
+            attack_roll.AutoMiss = true;
             attack_roll.SuspendCombatLog = true;
 
             var AttackBonus = Rulebook.Trigger<RuleAttackRoll>(attack_roll).AttackBonus;
