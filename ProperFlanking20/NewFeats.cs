@@ -107,7 +107,13 @@ namespace ProperFlanking20
                                                             "52c6b07a68940af41b270b3710682dc7", //greater Dirty trick
                                                             "63d8e3a9ab4d72e4081a7862d7246a79", //greater disarm
                                                             CallOfTheWild.NewFeats.felling_smash.AssetGuid,
-                                                            quick_dirty_trick.AssetGuid
+                                                            quick_dirty_trick.AssetGuid,
+                                                            //also allow to work for feint
+                                                            improved_feint.AssetGuid,
+                                                            greater_feint.AssetGuid,
+                                                            ranged_feint.AssetGuid,
+                                                            two_weapon_feint.AssetGuid,
+                                                            improved_two_weapon_feint.AssetGuid
                                                           };
 
             var dirty_fighting_prereq = CallOfTheWild.Helpers.PrerequisiteFeature(dirty_fighting);
