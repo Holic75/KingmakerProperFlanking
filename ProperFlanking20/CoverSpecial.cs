@@ -37,7 +37,7 @@ namespace ProperFlanking20.CoverSpecial
 
     public class NoCoverToFactOwners : Cover.SpecialProvideNoCover
     {
-        bool teamwork = true;
+        public bool teamwork = true;
 
         public override bool doesNotProvideCoverToFrom(UnitEntityData target, UnitEntityData attacker, AttackType attack_type)
         {
@@ -48,7 +48,7 @@ namespace ProperFlanking20.CoverSpecial
 
     public class NoCoverFromFactOwners : Cover.SpecialIgnoreCover
     {
-        bool teamwork = true;
+        public bool teamwork = true;
 
         public override bool ignoresCover(UnitEntityData target, UnitEntityData cover, AttackType attack_type)
         {

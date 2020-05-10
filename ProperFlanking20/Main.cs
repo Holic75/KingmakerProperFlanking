@@ -102,6 +102,7 @@ namespace ProperFlanking20
                     ProperFlanking20.UnloadCTT.run();
                     ProperFlanking20.Fixes.fixVarnFeats();
                     ProperFlanking20.Fixes.fixAldoriSwordlordPrc();
+                    ProperFlanking20.Fixes.createAuraOfCareForDivineHunter();
 #if DEBUG
                     string guid_file_name = @"C:\Repositories\KingmakerProperFlanking\ProperFlanking20\blueprints.txt";
                     CallOfTheWild.Helpers.GuidStorage.dump(guid_file_name);

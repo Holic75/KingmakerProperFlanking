@@ -4,6 +4,8 @@ using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Classes.Selection;
 using Kingmaker.Designers.Mechanics.Facts;
 using Kingmaker.UnitLogic.Abilities.Blueprints;
+using Kingmaker.UnitLogic.Mechanics.Conditions;
+using Kingmaker.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,6 +73,31 @@ namespace ProperFlanking20
 
             var swordlord_prc = library.Get<BlueprintProgression>("71edc73e46794fc44925259322c146e5");
             swordlord_prc.LevelEntries[0].Features.Add(selection);
+        }
+
+
+        static internal void createAuraOfCareForDivineHunter()
+        {
+            var buff = CallOfTheWild.Helpers.CreateBuff("AuraOfCareEffectBuff",
+                                                        "Aura of Care",
+                                                        "At 8th level, a divine hunter and her allies gain a preternatural awareness of each other’s position in battle. She and any allies within 10 feet of her no longer provide cover against each other’s ranged attacks unless they wish to.",
+                                                        "",
+                                                        CallOfTheWild.Helpers.GetIcon("05a3b543b0a0a0346a5061e90f293f0b"), //point blank master
+                                                        null);
+            buff.AddComponent(CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverFromFactOwners>(n => n.teamwork = false));
+            buff.AddComponent(CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverToFactOwners>(n => n.teamwork = false));
+
+            
+            var aura_of_care = CallOfTheWild.Common.createAuraEffectFeature(buff.Name,
+                                                         buff.Description,
+                                                         buff.Icon,
+                                                         buff, 13.Feet(), CallOfTheWild.Helpers.CreateConditionsCheckerOr(CallOfTheWild.Helpers.Create<ContextConditionIsAlly>())
+                                                         );
+
+            var divine_grace_archetype = library.Get<BlueprintArchetype>("fec08c1a3187da549abd6b85f27e4432");
+            divine_grace_archetype.AddFeatures.FirstOrDefault(f => f.Level == 8).Features[0] = aura_of_care;
+
+            divine_grace_archetype.GetParentClass().Progression.UIGroups[2].Features.Add(aura_of_care);
         }
     }
 }

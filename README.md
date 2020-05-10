@@ -26,6 +26,15 @@ New Rogue Talents:
 It also adds option to use combat maneuvers as attacks.
 In addition, when using Trip, Disarm, Sunder, Bull Rush (as a part of charge) or Dirty Trick combat maneuvers (as part of full attack with Quick Dirty Trick feat) CMB will be calculated based on weapon used for maneuver (primary hand weapon if used outside of full attack).
 
+Mod also makes reach weapons work closer to how they should in pnp:
+Unit with reach weapon is not threating enemies in range equal to half its maximum range. 
+So an enemy without reach trying to approach a unit with reach weapon will provoke an attack of opportunity from latter once it leaves the threat range.
+Units with reach weapon can still normally attack enemies in their non-threat range (since it will be too cumbersome to teach enemies to use 5 ft step).
+
+Other changes:
+- Aldori defender PRC receives quick draw feat (or aldori fighting technique if she has it, or any other combat feat if she has both quick draw and aldori fighting technique),
+- Divine Hunter paladin aura of clear sight is replaced with aura of care as per pnp rules.
+
 It is not compatible with Closer To Tabletop mod, but it can replace it without breaking your saves.
 It requires at least Call of the Wild 1.77.
 
