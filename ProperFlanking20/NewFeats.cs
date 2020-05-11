@@ -521,7 +521,14 @@ namespace ProperFlanking20
                                                    "",
                                                    CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/TwoWeaponFeintImproved.png"),
                                                    FeatureGroup.Feat,
-                                                   CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Dexterity, 15),
+                                                   CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Dexterity, 15, any: true),
+                                                   CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.CompoundPrerequisite>(p =>
+                                                                      {
+                                                                          p.prerequisite1 = CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Strength, 15);
+                                                                          p.prerequisite2 = CallOfTheWild.Helpers.PrerequisiteFeature(CallOfTheWild.NewFeats.prodigious_two_weapon_fighting);
+                                                                          p.Group = Prerequisite.GroupType.Any;
+                                                                      }
+                                                                      ),
                                                    CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
                                                    CallOfTheWild.Helpers.PrerequisiteFeature(two_weapon_fighting),
                                                    CallOfTheWild.Helpers.PrerequisiteFeature(improved_two_weapon_fighting),
@@ -559,7 +566,14 @@ namespace ProperFlanking20
             twf_feint_ability.IsOnByDefault = true;
 
             two_weapon_feint = CallOfTheWild.Common.ActivatableAbilityToFeature(twf_feint_ability, false);
-            two_weapon_feint.AddComponents(CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Dexterity, 15),
+            two_weapon_feint.AddComponents(CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Dexterity, 15, any: true),
+                                           CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.CompoundPrerequisite>(p =>
+                                                                {
+                                                                    p.prerequisite1 = CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Strength, 15);
+                                                                    p.prerequisite2 = CallOfTheWild.Helpers.PrerequisiteFeature(CallOfTheWild.NewFeats.prodigious_two_weapon_fighting);
+                                                                    p.Group = Prerequisite.GroupType.Any;
+                                                                }
+                                                                ),
                                            CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
                                            CallOfTheWild.Helpers.PrerequisiteFeature(two_weapon_fighting),
                                            CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise)

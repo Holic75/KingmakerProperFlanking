@@ -35,7 +35,7 @@ namespace ProperFlanking20.PairedOpportuists
 
         static bool hasPair(IList attack_of_opportunity_pairs, UnitEntityData attacker, UnitEntityData target)
         {
-            Main.logger.Log(attack_of_opportunity_pairs.Count.ToString());
+            //Main.logger.Log(attack_of_opportunity_pairs.Count.ToString());
             foreach (var aoo_pair in attack_of_opportunity_pairs)
             {
                 var attacker_i = CallOfTheWild.Helpers.GetField<UnitEntityData>(aoo_pair, "Attacker");
