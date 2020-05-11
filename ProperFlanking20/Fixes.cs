@@ -82,7 +82,7 @@ namespace ProperFlanking20
                                                         "Aura of Care",
                                                         "At 8th level, a divine hunter and her allies gain a preternatural awareness of each other’s position in battle. She and any allies within 10 feet of her no longer provide cover against each other’s ranged attacks unless they wish to.",
                                                         "",
-                                                        CallOfTheWild.Helpers.GetIcon("05a3b543b0a0a0346a5061e90f293f0b"), //point blank master
+                                                        CallOfTheWild.Helpers.GetIcon("c00342384c641be409907c2bf39d68f1"), //aura of clear sight
                                                         null);
             buff.AddComponent(CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverFromFactOwners>(n => n.teamwork = false));
             buff.AddComponent(CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverToFactOwners>(n => n.teamwork = false));
