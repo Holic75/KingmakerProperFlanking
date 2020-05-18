@@ -210,6 +210,10 @@ namespace ProperFlanking20
 
         static internal CoverType hasCoverFrom(this UnitEntityData unit, UnitEntityData attacker, AttackType attack_type)
         {
+            if (unit == null || attacker == null || unit == attacker)
+            {
+                return CoverType.None;
+            }
             var current_cover = CoverType.None;
 
             var c = (unit.Position + attacker.Position) / 2.0f;
@@ -218,8 +222,8 @@ namespace ProperFlanking20
             {
                 //account for units inside circle
                 var norm_r = r.normalized;
-                var unit_radius = unit.View.Corpulence;// Helpers.unitSizeToDiameter(unit.Descriptor.State.Size).Feet().Meters / 2.0f;
-                r = r - norm_r * unit_radius;
+                var unit_radius = unit?.View?.Corpulence;// Helpers.unitSizeToDiameter(unit.Descriptor.State.Size).Feet().Meters / 2.0f;
+                r = r - norm_r * (unit_radius.HasValue ? unit_radius.Value :  5.Feet().Meters * 0.5f);
                 //c = c - norm_r * unit_radius;
             }
 
@@ -231,6 +235,10 @@ namespace ProperFlanking20
 
             foreach (var u in units_around)
             {
+                if (u == null)
+                {
+                    continue;
+                }
                 current_cover = current_cover | u.providesCoverToFrom(unit, attacker, attack_type); //sum covers
                 if (current_cover.isFull())
                 { //full cover is maximum possible cover

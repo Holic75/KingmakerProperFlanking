@@ -87,7 +87,7 @@ namespace ProperFlanking20.CombatManeuverBonus
                 // if bab is replaced it is not an attack (very likely a spell or some other ability)
                 return true;
             }
-
+            
             var attack = Rulebook.CurrentContext.AllEvents.LastOfType<RuleAttackWithWeapon>();
             var maneuver = Rulebook.CurrentContext.AllEvents.LastOfType<RuleCombatManeuver>();
             if (maneuver == null || !maneuverAsAttack(maneuver.Type, __instance.Initiator))

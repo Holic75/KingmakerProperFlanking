@@ -65,6 +65,10 @@ namespace ProperFlanking20.ManeuverAsAttack
 
         public override bool maybeReplaceAttackWithAction(RuleAttackWithWeapon attack_rule)
         {
+            if (attack_rule?.Weapon == null)
+            {
+                return false;
+            }
             //Main.logger.Log("Checking for replacement with: " + maneuver.ToString() );
             if (!attack_rule.IsFullAttack && only_full_attack)
             {
@@ -100,8 +104,8 @@ namespace ProperFlanking20.ManeuverAsAttack
             else if (maneuver == CombatManeuver.Disarm)
             {
                 // same checks as in RuleCombatManeuver. If the unit cannot be disarmed (further), don't attempt to disarm.
-                ItemEntityWeapon maybe_weapon = attack_rule.Target.Body.PrimaryHand.MaybeWeapon;
-                ItemEntityWeapon maybe_weapon2 = attack_rule.Target.Body.SecondaryHand.MaybeWeapon;
+                ItemEntityWeapon maybe_weapon = attack_rule?.Target?.Body?.PrimaryHand?.MaybeWeapon;
+                ItemEntityWeapon maybe_weapon2 = attack_rule?.Target?.Body?.SecondaryHand?.MaybeWeapon;
                 bool can_disarm = false;
                 if (maybe_weapon != null && !maybe_weapon.Blueprint.IsUnarmed && !maybe_weapon.Blueprint.IsNatural && !attack_rule.Target.Descriptor.Buffs.HasFact(BlueprintRoot.Instance.SystemMechanics.DisarmMainHandBuff))
                     can_disarm = true;
@@ -145,18 +149,27 @@ namespace ProperFlanking20.ManeuverAsAttack
 
             //Main.logger.Log("Second Conditions Ok");
             attack_rule.Initiator.Ensure<CombatManeuverBonus.UnitPartUseWeaponForCombatManeuver>().force(attack_rule.Weapon, attack_rule.AttackBonusPenalty);
-            RuleCombatManeuver rule = new RuleCombatManeuver(this.Context.MaybeCaster, attack_rule.Target, maneuver);
+            RuleCombatManeuver rule = new RuleCombatManeuver(attack_rule.Initiator, attack_rule.Target, maneuver);
             
-            var result = Rulebook.CurrentContext.Trigger<RuleCombatManeuver>(rule);
+            var result = Rulebook.Trigger<RuleCombatManeuver>(rule);
             attack_rule.Initiator.Ensure<CombatManeuverBonus.UnitPartUseWeaponForCombatManeuver>().unForce();
 
             //Main.logger.Log("Maneuver Ok");
-            Harmony12.Traverse.Create(attack_rule).Property("AttackRoll").SetValue(new RuleAttackRoll(attack_rule.Initiator, attack_rule.Target, attack_rule.Weapon, attack_rule.AttackBonusPenalty));
+            var attack_roll = new RuleAttackRoll(attack_rule.Initiator, attack_rule.Target, attack_rule.Weapon, attack_rule.AttackBonusPenalty);
+            attack_roll.SuspendCombatLog = true;
+            var tr_attack_roll = Harmony12.Traverse.Create(attack_roll);
+            tr_attack_roll.Property("Result").SetValue(result.Success ? AttackResult.Hit : AttackResult.Miss);
+            tr_attack_roll.Property("Roll").SetValue(result.InitiatorRoll);
+            tr_attack_roll.Property("AttackBonus").SetValue(result.InitiatorCMB);
+            tr_attack_roll.Property("TargetAC").SetValue(result.TargetCMD);
+            Harmony12.Traverse.Create(attack_rule).Property("AttackRoll").SetValue(attack_roll);
+            //Main.logger.Log(attack_rule.AttackRoll.IsHit.ToString());
+            /*Harmony12.Traverse.Create(attack_rule).Property("AttackRoll").SetValue(new RuleAttackRoll(attack_rule.Initiator, attack_rule.Target, attack_rule.Weapon, attack_rule.AttackBonusPenalty));
             Harmony12.Traverse.Create(attack_rule).Property("AttackRoll").Property("Result").SetValue(result.Success ? AttackResult.Hit : AttackResult.Miss);
             Harmony12.Traverse.Create(attack_rule).Property("AttackRoll").Property("Roll").SetValue(result.InitiatorRoll);
             Harmony12.Traverse.Create(attack_rule).Property("AttackRoll").Property("AttackBonus").SetValue(result.InitiatorCMB);
-            Harmony12.Traverse.Create(attack_rule).Property("AttackRoll").Property("TargetAC").SetValue(result.TargetCMD);
-
+            Harmony12.Traverse.Create(attack_rule).Property("AttackRoll").Property("TargetAC").SetValue(result.TargetCMD);*/
+            
             //Main.logger.Log("Attack Rule Updated");
             return true;
         }
