@@ -359,7 +359,7 @@ namespace ProperFlanking20
                                                        );
 
             WeaponCategory[] categories = new WeaponCategory[] {WeaponCategory.BastardSword, WeaponCategory.Dagger, WeaponCategory.DoubleSword, WeaponCategory.DuelingSword, WeaponCategory.ElvenCurvedBlade,
-                                                                WeaponCategory.Estoc, WeaponCategory.Falcata, WeaponCategory.Falchion, WeaponCategory.Kama, WeaponCategory.Kukri,
+                                                                WeaponCategory.Estoc, WeaponCategory.Falcata, WeaponCategory.Falchion, WeaponCategory.Greatsword, WeaponCategory.Kama, WeaponCategory.Kukri,
                                                                 WeaponCategory.Longsword, WeaponCategory.Rapier, WeaponCategory.Sai, WeaponCategory.Scimitar, WeaponCategory.Shortsword,
                                                                WeaponCategory.Starknife, WeaponCategory.Scythe, WeaponCategory.Sickle};
 
