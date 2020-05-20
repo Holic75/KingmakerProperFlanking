@@ -27,7 +27,7 @@ namespace ProperFlanking20
             internal Settings()
             {
 
-                using (StreamReader settings_file = File.OpenText("Mods/ProperFlanking2/settings.json"))
+                using (StreamReader settings_file = File.OpenText(UnityModManager.modsPath + @"/ProperFlanking2/settings.json"))
                 using (JsonTextReader reader = new JsonTextReader(settings_file))
                 {
                     JObject jo = (JObject)JToken.ReadFrom(reader);
@@ -86,7 +86,7 @@ namespace ProperFlanking20
                 {
                     Main.DebugLog("Loading Proper Flanking 2");
 
-                    CallOfTheWild.LoadIcons.Image2Sprite.icons_folder = @"./Mods/ProperFlanking2/Icons/";
+                    CallOfTheWild.LoadIcons.Image2Sprite.icons_folder = UnityModManager.modsPath + @"/ProperFlanking2/Icons/";
 #if DEBUG                
                     bool allow_guid_generation = true;
 #else
@@ -107,7 +107,7 @@ namespace ProperFlanking20
                     string guid_file_name = @"C:\Repositories\KingmakerProperFlanking\ProperFlanking20\blueprints.txt";
                     CallOfTheWild.Helpers.GuidStorage.dump(guid_file_name);
 #endif
-                    CallOfTheWild.Helpers.GuidStorage.dump(@"./Mods/ProperFlanking2/loaded_blueprints.txt");
+                    CallOfTheWild.Helpers.GuidStorage.dump(UnityModManager.modsPath + @"/ProperFlanking2/loaded_blueprints.txt");
                 }
                 catch (Exception ex)
                 {
