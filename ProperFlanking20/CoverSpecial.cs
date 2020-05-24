@@ -23,6 +23,13 @@ namespace ProperFlanking20.CoverSpecial
         }
     }
 
+    public class IgnoreCover : Cover.SpecialIgnoreCover
+    {
+        public override bool ignoresCover(UnitEntityData target, UnitEntityData cover, AttackType attack_type)
+        {
+            return true;
+        }
+    }
 
 
     public class DoesNotProvideCover : Cover.SpecialProvideNoCover

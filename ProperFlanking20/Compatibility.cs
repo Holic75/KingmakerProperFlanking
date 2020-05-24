@@ -15,6 +15,19 @@ namespace ProperFlanking20
         static LibraryScriptableObject library = Main.library;
         static internal void load()
         {
+            fixArrowSongMinstrel();
+            fixSharpenedAccuracy();
+        }
+
+
+        static void fixSharpenedAccuracy()
+        {
+            CallOfTheWild.NewRagePowers.sharpened_accuracy_buff.AddComponent(CallOfTheWild.Helpers.Create<CoverSpecial.IgnoreCover>());
+        }
+
+
+        static void fixArrowSongMinstrel()
+        {
             //no cover provided by those under effect of arrowsongm isntrel bardic performance
             var buffs = new BlueprintBuff[]
             {
@@ -22,14 +35,17 @@ namespace ProperFlanking20
                 library.Get<BlueprintBuff>("1fa5f733fa1d77743bf54f5f3da5a6b1"), //competence
                 library.Get<BlueprintBuff>("ec38c2e60d738584983415cb8a4f508d"), //greatness
                 library.Get<BlueprintBuff>("31e1f369cf0e4904887c96e4ef97a9cb"), //heroics
+                CallOfTheWild.VersatilePerformance.blazing_rondo_buff,
+                CallOfTheWild.VersatilePerformance.symphony_of_elysian_heart_buff
             };
 
             foreach (var b in buffs)
             {
-                b.AddComponent(CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverToCasterWithFact>(n => 
-                                                                                                 { n.fact = CallOfTheWild.Archetypes.ArrowsongMinstrel.precise_minstrel;
-                                                                                                   n.attack_types = new AttackType[] { AttackType.Ranged };
-                                                                                                 }
+                b.AddComponent(CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverToCasterWithFact>(n =>
+                {
+                    n.fact = CallOfTheWild.Archetypes.ArrowsongMinstrel.precise_minstrel;
+                    n.attack_types = new AttackType[] { AttackType.Ranged };
+                }
                                                                                                  )
                               );
             }
