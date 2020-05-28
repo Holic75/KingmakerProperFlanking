@@ -1,10 +1,13 @@
 ﻿using CallOfTheWild;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Facts;
+using Kingmaker.Blueprints.Items.Ecnchantments;
+using Kingmaker.Blueprints.Items.Weapons;
 using Kingmaker.Controllers.Combat;
 using Kingmaker.Designers;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.Items;
+using Kingmaker.PubSubSystem;
 using Kingmaker.RuleSystem;
 using Kingmaker.RuleSystem.Rules;
 using Kingmaker.UnitLogic;
@@ -25,20 +28,36 @@ namespace ProperFlanking20
     {
         static bool Prefix(RuleCalculateAC __instance, RulebookEventContext context)
         {
+            bool veering = false;
+            var weapon = __instance.Reason?.Item as ItemEntityWeapon;
+            if (weapon != null && weapon.EnchantmentsCollection != null)
+            {
+                veering = weapon.EnchantmentsCollection.HasFact(Cover.veering);
+            }
             var current_cover = __instance.Target.hasCoverFrom(__instance.Initiator, __instance.AttackType);
             //Main.logger.Log(current_cover.ToString() + " "  + __instance.AttackType.ToString());
             if (current_cover.isFull())
             {
                 __instance.AddBonus(Cover.cover_ac_bonus, Cover.soft_cover_fact);
+                if (veering)
+                {
+                    __instance.AddBonus(Cover.partial_cover_ac_bonus - Cover.cover_ac_bonus, Cover.veering_fact);
+                }
+
             }
             else if (current_cover.isPartial())
             {
                 __instance.AddBonus(Cover.partial_cover_ac_bonus, Cover.partial_soft_cover_fact);
+                if (veering)
+                {
+                    __instance.AddBonus(-Cover.partial_cover_ac_bonus, Cover.veering_fact);
+                }
             }
 
             return true;
         }
     }
+
 
 
     [Harmony12.HarmonyPatch(typeof(UnitCombatState))]
@@ -90,7 +109,9 @@ namespace ProperFlanking20
 
         static internal LibraryScriptableObject library = Main.library;
         static internal Fact soft_cover_fact;
+        static internal Fact veering_fact;
         static internal Fact partial_soft_cover_fact;
+        static public BlueprintWeaponEnchantment veering;
 
         static internal int cover_ac_bonus;
         static internal int partial_cover_ac_bonus;
@@ -101,6 +122,47 @@ namespace ProperFlanking20
             partial_cover_ac_bonus = Math.Max(0, partial_bonus);
             Main.logger.Log($"Use cover with ac bonus: {cover_ac_bonus} / {partial_cover_ac_bonus}.");
             createSoftCoverFact();
+
+            createVeeringEnchant();
+        }
+
+
+        static void createVeeringEnchant()
+        {
+            veering = Common.createWeaponEnchantment("VeeringWeaponEnchantment", "Veering",
+                                                    "Veering weapons feature feathers or carved images of wings or winged creatures in their construction. Attacks with a veering weapon ignore a target’s bonus to AC from partial cover and reduce the target’s bonus to AC from full soft cover to that of partial. A veering weapon bestows no benefit against targets with total cover.",
+                                                    "Veering", "", "8d1096d3c259455cb438c6abb333dd8b", 3, 1, null);
+
+            var weapon_guids = new string[]
+            {
+                "05550fe34742a344c968839ba9e5284a", //fiery eye
+                "ad5cbd0bec32b6042abb0a0e82a43925", //shady bow
+                "1f546ab76bb0e77478ad08248795f7d7", //whirlwind
+                "4636ef8b8a64b3941ac5dda42918d765", //lucky longbow
+                "2f771b62ffb4bdf45a425ba0a0130217", //longbow of erastil
+                "b6c71cc97303b0f4f9f0a28e14bbb66e", //eye of the tornado
+                "051ccf83137987847aade5287788bf9c", //prowling cheetah
+                "007d72299a0c85743bccd47fb5ed6bdc", //hunter's blessing
+                "137fc6acf3f645a40a3ec041b472ba86", //planar hunter
+                "84094c6a1e5ba694f9b1b6492d6fcdf3", //greater sting
+                "d2127cb56fa4c4c43a6af226ffb21ac1", //ankle breaker
+                "a7712968bf669534799ba0c6639543af", //savage bow
+            };
+
+            foreach (var wg in weapon_guids)
+            {
+                var weapon = library.Get<BlueprintItemWeapon>(wg);
+                Common.addEnchantment(weapon, veering);
+            }
+
+
+            var veering_unit_fact = CallOfTheWild.Helpers.Create<BlueprintUnitFact>();
+
+            veering_unit_fact.name = "VeeringFact";
+            veering_unit_fact.SetName("Veering");
+            veering_unit_fact.SetDescription("");
+            library.AddAsset(veering_unit_fact, "721e98b30521407ba72564f16f031e3a");
+            veering_fact = new Fact(veering_unit_fact);
         }
 
         static void createSoftCoverFact()
