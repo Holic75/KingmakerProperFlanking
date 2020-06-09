@@ -9,6 +9,7 @@ using Kingmaker.RuleSystem;
 using Kingmaker.RuleSystem.Rules;
 using Kingmaker.RuleSystem.Rules.Damage;
 using Kingmaker.UnitLogic;
+using Kingmaker.UnitLogic.Parts;
 using Kingmaker.Utility;
 using Newtonsoft.Json;
 using System;
@@ -44,6 +45,22 @@ namespace ProperFlanking20
             }
 
             return codes.AsEnumerable();
+        }
+    }
+
+
+    [Harmony12.HarmonyPatch(typeof(RuleCalculateDamage))]
+    [Harmony12.HarmonyPatch("OnTrigger", Harmony12.MethodType.Normal)]
+    class RuleCalculateDamage__OnTrigger__BaseFix
+    {
+        static bool Prefix(RuleCalculateDamage __instance, RulebookEventContext context)
+        {
+            if (UnitPartConcealment.Calculate(__instance.Initiator, __instance.Target, false) != Concealment.None)
+            {//disable precision damage if target has concelement
+                __instance.ParentRule.DisablePrecisionDamage = true;
+            }
+
+            return true;
         }
     }
 
