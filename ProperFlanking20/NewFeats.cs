@@ -650,13 +650,14 @@ namespace ProperFlanking20
 
         static void createPackFlanking()
         {
+            var icon = CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/PackFlanking.png");
             var combat_expertise = library.Get<BlueprintFeature>("4c44724ffa8844f4d9bedb5bb27d144a");
 
             pack_flanking = CallOfTheWild.Helpers.CreateFeature("PackFlankingFeature",
                                                "Pack Flanking",
                                                "When you and your companion creature have this feat, your companion creature is adjacent to you or sharing your square, and you both threaten the same opponent, you are both considered to be flanking that opponent, regardless of your actual positioning.",
                                                "c269e2f31508424ab5352b21a5db770e",
-                                               null,
+                                               icon,
                                                FeatureGroup.Feat,
                                                CallOfTheWild.Helpers.Create<FlankingSpecial.PackFlanking>(),
                                                CallOfTheWild.Helpers.Create<PrerequisitePet>(),
@@ -691,13 +692,14 @@ namespace ProperFlanking20
 
         static void createFriendlyFireManeuvers()
         {
+            var icon = CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/FriendlyFireManeuvers.png");
             var point_blank_shot = library.Get<BlueprintFeature>("0da0c194d6e1d43419eb8d990b28e0ab");
             var precise_shot = library.Get<BlueprintFeature>("8f3d1e6b4be006f4d896081f2f889665");
             friendly_fire_maneuvers = CallOfTheWild.Helpers.CreateFeature("FriendlyFireManeuversFeature",
                                                                            "Friendly Fire Maneuvers",
                                                                            "Allies who also have this feat cannot provide soft cover to enemies, allowing you to make attacks of opportunity against an enemy even if those allies grant you soft cover against that foe’s attacks. If an ally who also has this feat casts a spell that targets the area you are in as it allows a Reflex saving throw to avoid the effect (such as fireball), you gain a +4 dodge bonus on that saving throw.",
                                                                            "24e988c2acf245f085ed9ed2c490753e",
-                                                                           null,
+                                                                           icon,
                                                                            FeatureGroup.Feat,
                                                                            CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverToFactOwners>(),
                                                                            CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverFromFactOwners>(),
@@ -717,13 +719,14 @@ namespace ProperFlanking20
 
         static void createEnfiladingFire()
         {
+            var icon = CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/EnfiladingFire.png");
             var point_blank_shot = library.Get<BlueprintFeature>("0da0c194d6e1d43419eb8d990b28e0ab");
             var precise_shot = library.Get<BlueprintFeature>("8f3d1e6b4be006f4d896081f2f889665");
             enfilading_fire = CallOfTheWild.Helpers.CreateFeature("EnfiladingFireFeature",
                                                                     "Enfilading Fire",
                                                                     "You receive a +2 bonus on ranged attacks made against a foe flanked by 1 or more allies with this feat.",
                                                                     "46332f6c8fe84583ac5b06cfc9d20b2f",
-                                                                    null,
+                                                                    icon,
                                                                     FeatureGroup.Feat,
                                                                     CallOfTheWild.Helpers.Create<NewMechanics.TeamworkBonusAgainstFlanked>(t => t.allowed_types = new AttackType[] { AttackType.Ranged, AttackType.RangedTouch }),
                                                                     CallOfTheWild.Helpers.PrerequisiteFeature(point_blank_shot),
