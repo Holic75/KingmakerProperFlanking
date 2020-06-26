@@ -435,6 +435,27 @@ namespace ProperFlanking20.NewMechanics
 
 
 
+    [AllowedOn(typeof(BlueprintUnitFact))]
+    [AllowMultipleComponents]
+    public class DamageBonusAgainstFlankedTarget : RuleInitiatorLogicComponent<RuleCalculateDamage>
+    {
+        public int bonus;
+
+        public override void OnEventAboutToTrigger(RuleCalculateDamage evt)
+        {
+            if (!evt.Target.isFlankedByAttacker(evt.Initiator))
+            {
+                return;
+            }
+
+             evt.DamageBundle.WeaponDamage?.AddBonusTargetRelated(bonus);
+        }
+
+        public override void OnEventDidTrigger(RuleCalculateDamage evt) { }
+    }
+
+
+
 
     [AllowedOn(typeof(BlueprintUnitFact))]
     [AllowMultipleComponents]

@@ -1,5 +1,7 @@
 ﻿using CallOfTheWild;
 using Kingmaker.Blueprints;
+using Kingmaker.Blueprints.Classes;
+using Kingmaker.Enums;
 using Kingmaker.RuleSystem;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 using System;
@@ -13,10 +15,38 @@ namespace ProperFlanking20
     class Compatibility
     {
         static LibraryScriptableObject library = Main.library;
+        static public BlueprintFeature dirty_fighter;
+        static public BlueprintFeature deadeye_bowman;
         static internal void load()
         {
             fixArrowSongMinstrel();
             fixSharpenedAccuracy();
+            createTraits();
+        }
+
+
+        static void createTraits()
+        {
+            dirty_fighter = CallOfTheWild.Helpers.CreateFeature("DirtyFighterProperFlankingTrait",
+                                     "Dirty Fighter",
+                                     "You wouldn’t have lived to make it out of childhood without the aid of a sibling, friend, or companion you could always count on to distract your enemies long enough for you to do a little bit more damage than normal. That companion may be another PC or an NPC (who may even be recently departed from your side).\n" +
+                                     "Benefit: When you hit a foe you are flanking, you deal 1 additional point of damage (this damage is added to your base damage, and is multiplied on a critical hit). This additional damage is a trait bonus.",
+                                     "b7677db3aa6f457a82c438481c04b659",
+                                     CallOfTheWild.Helpers.GetIcon("5662d1b793db90c4b9ba68037fd2a768"), // precise strike
+                                     FeatureGroup.Trait,
+                                     CallOfTheWild.Helpers.Create<NewMechanics.DamageBonusAgainstFlankedTarget>(d => d.bonus = 1)
+                                     );
+
+
+            deadeye_bowman = CallOfTheWild.Helpers.CreateFeature("DeadEyeBowmanTrait",
+                                                                 "Deadeye Bowman",
+                                                                 "When you are using a longbow, if only a single creature is providing soft cover, you can ignore it.",
+                                                                 "98656c735106478c9944316c2b62fa54",
+                                                                 CallOfTheWild.Helpers.GetIcon("8f3d1e6b4be006f4d896081f2f889665"), // precise shot
+                                                                 FeatureGroup.Trait,
+                                                                 CallOfTheWild.Helpers.Create<CoverSpecial.IgnoreCoverFromOneUnitWithWeaponCategory>(i => i.categories = new WeaponCategory[] { WeaponCategory.Longbow }),
+                                                                 CallOfTheWild.Helpers.PrerequisiteFeature(library.Get<BlueprintFeature>("afc775188deb7a44aa4cbde03512c671")) //erastil
+                                                                 );
         }
 
 

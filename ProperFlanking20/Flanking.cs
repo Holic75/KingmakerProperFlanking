@@ -223,6 +223,26 @@ namespace ProperFlanking20
     }
 
 
+    [Harmony12.HarmonyPatch(typeof(CallOfTheWild.NewMechanics.FlankingAttackBonus))]
+    [Harmony12.HarmonyPatch("OnEventAboutToTrigger", Harmony12.MethodType.Normal)]
+    class FlankingAttackBonus__OnEventAboutToTrigger__Patch
+    {
+        static bool Prefix(CallOfTheWild.NewMechanics.FlankingAttackBonus __instance, RuleAttackRoll evt)
+        {
+
+            if (evt.Weapon == null)
+                return false;
+
+            if (evt.Target.isFlankedByAttacker(evt.Initiator))
+            {
+                evt.AddTemporaryModifier(evt.Initiator.Stats.AdditionalAttackBonus.AddModifier(__instance.Bonus, (GameLogicComponent)__instance, __instance.Descriptor));
+            }
+
+            return false;
+        }
+    }
+
+
     [Harmony12.HarmonyPatch(typeof(OutflankProvokeAttack))]
     [Harmony12.HarmonyPatch("OnEventDidTrigger", Harmony12.MethodType.Normal)]
     class OutflankProvokeAttack__OnEventDidTrigger__Patch

@@ -34,7 +34,8 @@ namespace ProperFlanking20
             {
                 veering = weapon.EnchantmentsCollection.HasFact(Cover.veering);
             }
-            var current_cover = __instance.Target.hasCoverFrom(__instance.Initiator, __instance.AttackType);
+            
+            var current_cover = __instance.Target.hasCoverFrom(__instance.Initiator, __instance.AttackType, weapon);
             //Main.logger.Log(current_cover.ToString() + " "  + __instance.AttackType.ToString());
             if (current_cover.isFull())
             {
@@ -68,7 +69,7 @@ namespace ProperFlanking20
         {//prevent attack of opportunity if target has cover
             var weapon = __instance?.Unit?.GetFirstWeapon();
             AttackType attack_type = weapon == null ? AttackType.Melee : weapon.Blueprint.AttackType;
-            if (target.hasCoverFrom(__instance.Unit, __instance.Unit.GetFirstWeapon().Blueprint.AttackType) != Cover.CoverType.None)
+            if (target.hasCoverFrom(__instance.Unit, __instance.Unit.GetFirstWeapon().Blueprint.AttackType, weapon) != Cover.CoverType.None)
             {
                 __result = false;
                 return false;
@@ -211,6 +212,26 @@ namespace ProperFlanking20
         }
 
 
+        public class UnitPartIgnoreCoverFromOneUnit : CallOfTheWild.AdditiveUnitPart
+        {
+            public bool active(ItemEntityWeapon weapon)
+            {
+                foreach (var b in buffs)
+                {
+                    if (b.Blueprint.GetComponent<SpecialIgnoreCover>() != null)
+                    {
+                        bool result = false;
+                        b.CallComponents<IgnoreCoverFromOneUnitBase>(a => { result = a.ignoresCover(weapon); });
+                        if (result)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+        }
+
         public class UnitPartIgnoreCover : CallOfTheWild.AdditiveUnitPart
         {
             public bool hasBuff(BlueprintFact blueprint)
@@ -254,6 +275,21 @@ namespace ProperFlanking20
         }
 
 
+        public abstract class IgnoreCoverFromOneUnitBase : OwnedGameLogicComponent<UnitDescriptor>
+        {
+            public override void OnTurnOn()
+            {
+                this.Owner.Ensure<UnitPartIgnoreCoverFromOneUnit>().addBuff(this.Fact);
+            }
+
+            public override void OnTurnOff()
+            {
+                this.Owner.Ensure<UnitPartIgnoreCoverFromOneUnit>().removeBuff(this.Fact);
+            }
+
+            abstract public bool ignoresCover(ItemEntityWeapon weapon);
+        }
+
 
         public abstract class SpecialIgnoreCover : OwnedGameLogicComponent<UnitDescriptor>
         {
@@ -270,7 +306,7 @@ namespace ProperFlanking20
             abstract public bool ignoresCover(UnitEntityData target, UnitEntityData cover, AttackType attack_type);
         }
 
-        static internal CoverType hasCoverFrom(this UnitEntityData unit, UnitEntityData attacker, AttackType attack_type)
+        static internal CoverType hasCoverFrom(this UnitEntityData unit, UnitEntityData attacker, AttackType attack_type, ItemEntityWeapon weapon)
         {
             if (unit == null || attacker == null || unit == attacker)
             {
@@ -295,19 +331,27 @@ namespace ProperFlanking20
             var unit_position = unit.Position;
             var attacker_position = attacker.Position;
 
+            int cover_providers = 0;
+            var ignore_cover_from_one_unit_part = unit.Get<UnitPartIgnoreCoverFromOneUnit>();
+            bool ignore_cover_from_one_unit = ignore_cover_from_one_unit_part != null ? ignore_cover_from_one_unit_part.active(weapon) : false;
             foreach (var u in units_around)
             {
                 if (u == null)
                 {
                     continue;
                 }
-                current_cover = current_cover | u.providesCoverToFrom(unit, attacker, attack_type); //sum covers
-                if (current_cover.isFull())
+                var u_cover = u.providesCoverToFrom(unit, attacker, attack_type);
+                if (!u_cover.isNone())
+                {
+                    cover_providers++;
+                }
+                current_cover = current_cover | u_cover; //sum covers
+                if (current_cover.isFull() && !(ignore_cover_from_one_unit && cover_providers <= 1))
                 { //full cover is maximum possible cover
                     return current_cover;
                 }
             }
-            return current_cover;
+            return (ignore_cover_from_one_unit && cover_providers <= 1) ? CoverType.None : current_cover;
         }
 
         static internal CoverType providesCoverToFrom(this UnitEntityData cover, UnitEntityData unit, UnitEntityData attacker, AttackType attack_type)

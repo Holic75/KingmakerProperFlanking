@@ -1,9 +1,11 @@
 ﻿using Kingmaker.Blueprints.Facts;
 using Kingmaker.EntitySystem.Entities;
+using Kingmaker.Enums;
 using Kingmaker.Items;
 using Kingmaker.RuleSystem;
 using Kingmaker.UnitLogic;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
+using Kingmaker.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +14,15 @@ using System.Threading.Tasks;
 
 namespace ProperFlanking20.CoverSpecial
 {
+    public class IgnoreCoverFromOneUnitWithWeaponCategory : Cover.IgnoreCoverFromOneUnitBase
+    {
+        public WeaponCategory[] categories = new WeaponCategory[0];
+        public override bool ignoresCover(ItemEntityWeapon weapon)
+        {
+            return weapon != null && (categories.Empty() || categories.Contains(weapon.Blueprint.Category));
+        }
+    }
+
 
     public class IgnoreCoverForAttackType : Cover.SpecialIgnoreCover
     {
