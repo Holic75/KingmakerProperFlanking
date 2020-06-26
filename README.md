@@ -24,7 +24,8 @@ New Rogue Talents:
 - Underhanded Trick
 
 Additional Features:
-- Veering enchantment on certain unique weapons.
+- Veering enchantment on certain unique weapons,
+- Deadeye Bowman trait if you use traits with Favored Class mod.
 
 It also adds option to use combat maneuvers as attacks.
 In addition, when using Trip, Disarm, Sunder, Bull Rush (as a part of charge) or Dirty Trick combat maneuvers (as part of full attack with Quick Dirty Trick feat) CMB will be calculated based on weapon used for maneuver (primary hand weapon if used outside of full attack).
