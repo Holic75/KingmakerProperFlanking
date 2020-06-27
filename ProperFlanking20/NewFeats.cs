@@ -350,11 +350,12 @@ namespace ProperFlanking20
                                                                                                                                                            a.CheckedFact = combat_expertise_buff;
                                                                                                                                                            a.Bonus = CallOfTheWild.Helpers.CreateContextValue(AbilityRankType.Default);
                                                                                                                                                            a.OnlyFirstAttack = true;
-                                                                                                                                                           a.WeaponAttackTypes = new AttackType[] { AttackType.Melee };
+                                                                                                                                                           a.Descriptor = ModifierDescriptor.UntypedStackable;
+                                                                                                                                                           a.WeaponAttackTypes = new AttackType[] { AttackType.Melee, AttackType.Touch, AttackType.Ranged, AttackType.RangedTouch };
                                                                                                                                                        }
                                                                                                                                                        ),
                                                         CallOfTheWild.Helpers.CreateContextRankConfig(baseValueType: ContextRankBaseValueType.CustomProperty,
-                                                                                                      progression: ContextRankProgression.AsIs, stepLevel: 1,
+                                                                                                      progression: ContextRankProgression.AsIs, stepLevel: 1, min: 0,
                                                                                                       customProperty: library.Get<BlueprintUnitProperty>("8a63b06d20838954e97eb444f805ec89")) //combat expertise custom property
                                                        );
 
