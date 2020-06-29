@@ -218,7 +218,7 @@ namespace ProperFlanking20
             {
                 foreach (var b in buffs)
                 {
-                    if (b.Blueprint.GetComponent<SpecialIgnoreCover>() != null)
+                    if (b.Blueprint.GetComponent<IgnoreCoverFromOneUnitBase>() != null)
                     {
                         bool result = false;
                         b.CallComponents<IgnoreCoverFromOneUnitBase>(a => { result = a.ignoresCover(weapon); });
@@ -332,7 +332,7 @@ namespace ProperFlanking20
             var attacker_position = attacker.Position;
 
             int cover_providers = 0;
-            var ignore_cover_from_one_unit_part = unit.Get<UnitPartIgnoreCoverFromOneUnit>();
+            var ignore_cover_from_one_unit_part = attacker.Get<UnitPartIgnoreCoverFromOneUnit>();
             bool ignore_cover_from_one_unit = ignore_cover_from_one_unit_part != null ? ignore_cover_from_one_unit_part.active(weapon) : false;
             foreach (var u in units_around)
             {
