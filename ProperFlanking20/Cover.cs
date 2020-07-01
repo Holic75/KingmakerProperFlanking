@@ -36,7 +36,6 @@ namespace ProperFlanking20
             }
             
             var current_cover = __instance.Target.hasCoverFrom(__instance.Initiator, __instance.AttackType, weapon);
-            //Main.logger.Log(current_cover.ToString() + " "  + __instance.AttackType.ToString());
             if (current_cover.isFull())
             {
                 __instance.AddBonus(Cover.cover_ac_bonus, Cover.soft_cover_fact);
@@ -121,7 +120,6 @@ namespace ProperFlanking20
         {
             cover_ac_bonus = Math.Max(0, bonus);
             partial_cover_ac_bonus = Math.Max(0, partial_bonus);
-            Main.logger.Log($"Use cover with ac bonus: {cover_ac_bonus} / {partial_cover_ac_bonus}.");
             createSoftCoverFact();
 
             createVeeringEnchant();
@@ -321,12 +319,12 @@ namespace ProperFlanking20
                 //account for units inside circle
                 var norm_r = r.normalized;
                 var unit_radius = unit?.View?.Corpulence;// Helpers.unitSizeToDiameter(unit.Descriptor.State.Size).Feet().Meters / 2.0f;
-                r = r - norm_r * (unit_radius.HasValue ? unit_radius.Value :  5.Feet().Meters * 0.5f);
+                r = r - norm_r * (unit_radius.HasValue ? unit_radius.Value :  0.25f);
                 //c = c - norm_r * unit_radius;
             }
 
             float radius = (float)Math.Sqrt(Vector3.Dot(r, r));
-            var units_around = GameHelper.GetTargetsAround(c, radius, true);
+            var units_around = GameHelper.GetTargetsAround(c, radius, false);
 
             var unit_position = unit.Position;
             var attacker_position = attacker.Position;
@@ -360,7 +358,6 @@ namespace ProperFlanking20
             {
                 return CoverType.None;
             }
-          
             if (cover.Ensure<UnitPartNoCover>().doesNotProvideCoverToFrom(unit, attacker, attack_type))
             {//check if special cases
                 return CoverType.None;
@@ -400,7 +397,6 @@ namespace ProperFlanking20
                 var cover_r = unit.View.Corpulence; //Helpers.unitSizeToDiameter(cover.Descriptor.State.Size).Feet().Meters / 2.0f * 0.9f;
                 var unit_r = attacker.View.Corpulence; //assume the window required for unimepeded shooting is based on attacker size (i.e smaller units need less space) ?  //5.Feet().Meters / 2.0f; 
                 var unit_center = unit.Position.To2D();
-                              
                 if (Helpers.isCircleIntersectedByLine(cover.Position.To2D(), cover_r * cover_r, attacker.Position.To2D(), unit_center))
                 {
                     current_cover = current_cover | CoverType.Center;
