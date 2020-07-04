@@ -56,10 +56,19 @@ namespace ProperFlanking20.CoverSpecial
     public class NoCoverToFactOwners : Cover.SpecialProvideNoCover
     {
         public bool teamwork = true;
+        public AttackType[] attack_types = new AttackType[0];
 
         public override bool doesNotProvideCoverToFrom(UnitEntityData target, UnitEntityData attacker, AttackType attack_type)
         {
-            return ((teamwork && (bool)attacker.Descriptor.State.Features.SoloTactics) || attacker.Descriptor.HasFact(this.Fact.Blueprint as BlueprintUnitFact)) && attacker.IsAlly(this.Owner.Unit);
+            return ((teamwork && (bool)attacker.Descriptor.State.Features.SoloTactics) || attacker.Descriptor.HasFact(this.Fact.Blueprint as BlueprintUnitFact)) 
+                && attacker.IsAlly(this.Owner.Unit)
+                && isCorrectAttackType(attack_type);
+        }
+
+
+        private bool isCorrectAttackType(AttackType attack_type)
+        {
+            return attack_types.Empty() || attack_types.Contains(attack_type);
         }
     }
 
@@ -67,10 +76,16 @@ namespace ProperFlanking20.CoverSpecial
     public class NoCoverFromFactOwners : Cover.SpecialIgnoreCover
     {
         public bool teamwork = true;
+        public AttackType[] attack_types = new AttackType[0];
 
         public override bool ignoresCover(UnitEntityData target, UnitEntityData cover, AttackType attack_type)
         {
-            return ((teamwork && (bool)Owner.State.Features.SoloTactics) || cover.Descriptor.HasFact(this.Fact.Blueprint as BlueprintUnitFact)) && cover.IsAlly(this.Owner.Unit);
+            return ((teamwork && (bool)Owner.State.Features.SoloTactics) || cover.Descriptor.HasFact(this.Fact.Blueprint as BlueprintUnitFact)) && cover.IsAlly(this.Owner.Unit) && isCorrectAttackType(attack_type);
+        }
+
+        private bool isCorrectAttackType(AttackType attack_type)
+        {
+            return attack_types.Empty() || attack_types.Contains(attack_type);
         }
     }
 

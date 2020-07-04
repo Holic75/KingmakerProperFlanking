@@ -3,6 +3,7 @@ using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Blueprints.Classes.Selection;
 using Kingmaker.Designers.Mechanics.Facts;
+using Kingmaker.RuleSystem;
 using Kingmaker.UnitLogic.Abilities.Blueprints;
 using Kingmaker.UnitLogic.Mechanics.Conditions;
 using Kingmaker.Utility;
@@ -84,8 +85,8 @@ namespace ProperFlanking20
                                                         "",
                                                         CallOfTheWild.Helpers.GetIcon("c00342384c641be409907c2bf39d68f1"), //aura of clear sight
                                                         null);
-            buff.AddComponent(CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverFromFactOwners>(n => n.teamwork = false));
-            buff.AddComponent(CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverToFactOwners>(n => n.teamwork = false));
+            buff.AddComponent(CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverFromFactOwners>(n => { n.teamwork = false; n.attack_types = new AttackType[] { AttackType.Ranged, AttackType.RangedTouch }; }));
+            buff.AddComponent(CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverToFactOwners>(n => { n.teamwork = false; n.attack_types = new AttackType[] { AttackType.Ranged, AttackType.RangedTouch }; }));
 
             
             var aura_of_care = CallOfTheWild.Common.createAuraEffectFeature(buff.Name,
