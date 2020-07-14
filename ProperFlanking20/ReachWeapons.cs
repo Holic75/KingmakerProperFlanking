@@ -1,5 +1,7 @@
 ﻿using Kingmaker.Controllers.Combat;
 using Kingmaker.EntitySystem.Entities;
+using Kingmaker.Enums;
+using Kingmaker.Items;
 using Kingmaker.Items.Slots;
 using Kingmaker.UnitLogic.Commands;
 using Kingmaker.UnitLogic.Commands.Base;
@@ -34,12 +36,20 @@ namespace ProperFlanking20.ReachWeapons
                //if unit is huge - it will be 13/2 = 6.5 feet
                //if unit is gargantuan - it will be 16/2 = 8 feet
                //if unit is clossal - it will be 19/2 = 9.5 feet
-                float meters = hand.Weapon.AttackRange.Meters * 0.5f;
+               //float meters = hand.Weapon.AttackRange.Meters * 0.5f;
+                float meters = getDeadRange(unit, hand.Weapon);
                 //Main.logger.Log(unit.CharacterName + " TestingReach: " + meters.ToString() + " Distance: " + unit.DistanceTo(enemy).ToString());
                 //Main.logger.Log(unit.CharacterName + " Min Distance: " + (unit.View.Corpulence + meters + enemy.View.Corpulence).ToString());
                 __result = (unit.DistanceTo(enemy) >= unit.View.Corpulence + meters + enemy.View.Corpulence);
                 //Main.logger.Log("TestingReachResult: " + __result.ToString());
             }
+        }
+
+
+        public static float getDeadRange(UnitEntityData unit, ItemEntityWeapon weapon)
+        {
+            //return weapon.AttackRange.Meters * 0.5f;
+            return  (unit.Descriptor.State.Size.GetModifiers().Reach + 1).Feet().Meters * 0.5f;
         }
     }
 
@@ -68,8 +78,8 @@ namespace ProperFlanking20.ReachWeapons
             {
                 return;
             }
-            float dead_meters = attack_command.PlannedAttack.Weapon.AttackRange.Meters * 0.5f;
-
+            //float dead_meters = attack_command.PlannedAttack.Weapon.AttackRange.Meters * 0.5f;
+            float dead_meters = Patch_UnitEngagementExtension__IsReach__Patch.getDeadRange(unit, attack_command.PlannedAttack.Weapon);
             if (GeometryUtils.SqrMechanicsDistance(__instance.Target.Point, unit.Position) > (double)__instance.ApproachRadius * (double)__instance.ApproachRadius)
             {
                 //unit is too far from its target, no need to worry
