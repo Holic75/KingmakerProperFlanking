@@ -40,7 +40,7 @@ namespace ProperFlanking20.ReachWeapons
                 float meters = getDeadRange(unit, hand.Weapon);
                 //Main.logger.Log(unit.CharacterName + " TestingReach: " + meters.ToString() + " Distance: " + unit.DistanceTo(enemy).ToString());
                 //Main.logger.Log(unit.CharacterName + " Min Distance: " + (unit.View.Corpulence + meters + enemy.View.Corpulence).ToString());
-                __result = (unit.DistanceTo(enemy) >= unit.View.Corpulence + meters + enemy.View.Corpulence);
+                __result = (distance(unit, enemy) >= unit.View.Corpulence + meters + enemy.View.Corpulence);
                 //Main.logger.Log("TestingReachResult: " + __result.ToString());
             }
         }
@@ -51,6 +51,13 @@ namespace ProperFlanking20.ReachWeapons
             //return weapon.AttackRange.Meters * 0.5f;
             return  (unit.Descriptor.State.Size.GetModifiers().Reach + 1).Feet().Meters * 0.5f;
         }
+
+        public static float distance(UnitEntityData unit, UnitEntityData enemy)
+        {
+            //return unit.DistanceTo(enemy);
+            return (unit.Position - enemy.Position).magnitude;
+        }
+
     }
 
     [Harmony12.HarmonyPatch(typeof(UnitCommand))]
@@ -86,12 +93,13 @@ namespace ProperFlanking20.ReachWeapons
                 return;
             }
 
-            float ud = unit.DistanceTo(enemy);
+            float ud = Patch_UnitEngagementExtension__IsReach__Patch.distance(unit, enemy);
+            var e = (unit.Position - enemy.Position).normalized;
             float margin = unit.View.Corpulence + dead_meters + enemy.View.Corpulence;
             if (ud < margin)
             {
                 //we are too close, need to update approach point
-                __result = unit.Position + (unit.Position - enemy.Position).normalized * (__instance.ApproachRadius + 1.1f*(margin - ud));
+                __result = unit.Position + e * (__instance.ApproachRadius + 1.1f*(margin - ud));
             }
 
         }
