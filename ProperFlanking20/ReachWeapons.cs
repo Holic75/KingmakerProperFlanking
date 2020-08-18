@@ -15,8 +15,40 @@ using UnityEngine;
 
 namespace ProperFlanking20.ReachWeapons
 {
+
     [Harmony12.HarmonyPatch(typeof(UnitEngagementExtension))]
     [Harmony12.HarmonyPatch("IsReach", Harmony12.MethodType.Normal)]
+    [Harmony12.HarmonyPatch(new Type[] { typeof(UnitEntityData), typeof(UnitEntityData), typeof(WeaponSlot), typeof(Vector3) })]
+    class Patch_UnitEngagementExtension__IsReach2__Patch
+    {
+        static void Postfix(UnitEntityData unit, UnitEntityData enemy, WeaponSlot hand, Vector3 overrideEnemyPosition, ref bool __result)
+        {
+            var weapon = hand.Weapon;
+            if (weapon == null)
+            {
+                return;
+            }
+
+            bool is_reach = weapon.Blueprint.IsMelee && weapon.Blueprint.Type.AttackRange > GameConsts.MinWeaponRange;
+
+            if (__result == true && is_reach)
+            {  //we are going to use half of treat range in this case for dead zone
+               //if unit is medium  - it will be 6/2 = 3 feet
+               //if unit is large - it will be 10/2 = 5 feet
+               //if unit is huge - it will be 13/2 = 6.5 feet
+               //if unit is gargantuan - it will be 16/2 = 8 feet
+               //if unit is clossal - it will be 19/2 = 9.5 feet
+               //float meters = hand.Weapon.AttackRange.Meters * 0.5f;
+                float meters = Patch_UnitEngagementExtension__IsReach__Patch.getDeadRange(unit, hand.Weapon);
+                __result = (Patch_UnitEngagementExtension__IsReach__Patch.distance(unit.Position, overrideEnemyPosition) >= unit.View.Corpulence + meters + enemy.View.Corpulence);
+
+            }
+        }
+    }
+    
+    [Harmony12.HarmonyPatch(typeof(UnitEngagementExtension))]
+    [Harmony12.HarmonyPatch("IsReach", Harmony12.MethodType.Normal)]
+    [Harmony12.HarmonyPatch(new Type[] { typeof(UnitEntityData), typeof(UnitEntityData), typeof(WeaponSlot) })]
     class Patch_UnitEngagementExtension__IsReach__Patch
     {
         static void Postfix(UnitEntityData unit, UnitEntityData enemy, WeaponSlot hand, ref bool __result)
@@ -55,7 +87,14 @@ namespace ProperFlanking20.ReachWeapons
         public static float distance(UnitEntityData unit, UnitEntityData enemy)
         {
             //return unit.DistanceTo(enemy);
-            return (unit.Position - enemy.Position).magnitude;
+            return distance(unit.Position, enemy.Position);
+        }
+
+
+        public static float distance(Vector3 unit_position, Vector3 enemy_position)
+        {
+            //return unit.DistanceTo(enemy);
+            return (unit_position - enemy_position).magnitude;
         }
 
     }
