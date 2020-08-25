@@ -97,7 +97,7 @@ namespace ProperFlanking20.QuickDraw
             if (__instance.Owner.Ensure<UnitPartQuickDraw>().active()
                  && __instance.InCombat && (__instance.Owner.Descriptor.State.CanAct || __instance.IsDollRoom))
             {
-                tr.Method("ChangeEquipmentWithoutAnimation").GetValue();
+                tr.Method("UpdateActiveWeaponSetImmediately").GetValue();
                 return false;
             }
 
