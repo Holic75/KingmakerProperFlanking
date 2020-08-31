@@ -294,7 +294,7 @@ namespace ProperFlanking20
                                                           wild_flanking.Icon,
                                                           null,
                                                           CallOfTheWild.Helpers.Create<UniqueBuff>());
-
+            buff.Stacking = StackingType.Stack;
             var apply_buff = Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(1), dispellable: false);
             var ability = CallOfTheWild.Helpers.CreateAbility("WildFlankingAbility",
                                                         "Select " + wild_flanking.Name + " Partner",

@@ -374,7 +374,7 @@ namespace ProperFlanking20.NewMechanics
 
             foreach (var u in evt.Target.CombatState.EngagedBy)
             {
-                if (u != evt.Initiator && u.Buffs.HasFact(wild_flanking_mark) && evt.Target.isFlankedByAttacker(u))
+                if (u != evt.Initiator && u.Buffs.HasFact(wild_flanking_mark) && evt.Target.isFlankedByAttackerWith(evt.Initiator, u))
                 {
                     unit = u;
                     damage = getPowerAttackBonus(this.Owner.Unit, evt.Weapon);

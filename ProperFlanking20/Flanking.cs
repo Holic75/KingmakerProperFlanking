@@ -351,6 +351,7 @@ namespace ProperFlanking20
             }
 
             abstract public bool isFlanking(UnitEntityData target);
+            abstract public bool isFlankingTogether(UnitEntityData target, UnitEntityData partner);
         }
 
         public class UnitPartSpecialFlanking : CallOfTheWild.AdditiveUnitPart
@@ -359,6 +360,28 @@ namespace ProperFlanking20
             {
                 return buffs.Any(b => b.Blueprint == blueprint);
             }
+
+            public bool isFlankingTogether(UnitEntityData target, UnitEntityData partner)
+            {
+
+                foreach (var b in buffs)
+                {
+                    if (b.Blueprint.GetComponent<SpecialFlanking>() != null)
+                    {
+                        bool result = false;
+                        b.CallComponents<SpecialFlanking>(a => { result = a.isFlankingTogether(target, partner); });
+                        if (result)
+                        {
+#if DEBUG
+                            Main.logger.Log($"{this.Owner.Unit.CharacterName} is flanking {target.CharacterName} with {partner.CharacterName} due to {b.Name}");
+#endif
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
 
 
             public bool isFlanking(UnitEntityData target)
@@ -406,9 +429,41 @@ namespace ProperFlanking20
         }
 
 
+        static internal bool isFlankedByAttackerWith(this UnitEntityData unit, UnitEntityData attacker, UnitEntityData partner)
+        {
+            if (unit == null || attacker == null || unit == attacker || partner == null || attacker == partner || unit == partner)
+            {
+                return false;
+            }
+
+            if (IsFlatFootedTo(attacker, unit))
+            {
+                return false;
+            }
+
+            if (IsFlatFootedTo(partner, unit))
+            {
+                return false;
+            }
+
+            if (unit.Descriptor.State.Features.CannotBeFlanked)
+            {
+                return false;
+            }
+
+            return unit.isFlankedByAttackerGeometricallyTogetherWith(attacker, partner) || unit.isFlankedBySpecialWith(attacker, partner);
+        }
+
+
         static internal bool isFlankedBySpecial(this UnitEntityData unit, UnitEntityData attacker)
         {
             return attacker.Ensure<UnitPartSpecialFlanking>().isFlanking(unit);
+        }
+
+
+        static internal bool isFlankedBySpecialWith(this UnitEntityData unit, UnitEntityData attacker, UnitEntityData partner)
+        {
+            return attacker.Ensure<UnitPartSpecialFlanking>().isFlankingTogether(unit, partner);
         }
 
 
@@ -445,6 +500,35 @@ namespace ProperFlanking20
 
             }
             return false;
+        }
+
+
+        static internal bool isFlankedByAttackerGeometricallyTogetherWith(this UnitEntityData unit, UnitEntityData attacker, UnitEntityData partner)
+        {
+            float unit_radius = unit.View.Corpulence; //(Helpers.unitSizeToDiameter(unit.Descriptor.State.Size) / 2.0f).Feet().Meters;
+
+            float unit_radius2 = unit_radius * unit_radius;
+            var unit_position = unit.Position;
+
+            var engaged_array = unit.CombatState.EngagedBy.ToArray();
+
+            if (!engaged_array.Contains(attacker))
+            {
+                return false;
+            }
+
+            if (!engaged_array.Contains(partner))
+            {
+                return false;
+            }
+
+
+            if (attacker == partner)
+            {
+                return false;
+            }
+
+            return Helpers.isCircleIntersectedByLine(unit_position.To2D(), unit_radius2, attacker.Position.To2D(), partner.Position.To2D());
         }
 
 

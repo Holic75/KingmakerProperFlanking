@@ -39,6 +39,11 @@ namespace ProperFlanking20.FlankingSpecial
             }
             return false;
         }
+
+        public override bool isFlankingTogether(UnitEntityData target, UnitEntityData partner)
+        {
+            return isFlanking(target) && target.CombatState.EngagedBy.Contains(partner);
+        }
     }
 
 
@@ -62,6 +67,11 @@ namespace ProperFlanking20.FlankingSpecial
             }
 
             return teammate.CombatState.IsEngage(target) && (teammate.Ensure<Flanking.UnitPartSpecialFlanking>().hasBuff(this.Fact.Blueprint) || solo_tactics);
+        }
+
+        public override bool isFlankingTogether(UnitEntityData target, UnitEntityData partner)
+        {
+            return isFlanking(target) && ((partner == this.Owner.Unit.Descriptor.Pet) || (partner == this.Owner.Unit.Descriptor.Master.Value));
         }
     }
 }
