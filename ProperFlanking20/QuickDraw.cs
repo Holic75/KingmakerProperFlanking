@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TurnBased.Controllers;
 
 namespace ProperFlanking20.QuickDraw
 {
@@ -98,6 +99,22 @@ namespace ProperFlanking20.QuickDraw
                  && __instance.InCombat && (__instance.Owner.Descriptor.State.CanAct || __instance.IsDollRoom))
             {
                 tr.Method("UpdateActiveWeaponSetImmediately").GetValue();
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+
+    [Harmony12.HarmonyPatch(typeof(TurnController))]
+    [Harmony12.HarmonyPatch("HandleUnitChangeActiveEquipmentSet", Harmony12.MethodType.Normal)]
+    class TurnController_HandleEquipmentSetChanged_Patch
+    {
+        static bool Prefix(TurnController __instance, UnitDescriptor unit)
+        {
+            if ((unit?.Get<UnitPartQuickDraw>()?.active()).GetValueOrDefault())
+            {
                 return false;
             }
 

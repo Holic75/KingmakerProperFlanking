@@ -494,19 +494,14 @@ namespace ProperFlanking20.NewMechanics
     [AllowedOn(typeof(BlueprintUnitFact))]
     public class WeaponGroupAttackBonusCompatibleWithCMB : WeaponGroupAttackBonus, IInitiatorRulebookHandler<RuleCalculateAttackBonusWithoutTarget>
     {
-        public override void OnEventAboutToTrigger(RuleAttackWithWeapon evt)
-        {
-
-        }
-
-        public void OnEventAboutToTrigger(RuleCalculateAttackBonusWithoutTarget evt)
+        public override void OnEventAboutToTrigger(RuleCalculateAttackBonusWithoutTarget evt)
         {
             if (evt.Weapon == null || evt.Weapon.Blueprint.FighterGroup != this.WeaponGroup)
                 return;
             evt.AddBonus(this.AttackBonus * this.Fact.GetRank(), this.Fact);
         }
 
-        public void OnEventDidTrigger(RuleCalculateAttackBonusWithoutTarget evt)
+        public override void OnEventDidTrigger(RuleCalculateAttackBonusWithoutTarget evt)
         {
         }
     }
