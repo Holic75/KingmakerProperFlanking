@@ -51,6 +51,7 @@ namespace ProperFlanking20
         static public BlueprintFeature quick_dirty_trick;
         static public BlueprintFeature dirty_fighting;
         static public BlueprintFeature paired_opportunists;
+        static public BlueprintFeature improved_outflank;
 
         static internal BlueprintBuff maneuver_as_attack_buff;
 
@@ -79,6 +80,8 @@ namespace ProperFlanking20
 
             createDirtyFighting();
             createPairedOpportunists();
+
+            createImprovedOutFlank();
         }
 
 
@@ -271,6 +274,28 @@ namespace ProperFlanking20
             var no_cover = CallOfTheWild.Helpers.Create<CoverSpecial.IgnoreCoverForAttackType>(i => i.allowed_types = new AttackType[] { AttackType.Melee, AttackType.Touch });
             CallOfTheWild.NewSpells.bladed_dash_buff.AddComponent(no_cover);
             CallOfTheWild.KineticistFix.blade_rush_buff.AddComponent(no_cover);
+        }
+
+
+        static void createImprovedOutFlank()
+        {
+            var outflank = library.Get<BlueprintFeature>("422dab7309e1ad343935f33a4d6e9f11");
+            
+            improved_outflank = CallOfTheWild.Helpers.CreateFeature("ImprovedOutflankFeature",
+                                                                "Improved Outflank",
+                                                                "Whenever you and an ally who also has this feat are threatening the same foe, you are considered to be flanking that foe if you are adjacent to the point from which you would be able to flank the foe with your ally.",
+                                                                "",
+                                                                outflank.Icon,
+                                                                FeatureGroup.Feat,
+                                                                CallOfTheWild.Helpers.Create<FlankingSpecial.ImprovedOutflank>(i => i.angle = (float)Math.PI/4),
+                                                                CallOfTheWild.Helpers.PrerequisiteFeature(outflank),
+                                                                CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 6)
+                                                               );
+
+
+            improved_outflank.Groups = improved_outflank.Groups.AddToArray(FeatureGroup.TeamworkFeat);
+            library.AddCombatFeats(improved_outflank);
+            CallOfTheWild.Common.addTemworkFeats(improved_outflank);
         }
 
 

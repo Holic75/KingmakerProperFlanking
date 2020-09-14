@@ -26,6 +26,20 @@ namespace ProperFlanking20
         }
 
 
+        public static bool checkGeometricFlanking(Vector2 o, Vector2 a, Vector2 b, float max_angle_rad)
+        {
+            //o - target, a, b - attackers
+            var oa = (o - a).normalized;
+            var ob = (o - b).normalized;
+            var ab = (b - a).normalized;
+
+
+            return Vector2.Dot(oa, ob) <= max_angle_rad
+                   && Vector2.Dot(oa, ab) < Math.PI / 2
+                   && Vector2.Dot(ob, ab) < Math.PI / 2;
+        }
+
+
         public static float unitSizeToDiameter(Size sz) //in feet
         {
             switch (sz)

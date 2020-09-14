@@ -338,6 +338,50 @@ namespace ProperFlanking20
 
     static class Flanking
     {
+        public abstract class ModifyFlankingAngle : OwnedGameLogicComponent<UnitDescriptor>
+        {
+            public override void OnTurnOn()
+            {
+                this.Owner.Ensure<UnitPartModifyFlankingAngle>().addBuff(this.Fact);
+            }
+
+            public override void OnTurnOff()
+            {
+                this.Owner.Ensure<UnitPartModifyFlankingAngle>().removeBuff(this.Fact);
+            }
+
+            abstract public float getFlankingAngle(UnitEntityData target, UnitEntityData partner);
+        }
+
+
+        public class UnitPartModifyFlankingAngle : CallOfTheWild.AdditiveUnitPart
+        {
+            static public float default_flanking_angle_rad = (float)(Math.PI/6);
+            public bool hasBuff(BlueprintFact blueprint)
+            {
+                return buffs.Any(b => b.Blueprint == blueprint);
+            }
+
+            public float getFlankingAngle(UnitEntityData target, UnitEntityData partner)
+            {
+                float flanking_angle = default_flanking_angle_rad;
+                foreach (var b in buffs)
+                {
+                    if (b.Blueprint.GetComponent<ModifyFlankingAngle>() != null)
+                    {
+                        float angle = -(float)Math.PI;
+                        b.CallComponents<ModifyFlankingAngle>(a => { angle = a.getFlankingAngle(target, partner); });
+                        if (angle > flanking_angle)
+                        {
+                            flanking_angle = angle;
+                        }
+                    }
+                }
+                return flanking_angle;
+            }
+        }
+
+
         public abstract class  SpecialFlanking: OwnedGameLogicComponent<UnitDescriptor>
         {
             public override void OnTurnOn()
@@ -451,7 +495,7 @@ namespace ProperFlanking20
                 return false;
             }
 
-            return unit.isFlankedByAttackerGeometricallyTogetherWith(attacker, partner) || unit.isFlankedBySpecialWith(attacker, partner);
+            return unit.isFlankedBySpecialWith(attacker, partner) || unit.isFlankedByAttackerGeometricallyTogetherWith(attacker, partner);
         }
 
 
@@ -490,7 +534,11 @@ namespace ProperFlanking20
                 }
 
                 //geometrical flanking
-                if (Helpers.isCircleIntersectedByLine(unit_position.To2D(), unit_radius2, attacker.Position.To2D(), engaged_array[i].Position.To2D()))
+
+                //if (Helpers.isCircleIntersectedByLine(unit_position.To2D(), unit_radius2, attacker.Position.To2D(), engaged_array[i].Position.To2D()))
+                var unit_part_modify_flanking_angle = attacker.Get<UnitPartModifyFlankingAngle>();
+                float flanking_angle_rad =  unit_part_modify_flanking_angle == null ? UnitPartModifyFlankingAngle.default_flanking_angle_rad : unit_part_modify_flanking_angle.getFlankingAngle(unit, engaged_array[i]);
+                if (Helpers.checkGeometricFlanking(unit_position.To2D(), attacker.Position.To2D(), engaged_array[i].Position.To2D(), flanking_angle_rad))
                 {
 #if DEBUG
                     Main.logger.Log($"{attacker.CharacterName} and {engaged_array[i].CharacterName} are flanking {unit.CharacterName} due to geometry");

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Kingmaker.Designers;
 using Kingmaker.EntitySystem.Entities;
+using Kingmaker.UnitLogic;
 
 namespace ProperFlanking20.FlankingSpecial
 {
@@ -46,6 +47,24 @@ namespace ProperFlanking20.FlankingSpecial
         }
     }
 
+    class ImprovedOutflank : Flanking.ModifyFlankingAngle
+    {
+        public float angle;
+
+        public override float getFlankingAngle(UnitEntityData target, UnitEntityData partner)
+        {
+            if (this.Owner.Unit == partner)
+            {
+                return -100f;
+            }
+
+            if (partner.Descriptor.HasFact(this.Fact) || this.Owner.State.Features.SoloTactics)
+            {
+                return angle;
+            }
+            return -100f;
+        }
+    }
 
 
     class PackFlanking : Flanking.SpecialFlanking
