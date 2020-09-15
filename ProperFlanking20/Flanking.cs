@@ -350,27 +350,26 @@ namespace ProperFlanking20
                 this.Owner.Ensure<UnitPartModifyFlankingAngle>().removeBuff(this.Fact);
             }
 
-            abstract public float getFlankingAngle(UnitEntityData target, UnitEntityData partner);
+            abstract public float getFlankingAngleIncrease(UnitEntityData target, UnitEntityData partner);
         }
 
 
         public class UnitPartModifyFlankingAngle : CallOfTheWild.AdditiveUnitPart
         {
-            static public float default_flanking_angle_rad = (float)(Math.PI/6);
             public bool hasBuff(BlueprintFact blueprint)
             {
                 return buffs.Any(b => b.Blueprint == blueprint);
             }
 
-            public float getFlankingAngle(UnitEntityData target, UnitEntityData partner)
+            public float getFlankingAngleIncrease(UnitEntityData target, UnitEntityData partner)
             {
-                float flanking_angle = default_flanking_angle_rad;
+                float flanking_angle = 0f;
                 foreach (var b in buffs)
                 {
                     if (b.Blueprint.GetComponent<ModifyFlankingAngle>() != null)
                     {
-                        float angle = -(float)Math.PI;
-                        b.CallComponents<ModifyFlankingAngle>(a => { angle = a.getFlankingAngle(target, partner); });
+                        float angle = 0f;
+                        b.CallComponents<ModifyFlankingAngle>(a => { angle = a.getFlankingAngleIncrease(target, partner); });
                         if (angle > flanking_angle)
                         {
                             flanking_angle = angle;
@@ -516,7 +515,6 @@ namespace ProperFlanking20
         {
             float unit_radius = unit.View.Corpulence; //(Helpers.unitSizeToDiameter(unit.Descriptor.State.Size) / 2.0f).Feet().Meters;
 
-            float unit_radius2 = unit_radius * unit_radius;
             var unit_position = unit.Position;
 
             var engaged_array = unit.CombatState.EngagedBy.ToArray();
@@ -528,24 +526,10 @@ namespace ProperFlanking20
 
             for (int i = 0; i < engaged_array.Length; i++)
             {
-                if (engaged_array[i] == attacker)
+                if (isFlankedByAttackerGeometricallyTogetherWith(unit, attacker, engaged_array[i]))
                 {
-                    continue;
-                }
-
-                //geometrical flanking
-
-                //if (Helpers.isCircleIntersectedByLine(unit_position.To2D(), unit_radius2, attacker.Position.To2D(), engaged_array[i].Position.To2D()))
-                var unit_part_modify_flanking_angle = attacker.Get<UnitPartModifyFlankingAngle>();
-                float flanking_angle_rad =  unit_part_modify_flanking_angle == null ? UnitPartModifyFlankingAngle.default_flanking_angle_rad : unit_part_modify_flanking_angle.getFlankingAngle(unit, engaged_array[i]);
-                if (Helpers.checkGeometricFlanking(unit_position.To2D(), attacker.Position.To2D(), engaged_array[i].Position.To2D(), flanking_angle_rad))
-                {
-#if DEBUG
-                    Main.logger.Log($"{attacker.CharacterName} and {engaged_array[i].CharacterName} are flanking {unit.CharacterName} due to geometry");
-#endif
                     return true;
                 }
-
             }
             return false;
         }
@@ -554,8 +538,7 @@ namespace ProperFlanking20
         static internal bool isFlankedByAttackerGeometricallyTogetherWith(this UnitEntityData unit, UnitEntityData attacker, UnitEntityData partner)
         {
             float unit_radius = unit.View.Corpulence; //(Helpers.unitSizeToDiameter(unit.Descriptor.State.Size) / 2.0f).Feet().Meters;
-
-            float unit_radius2 = unit_radius * unit_radius;
+            
             var unit_position = unit.Position;
 
             var engaged_array = unit.CombatState.EngagedBy.ToArray();
@@ -576,7 +559,17 @@ namespace ProperFlanking20
                 return false;
             }
 
-            return Helpers.isCircleIntersectedByLine(unit_position.To2D(), unit_radius2, attacker.Position.To2D(), partner.Position.To2D());
+            float flanking_angle_rad = (float)Math.Atan(unit_radius / Math.Max((attacker.Position.To2D() - unit_position.To2D()).magnitude, unit_radius));//[0, pi/2]
+            var unit_part_modify_flanking_angle = attacker.Get<UnitPartModifyFlankingAngle>();
+            float angle_increase = unit_part_modify_flanking_angle == null ? 0.0f : unit_part_modify_flanking_angle.getFlankingAngleIncrease(unit, partner);
+            if (Helpers.checkGeometricFlanking(unit_position.To2D(), attacker.Position.To2D(), partner.Position.To2D(), flanking_angle_rad + angle_increase))
+            {
+                Main.logger.Log($"{attacker.CharacterName} and {partner.CharacterName} are flanking {unit.CharacterName} due to geometry");
+                return true;
+            }
+            return false;
+            //float unit_radius2 = unit_radius * unit_radius;
+            //return Helpers.isCircleIntersectedByLine(unit_position.To2D(), unit_radius2, attacker.Position.To2D(), partner.Position.To2D());
         }
 
 

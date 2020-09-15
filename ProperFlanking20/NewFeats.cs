@@ -287,7 +287,7 @@ namespace ProperFlanking20
                                                                 "",
                                                                 outflank.Icon,
                                                                 FeatureGroup.Feat,
-                                                                CallOfTheWild.Helpers.Create<FlankingSpecial.ImprovedOutflank>(i => i.angle = (float)Math.PI/4),
+                                                                CallOfTheWild.Helpers.Create<FlankingSpecial.ImprovedOutflank>(i => i.angle_increase = (float)Math.PI/12),//+15 degrees
                                                                 CallOfTheWild.Helpers.PrerequisiteFeature(outflank),
                                                                 CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 6)
                                                                );

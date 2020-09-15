@@ -49,20 +49,20 @@ namespace ProperFlanking20.FlankingSpecial
 
     class ImprovedOutflank : Flanking.ModifyFlankingAngle
     {
-        public float angle;
+        public float angle_increase;
 
-        public override float getFlankingAngle(UnitEntityData target, UnitEntityData partner)
+        public override float getFlankingAngleIncrease(UnitEntityData target, UnitEntityData partner)
         {
             if (this.Owner.Unit == partner)
             {
-                return -100f;
+                return 0f;
             }
 
             if (partner.Descriptor.HasFact(this.Fact) || this.Owner.State.Features.SoloTactics)
             {
-                return angle;
+                return angle_increase;
             }
-            return -100f;
+            return 0f;
         }
     }
 
