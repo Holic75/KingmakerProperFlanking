@@ -31,6 +31,11 @@ namespace ProperFlanking20.FlankingSpecial
                     continue;
                 }
 
+                if (teammate.IsFlatFootedTo(target))
+                {
+                    continue;
+                }
+
                 need_flankers--;
 
                 if (need_flankers <= 0)
@@ -81,6 +86,11 @@ namespace ProperFlanking20.FlankingSpecial
 
             var teammate = this.Owner.Unit.Descriptor.IsPet ? this.Owner.Unit.Descriptor.Master.Value : this.Owner.Unit.Descriptor.Pet;
             if (!GameHelper.IsUnitInRange(teammate, this.Owner.Unit.Position, radius, false))
+            {
+                return false;
+            }
+
+            if (teammate.IsFlatFootedTo(target))
             {
                 return false;
             }

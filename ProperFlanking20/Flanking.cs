@@ -526,6 +526,11 @@ namespace ProperFlanking20
 
             for (int i = 0; i < engaged_array.Length; i++)
             {
+                if (IsFlatFootedTo(engaged_array[i], unit))
+                {
+                    continue;
+                }
+
                 if (isFlankedByAttackerGeometricallyTogetherWith(unit, attacker, engaged_array[i]))
                 {
                     return true;
@@ -539,7 +544,6 @@ namespace ProperFlanking20
         {
             float unit_radius = unit.View.Corpulence; //(Helpers.unitSizeToDiameter(unit.Descriptor.State.Size) / 2.0f).Feet().Meters;
             
-            var unit_position = unit.Position;
 
             var engaged_array = unit.CombatState.EngagedBy.ToArray();
 
@@ -559,12 +563,25 @@ namespace ProperFlanking20
                 return false;
             }
 
-            float flanking_angle_rad = (float)Math.Atan(unit_radius / Math.Max((attacker.Position.To2D() - unit_position.To2D()).magnitude, unit_radius));//[0, pi/2]
+            float flanking_angle_rad = (float)Math.Atan(unit_radius / Math.Max((attacker.Position.To2D() - unit.Position.To2D()).magnitude, unit_radius));//[0, pi/2]
+            
             var unit_part_modify_flanking_angle = attacker.Get<UnitPartModifyFlankingAngle>();
             float angle_increase = unit_part_modify_flanking_angle == null ? 0.0f : unit_part_modify_flanking_angle.getFlankingAngleIncrease(unit, partner);
-            if (Helpers.checkGeometricFlanking(unit_position.To2D(), attacker.Position.To2D(), partner.Position.To2D(), flanking_angle_rad + angle_increase))
+            flanking_angle_rad += angle_increase;
+            /*if (attacker.IsPlayerFaction)
             {
-                Main.logger.Log($"{attacker.CharacterName} and {partner.CharacterName} are flanking {unit.CharacterName} due to geometry");
+                Main.logger.Log(attacker.CharacterName + "/" + partner.CharacterName + " Flanking Angle: " + flanking_angle_rad.ToString());
+                Main.logger.Log(unit.Position.To2D().ToString());
+                Main.logger.Log(attacker.Position.To2D().ToString());
+                Main.logger.Log(partner.Position.To2D().ToString());
+            }*/
+            //Main.logger.Log(attacker.CharacterName + " Flanking Angle: " + flanking_angle_rad.ToString());
+            if (Helpers.checkGeometricFlanking(unit.Position.To2D(), attacker.Position.To2D(), partner.Position.To2D(), flanking_angle_rad))
+            {
+                /*if (attacker.IsPlayerFaction)
+                {
+                    Main.logger.Log($"{attacker.CharacterName} and {partner.CharacterName} are flanking {unit.CharacterName} due to geometry");
+                }*/
                 return true;
             }
             return false;
