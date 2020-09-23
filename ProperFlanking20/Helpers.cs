@@ -26,6 +26,24 @@ namespace ProperFlanking20
         }
 
 
+        public static bool checkGeometricFlanking(Vector2 o, Vector2 a, Vector2 b, float max_angle_rad)
+        {
+            //consider triangle oab
+            //o - target, a, b - attackers
+            //for flanking we want:
+            //1. angle aob >= pi/2
+            //2. angle oab <= max_angle_rad
+            var ao = (o - a).normalized;
+            var bo = (o - b).normalized;
+            var ab = (b - a).normalized;
+
+            float cos_o_a_b = Vector2.Dot(ao, ab);//angle between enemy and flanking partner
+            float cos_a_o_b = Vector2.Dot(bo, ao);//angle between flankers
+
+            return cos_o_a_b >= Mathf.Cos(max_angle_rad) && cos_a_o_b <= 0;
+        }
+
+
         public static float unitSizeToDiameter(Size sz) //in feet
         {
             switch (sz)

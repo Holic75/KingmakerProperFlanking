@@ -338,6 +338,49 @@ namespace ProperFlanking20
 
     static class Flanking
     {
+        public abstract class ModifyFlankingAngle : OwnedGameLogicComponent<UnitDescriptor>
+        {
+            public override void OnTurnOn()
+            {
+                this.Owner.Ensure<UnitPartModifyFlankingAngle>().addBuff(this.Fact);
+            }
+
+            public override void OnTurnOff()
+            {
+                this.Owner.Ensure<UnitPartModifyFlankingAngle>().removeBuff(this.Fact);
+            }
+
+            abstract public float getFlankingAngleIncrease(UnitEntityData target, UnitEntityData partner);
+        }
+
+
+        public class UnitPartModifyFlankingAngle : CallOfTheWild.AdditiveUnitPart
+        {
+            public bool hasBuff(BlueprintFact blueprint)
+            {
+                return buffs.Any(b => b.Blueprint == blueprint);
+            }
+
+            public float getFlankingAngleIncrease(UnitEntityData target, UnitEntityData partner)
+            {
+                float flanking_angle = 0f;
+                foreach (var b in buffs)
+                {
+                    if (b.Blueprint.GetComponent<ModifyFlankingAngle>() != null)
+                    {
+                        float angle = 0f;
+                        b.CallComponents<ModifyFlankingAngle>(a => { angle = a.getFlankingAngleIncrease(target, partner); });
+                        if (angle > flanking_angle)
+                        {
+                            flanking_angle = angle;
+                        }
+                    }
+                }
+                return flanking_angle;
+            }
+        }
+
+
         public abstract class  SpecialFlanking: OwnedGameLogicComponent<UnitDescriptor>
         {
             public override void OnTurnOn()
@@ -351,6 +394,7 @@ namespace ProperFlanking20
             }
 
             abstract public bool isFlanking(UnitEntityData target);
+            abstract public bool isFlankingTogether(UnitEntityData target, UnitEntityData partner);
         }
 
         public class UnitPartSpecialFlanking : CallOfTheWild.AdditiveUnitPart
@@ -359,6 +403,28 @@ namespace ProperFlanking20
             {
                 return buffs.Any(b => b.Blueprint == blueprint);
             }
+
+            public bool isFlankingTogether(UnitEntityData target, UnitEntityData partner)
+            {
+
+                foreach (var b in buffs)
+                {
+                    if (b.Blueprint.GetComponent<SpecialFlanking>() != null)
+                    {
+                        bool result = false;
+                        b.CallComponents<SpecialFlanking>(a => { result = a.isFlankingTogether(target, partner); });
+                        if (result)
+                        {
+#if DEBUG
+                            Main.logger.Log($"{this.Owner.Unit.CharacterName} is flanking {target.CharacterName} with {partner.CharacterName} due to {b.Name}");
+#endif
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
 
 
             public bool isFlanking(UnitEntityData target)
@@ -406,9 +472,41 @@ namespace ProperFlanking20
         }
 
 
+        static internal bool isFlankedByAttackerWith(this UnitEntityData unit, UnitEntityData attacker, UnitEntityData partner)
+        {
+            if (unit == null || attacker == null || unit == attacker || partner == null || attacker == partner || unit == partner)
+            {
+                return false;
+            }
+
+            if (IsFlatFootedTo(attacker, unit))
+            {
+                return false;
+            }
+
+            if (IsFlatFootedTo(partner, unit))
+            {
+                return false;
+            }
+
+            if (unit.Descriptor.State.Features.CannotBeFlanked)
+            {
+                return false;
+            }
+
+            return unit.isFlankedBySpecialWith(attacker, partner) || unit.isFlankedByAttackerGeometricallyTogetherWith(attacker, partner);
+        }
+
+
         static internal bool isFlankedBySpecial(this UnitEntityData unit, UnitEntityData attacker)
         {
             return attacker.Ensure<UnitPartSpecialFlanking>().isFlanking(unit);
+        }
+
+
+        static internal bool isFlankedBySpecialWith(this UnitEntityData unit, UnitEntityData attacker, UnitEntityData partner)
+        {
+            return attacker.Ensure<UnitPartSpecialFlanking>().isFlankingTogether(unit, partner);
         }
 
 
@@ -417,7 +515,6 @@ namespace ProperFlanking20
         {
             float unit_radius = unit.View.Corpulence; //(Helpers.unitSizeToDiameter(unit.Descriptor.State.Size) / 2.0f).Feet().Meters;
 
-            float unit_radius2 = unit_radius * unit_radius;
             var unit_position = unit.Position;
 
             var engaged_array = unit.CombatState.EngagedBy.ToArray();
@@ -429,22 +526,67 @@ namespace ProperFlanking20
 
             for (int i = 0; i < engaged_array.Length; i++)
             {
-                if (engaged_array[i] == attacker)
+                if (IsFlatFootedTo(engaged_array[i], unit))
                 {
                     continue;
                 }
 
-                //geometrical flanking
-                if (Helpers.isCircleIntersectedByLine(unit_position.To2D(), unit_radius2, attacker.Position.To2D(), engaged_array[i].Position.To2D()))
+                if (isFlankedByAttackerGeometricallyTogetherWith(unit, attacker, engaged_array[i]))
                 {
-#if DEBUG
-                    Main.logger.Log($"{attacker.CharacterName} and {engaged_array[i].CharacterName} are flanking {unit.CharacterName} due to geometry");
-#endif
                     return true;
                 }
-
             }
             return false;
+        }
+
+
+        static internal bool isFlankedByAttackerGeometricallyTogetherWith(this UnitEntityData unit, UnitEntityData attacker, UnitEntityData partner)
+        {
+            float unit_radius = unit.View.Corpulence; //(Helpers.unitSizeToDiameter(unit.Descriptor.State.Size) / 2.0f).Feet().Meters;
+            
+
+            var engaged_array = unit.CombatState.EngagedBy.ToArray();
+
+            if (!engaged_array.Contains(attacker))
+            {
+                return false;
+            }
+
+            if (!engaged_array.Contains(partner))
+            {
+                return false;
+            }
+
+
+            if (attacker == partner)
+            {
+                return false;
+            }
+
+            float flanking_angle_rad = (float)Math.Atan(unit_radius / Math.Max((attacker.Position.To2D() - unit.Position.To2D()).magnitude, unit_radius));//[0, pi/2]
+            
+            var unit_part_modify_flanking_angle = attacker.Get<UnitPartModifyFlankingAngle>();
+            float angle_increase = unit_part_modify_flanking_angle == null ? 0.0f : unit_part_modify_flanking_angle.getFlankingAngleIncrease(unit, partner);
+            flanking_angle_rad += angle_increase;
+            /*if (attacker.IsPlayerFaction)
+            {
+                Main.logger.Log(attacker.CharacterName + "/" + partner.CharacterName + " Flanking Angle: " + flanking_angle_rad.ToString());
+                Main.logger.Log(unit.Position.To2D().ToString());
+                Main.logger.Log(attacker.Position.To2D().ToString());
+                Main.logger.Log(partner.Position.To2D().ToString());
+            }*/
+            //Main.logger.Log(attacker.CharacterName + " Flanking Angle: " + flanking_angle_rad.ToString());
+            if (Helpers.checkGeometricFlanking(unit.Position.To2D(), attacker.Position.To2D(), partner.Position.To2D(), flanking_angle_rad))
+            {
+                /*if (attacker.IsPlayerFaction)
+                {
+                    Main.logger.Log($"{attacker.CharacterName} and {partner.CharacterName} are flanking {unit.CharacterName} due to geometry");
+                }*/
+                return true;
+            }
+            return false;
+            //float unit_radius2 = unit_radius * unit_radius;
+            //return Helpers.isCircleIntersectedByLine(unit_position.To2D(), unit_radius2, attacker.Position.To2D(), partner.Position.To2D());
         }
 
 

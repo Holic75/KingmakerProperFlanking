@@ -51,6 +51,7 @@ namespace ProperFlanking20
         static public BlueprintFeature quick_dirty_trick;
         static public BlueprintFeature dirty_fighting;
         static public BlueprintFeature paired_opportunists;
+        static public BlueprintFeature improved_outflank;
 
         static internal BlueprintBuff maneuver_as_attack_buff;
 
@@ -79,6 +80,8 @@ namespace ProperFlanking20
 
             createDirtyFighting();
             createPairedOpportunists();
+
+            createImprovedOutFlank();
         }
 
 
@@ -274,6 +277,28 @@ namespace ProperFlanking20
         }
 
 
+        static void createImprovedOutFlank()
+        {
+            var outflank = library.Get<BlueprintFeature>("422dab7309e1ad343935f33a4d6e9f11");
+            
+            improved_outflank = CallOfTheWild.Helpers.CreateFeature("ImprovedOutflankFeature",
+                                                                "Improved Outflank",
+                                                                "Whenever you and an ally who also has this feat are threatening the same foe, you are considered to be flanking that foe if you are adjacent to the point from which you would be able to flank the foe with your ally.",
+                                                                "",
+                                                                outflank.Icon,
+                                                                FeatureGroup.Feat,
+                                                                CallOfTheWild.Helpers.Create<FlankingSpecial.ImprovedOutflank>(i => i.angle_increase = (float)Math.PI/12),//+15 degrees
+                                                                CallOfTheWild.Helpers.PrerequisiteFeature(outflank),
+                                                                CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 6)
+                                                               );
+
+
+            improved_outflank.Groups = improved_outflank.Groups.AddToArray(FeatureGroup.TeamworkFeat);
+            library.AddCombatFeats(improved_outflank);
+            CallOfTheWild.Common.addTemworkFeats(improved_outflank);
+        }
+
+
         static void createWildFlanking()
         {
             var icon = CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/WildFlanking.png");
@@ -294,7 +319,7 @@ namespace ProperFlanking20
                                                           wild_flanking.Icon,
                                                           null,
                                                           CallOfTheWild.Helpers.Create<UniqueBuff>());
-
+            buff.Stacking = StackingType.Stack;
             var apply_buff = Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(1), dispellable: false);
             var ability = CallOfTheWild.Helpers.CreateAbility("WildFlankingAbility",
                                                         "Select " + wild_flanking.Name + " Partner",

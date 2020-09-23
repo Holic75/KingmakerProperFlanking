@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Kingmaker.Designers;
 using Kingmaker.EntitySystem.Entities;
+using Kingmaker.UnitLogic;
 
 namespace ProperFlanking20.FlankingSpecial
 {
@@ -30,6 +31,11 @@ namespace ProperFlanking20.FlankingSpecial
                     continue;
                 }
 
+                if (teammate.IsFlatFootedTo(target))
+                {
+                    continue;
+                }
+
                 need_flankers--;
 
                 if (need_flankers <= 0)
@@ -39,8 +45,31 @@ namespace ProperFlanking20.FlankingSpecial
             }
             return false;
         }
+
+        public override bool isFlankingTogether(UnitEntityData target, UnitEntityData partner)
+        {
+            return isFlanking(target) && target.CombatState.EngagedBy.Contains(partner);
+        }
     }
 
+    class ImprovedOutflank : Flanking.ModifyFlankingAngle
+    {
+        public float angle_increase;
+
+        public override float getFlankingAngleIncrease(UnitEntityData target, UnitEntityData partner)
+        {
+            if (this.Owner.Unit == partner)
+            {
+                return 0f;
+            }
+
+            if (partner.Descriptor.HasFact(this.Fact) || this.Owner.State.Features.SoloTactics)
+            {
+                return angle_increase;
+            }
+            return 0f;
+        }
+    }
 
 
     class PackFlanking : Flanking.SpecialFlanking
@@ -61,7 +90,17 @@ namespace ProperFlanking20.FlankingSpecial
                 return false;
             }
 
+            if (teammate.IsFlatFootedTo(target))
+            {
+                return false;
+            }
+
             return teammate.CombatState.IsEngage(target) && (teammate.Ensure<Flanking.UnitPartSpecialFlanking>().hasBuff(this.Fact.Blueprint) || solo_tactics);
+        }
+
+        public override bool isFlankingTogether(UnitEntityData target, UnitEntityData partner)
+        {
+            return isFlanking(target) && ((partner == this.Owner.Unit.Descriptor.Pet) || (partner == this.Owner.Unit.Descriptor.Master.Value));
         }
     }
 }
