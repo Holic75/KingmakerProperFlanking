@@ -19,6 +19,7 @@ It also adds soft cover mechanics (can be disabled in your_game_folder/Mods/Prop
 - Two-Weapon Feint and Improved Two-Weapon Feint
 - Quick Dirty Trick
 - Dirty Fighting
+- Improved Outflank
 
 New Rogue Talents:
 - Underhanded Trick
