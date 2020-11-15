@@ -2,7 +2,7 @@
   "Id": "ProperFlanking2",
   "DisplayName": "Proper Flanking 2",
   "Author": "Holic75",
-  "Version": "1.2.0",
+  "Version": "1.2.0b",
   "ManagerVersion": "0.13.0",
   "Requirements": [ "CallOfTheWild" ],
   "AssemblyName": "ProperFlanking20.dll",
