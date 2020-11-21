@@ -96,7 +96,8 @@ namespace ProperFlanking20.ManeuverAsAttack
             {
                 UnitState state = attack_rule.Target.Descriptor.State;
                 // same checks as in UnitProneController, if this is true (and the unit is not in a cutscene), state.Prone.Active will be true on the next tick and we also don't want to trip again.
-                if (state.Prone.Active || state.Prone.ShouldBeActive || !state.IsConscious || state.HasCondition(UnitCondition.Prone) || state.HasCondition(UnitCondition.Sleeping) || state.HasCondition(UnitCondition.Unconscious))
+                if (state.Prone.Active || state.Prone.ShouldBeActive || !state.IsConscious || state.HasCondition(UnitCondition.Prone) || state.HasCondition(UnitCondition.Sleeping) || state.HasCondition(UnitCondition.Unconscious)
+                    || !attack_rule.Target.CanBeKnockedOff())
                 {
                     return false;
                 }
