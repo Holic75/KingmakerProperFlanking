@@ -103,4 +103,19 @@ namespace ProperFlanking20.FlankingSpecial
             return isFlanking(target) && ((partner == this.Owner.Unit.Descriptor.Pet) || (partner == this.Owner.Unit.Descriptor.Master.Value));
         }
     }
+
+
+    //always flanks independently of position if there is at least one other attacker
+    class AlwaysFlanking : Flanking.SpecialFlanking
+    {
+        public override bool isFlanking(UnitEntityData target)
+        {
+            return target.CombatState.EngagedBy.Count > 1 && target.CombatState.EngagedBy.Contains(this.Owner.Unit);
+        }
+
+        public override bool isFlankingTogether(UnitEntityData target, UnitEntityData partner)
+        {
+            return isFlanking(target) && target.CombatState.EngagedBy.Contains(partner);
+        }
+    }
 }

@@ -4,6 +4,7 @@ using Kingmaker.Blueprints.Classes;
 using Kingmaker.Enums;
 using Kingmaker.RuleSystem;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
+using Kingmaker.UnitLogic.FactLogic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,23 @@ namespace ProperFlanking20
         {
             fixArrowSongMinstrel();
             fixSharpenedAccuracy();
-            createTraits();
+            fixSpiritualWeapons();
+            createTraits();         
+        }
+
+
+        static void fixSpiritualWeapons()
+        {
+            // twilight dagger should alwasy flank if possible
+            var twilight_dagger_feature = CallOfTheWild.SpiritualWeapons.twilight_knife_unit.AddFacts[0];
+            twilight_dagger_feature.AddComponent(CallOfTheWild.Helpers.Create<FlankingSpecial.AlwaysFlanking>());
+
+            //spiritual weapon and spiritual ally should ignore reach dead zone
+            var spiritual_weapon_feature = CallOfTheWild.SpiritualWeapons.spiritual_weapon_unit.AddFacts[0];
+            spiritual_weapon_feature.AddComponent(CallOfTheWild.Helpers.Create<ReachWeapons.IgnoreReachDeadZone>());
+            var spiritual_ally_feature = CallOfTheWild.SpiritualWeapons.spiritual_ally_unit.AddFacts[0];
+            spiritual_ally_feature.AddComponent(CallOfTheWild.Helpers.Create<ReachWeapons.IgnoreReachDeadZone>());
+            
         }
 
 

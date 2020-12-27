@@ -147,7 +147,6 @@
     </Compile>
     <Compile Include="FlankingSpecial.cs" />
     <Compile Include="QuickDraw.cs" />
-    <Compile Include="ReachWeaponFix.cs" />
     <Compile Include="ReachWeapons.cs" />
     <Compile Include="RogueTalents.cs" />
     <Compile Include="UnloadCTT.cs" />

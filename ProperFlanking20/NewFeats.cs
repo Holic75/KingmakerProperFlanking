@@ -320,7 +320,7 @@ namespace ProperFlanking20
                                                           null,
                                                           CallOfTheWild.Helpers.Create<UniqueBuff>());
             buff.Stacking = StackingType.Stack;
-            var apply_buff = Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(1), dispellable: false);
+            var apply_buff = Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, is_permanent: true);
             var ability = CallOfTheWild.Helpers.CreateAbility("WildFlankingAbility",
                                                         "Select " + wild_flanking.Name + " Partner",
                                                         wild_flanking.Description,
@@ -335,7 +335,24 @@ namespace ProperFlanking20
                                                         CallOfTheWild.Helpers.Create<CallOfTheWild.TeamworkMechanics.AbilityTargetHasFactOrCasterHasSoloTactics>(a => a.fact = wild_flanking)
                                                         );
             ability.setMiscAbilityParametersSingleTargetRangedFriendly();
-            wild_flanking.AddComponents(CallOfTheWild.Helpers.CreateAddFact(ability),
+
+            var ability_remove = CallOfTheWild.Helpers.CreateAbility("WildFlankingRemoveAbility",
+                                            "Unselect " + wild_flanking.Name + " Partner",
+                                            wild_flanking.Description,
+                                            "",
+                                             CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/WildFlankingDeactivate.png"),
+                                            AbilityType.Special,
+                                            Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
+                                            AbilityRange.Personal,
+                                            "",
+                                            "",
+                                            CallOfTheWild.Helpers.CreateRunActions(CallOfTheWild.Helpers.Create<CallOfTheWild.BuffMechanics.RemoveUniqueBuff>(r => r.buff = buff))
+                                            );
+            ability_remove.setMiscAbilityParametersSingleTargetRangedFriendly();
+            var wrapper = Common.createVariantWrapper("WildFlankingBase", "", ability, ability_remove);
+            wrapper.SetName(wild_flanking.Name);
+           
+            wild_flanking.AddComponents(CallOfTheWild.Helpers.CreateAddFact(wrapper),
                                         CallOfTheWild.Helpers.Create<NewMechanics.WildFlanking>(w =>
                                                                                                 {
                                                                                                     w.GreaterPowerAttackBlueprint = library.Get<BlueprintFeature>("1b058a5ce1de415449a0f105c55b5f8b"); //2h fighter power attack

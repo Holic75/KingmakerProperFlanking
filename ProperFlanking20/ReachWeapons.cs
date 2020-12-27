@@ -1,8 +1,10 @@
-﻿using Kingmaker.Controllers.Combat;
+﻿using Kingmaker.Blueprints;
+using Kingmaker.Controllers.Combat;
 using Kingmaker.EntitySystem.Entities;
 using Kingmaker.Enums;
 using Kingmaker.Items;
 using Kingmaker.Items.Slots;
+using Kingmaker.UnitLogic;
 using Kingmaker.UnitLogic.Commands;
 using Kingmaker.UnitLogic.Commands.Base;
 using Kingmaker.Utility;
@@ -15,6 +17,27 @@ using UnityEngine;
 
 namespace ProperFlanking20.ReachWeapons
 {
+    public class UnitPartIgnoreReachDeadZone : CallOfTheWild.AdditiveUnitPart
+    {
+        public bool active()
+        {
+            return !buffs.Empty();
+        }
+    }
+
+
+    public class IgnoreReachDeadZone : OwnedGameLogicComponent<UnitDescriptor>
+    {
+        public override void OnTurnOn()
+        {
+            this.Owner.Ensure<UnitPartIgnoreReachDeadZone>().addBuff(this.Fact);
+        }
+
+        public override void OnTurnOff()
+        {
+            this.Owner.Ensure<UnitPartIgnoreReachDeadZone>().removeBuff(this.Fact);
+        }
+    }
 
     [Harmony12.HarmonyPatch(typeof(UnitEngagementExtension))]
     [Harmony12.HarmonyPatch("IsReach", Harmony12.MethodType.Normal)]
