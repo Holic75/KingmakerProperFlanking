@@ -53,7 +53,7 @@ namespace ProperFlanking20.ReachWeapons
             }
 
             bool is_reach = weapon.Blueprint.IsMelee && weapon.Blueprint.Type.AttackRange > GameConsts.MinWeaponRange;
-
+            is_reach = is_reach && !(unit?.Get<UnitPartIgnoreReachDeadZone>()?.active()).GetValueOrDefault();
             if (__result == true && is_reach)
             {  //we are going to use half of treat range in this case for dead zone
                //if unit is medium  - it will be 6/2 = 3 feet
@@ -83,7 +83,7 @@ namespace ProperFlanking20.ReachWeapons
             }
 
             bool is_reach = weapon.Blueprint.IsMelee && weapon.Blueprint.Type.AttackRange > GameConsts.MinWeaponRange;
-
+            is_reach = is_reach && !(unit?.Get<UnitPartIgnoreReachDeadZone>()?.active()).GetValueOrDefault();
             if (__result == true && is_reach)
             {  //we are going to use half of treat range in this case for dead zone
                //if unit is medium  - it will be 6/2 = 3 feet
@@ -134,15 +134,17 @@ namespace ProperFlanking20.ReachWeapons
                 return;
             }
 
-            bool is_reach = attack_command.PlannedAttack.Weapon.Blueprint.IsMelee && attack_command.PlannedAttack.Weapon.Blueprint.Type.AttackRange > GameConsts.MinWeaponRange;
+            var enemy = __instance.Target.Unit;
+            var unit = __instance.Executor;
 
+            bool is_reach = attack_command.PlannedAttack.Weapon.Blueprint.IsMelee && attack_command.PlannedAttack.Weapon.Blueprint.Type.AttackRange > GameConsts.MinWeaponRange;
+            is_reach = is_reach && !(unit?.Get<UnitPartIgnoreReachDeadZone>()?.active()).GetValueOrDefault();
             if (!is_reach)
             {
                 return;
             }
 
-            var enemy = __instance.Target.Unit;
-            var unit = __instance.Executor;
+
             if (enemy == null || unit == null)
             {
                 return;

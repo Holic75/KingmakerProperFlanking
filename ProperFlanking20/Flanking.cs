@@ -513,6 +513,10 @@ namespace ProperFlanking20
 
         static internal bool isFlankedByAttackerGeometrically(this UnitEntityData unit, UnitEntityData attacker)
         {
+            if (unit == null || attacker == null)
+            {
+                return false;
+            }
             float unit_radius = unit.View.Corpulence; //(Helpers.unitSizeToDiameter(unit.Descriptor.State.Size) / 2.0f).Feet().Meters;
 
             var unit_position = unit.Position;
