@@ -166,6 +166,39 @@ namespace ProperFlanking20
     }
 
 
+    [Harmony12.HarmonyPatch(typeof(CallOfTheWild.NewMechanics.DamageBonusAgainstFlankedTarget))]
+    [Harmony12.HarmonyPatch("OnEventAboutToTrigger", Harmony12.MethodType.Normal)]
+    class DamageBonusAgainstFlankedTarget__OnEventAboutToTrigger__Patch
+    {
+        static bool Prefix(CallOfTheWild.NewMechanics.DamageBonusAgainstFlankedTarget __instance, RuleCalculateDamage evt)
+        {
+            if (evt.Target.isFlankedByAttacker(__instance.Owner.Unit) && (evt.DamageBundle.Weapon?.Blueprint.IsMelee).GetValueOrDefault() == true)
+            { 
+                evt.DamageBundle.WeaponDamage?.AddBonusTargetRelated(__instance.bonus);
+            }
+            return false;
+        }
+    }
+
+
+    [Harmony12.HarmonyPatch(typeof(CallOfTheWild.NewMechanics.FlankingAttackBonus))]
+    [Harmony12.HarmonyPatch("OnEventAboutToTrigger", Harmony12.MethodType.Normal)]
+    class FlankingAttackBonus__OnEventAboutToTrigger__Patch
+    {
+        static bool Prefix(CallOfTheWild.NewMechanics.FlankingAttackBonus __instance, RuleAttackRoll evt)
+        {
+            if (evt.Weapon == null || !evt.Weapon.Blueprint.IsMelee)
+                return false;
+
+            if (evt.Target.isFlankedByAttacker(__instance.Owner.Unit))
+            {
+                evt.AddTemporaryModifier(evt.Initiator.Stats.AdditionalAttackBonus.AddModifier(__instance.Bonus, (GameLogicComponent)__instance, __instance.Descriptor));
+            }
+            return false;
+        }
+    }
+
+
 
     [Harmony12.HarmonyPatch(typeof(PreciseStrike))]
     [Harmony12.HarmonyPatch("OnEventAboutToTrigger", Harmony12.MethodType.Normal)]
@@ -218,26 +251,6 @@ namespace ProperFlanking20
                 evt.AddBonus(__instance.AttackBonus * __instance.Fact.GetRank(), __instance.Fact);
             }
                 
-            return false;
-        }
-    }
-
-
-    [Harmony12.HarmonyPatch(typeof(CallOfTheWild.NewMechanics.FlankingAttackBonus))]
-    [Harmony12.HarmonyPatch("OnEventAboutToTrigger", Harmony12.MethodType.Normal)]
-    class FlankingAttackBonus__OnEventAboutToTrigger__Patch
-    {
-        static bool Prefix(CallOfTheWild.NewMechanics.FlankingAttackBonus __instance, RuleAttackRoll evt)
-        {
-
-            if (evt.Weapon == null)
-                return false;
-
-            if (evt.Target.isFlankedByAttacker(evt.Initiator))
-            {
-                evt.AddTemporaryModifier(evt.Initiator.Stats.AdditionalAttackBonus.AddModifier(__instance.Bonus, (GameLogicComponent)__instance, __instance.Descriptor));
-            }
-
             return false;
         }
     }
@@ -468,6 +481,12 @@ namespace ProperFlanking20
                 return false;
             }
 
+            if ((unit.Get<CallOfTheWild.FlankingMechanics.UnitPartAlwaysFlanked>()?.active()).GetValueOrDefault() 
+                && attacker.CombatState.IsEngage(unit))
+            {
+                return true;
+            }
+
             return unit.isFlankedByAttackerGeometrically(attacker) || unit.isFlankedBySpecial(attacker);
         }
 
@@ -492,6 +511,12 @@ namespace ProperFlanking20
             if (unit.Descriptor.State.Features.CannotBeFlanked)
             {
                 return false;
+            }
+
+            if ((unit.Get<CallOfTheWild.FlankingMechanics.UnitPartAlwaysFlanked>()?.active()).GetValueOrDefault()
+                 && attacker.CombatState.IsEngage(unit) && partner.CombatState.IsEngage(unit))
+            {
+                return true;
             }
 
             return unit.isFlankedBySpecialWith(attacker, partner) || unit.isFlankedByAttackerGeometricallyTogetherWith(attacker, partner);
