@@ -588,11 +588,11 @@ namespace ProperFlanking20
                 return false;
             }
 
-            float flanking_angle_rad = (float)Math.Atan(unit_radius / Math.Max((attacker.Position.To2D() - unit.Position.To2D()).magnitude, unit_radius));//[0, pi/2]
+            float flanking_angle_rad = (float)( 0.75 * Math.PI); //135 degrees
             
             var unit_part_modify_flanking_angle = attacker.Get<UnitPartModifyFlankingAngle>();
             float angle_increase = unit_part_modify_flanking_angle == null ? 0.0f : unit_part_modify_flanking_angle.getFlankingAngleIncrease(unit, partner);
-            flanking_angle_rad += angle_increase;
+            flanking_angle_rad -= angle_increase;
             /*if (attacker.IsPlayerFaction)
             {
                 Main.logger.Log(attacker.CharacterName + "/" + partner.CharacterName + " Flanking Angle: " + flanking_angle_rad.ToString());
