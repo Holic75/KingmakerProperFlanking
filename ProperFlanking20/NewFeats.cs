@@ -573,9 +573,13 @@ namespace ProperFlanking20
                                                                       ),
                                                    CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
                                                    CallOfTheWild.Helpers.PrerequisiteFeature(two_weapon_fighting),
-                                                   CallOfTheWild.Helpers.PrerequisiteFeature(improved_two_weapon_fighting),
                                                    CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise)
                                                    );
+
+            if (!CallOfTheWild.Main.settings.balance_fixes)
+            {
+                improved_two_weapon_feint.AddComponent(CallOfTheWild.Helpers.PrerequisiteFeature(improved_two_weapon_fighting));
+            }
             improved_two_weapon_feint.Groups = improved_two_weapon_feint.Groups.AddToArray(FeatureGroup.CombatFeat);
 
             var twf_action = CallOfTheWild.Helpers.CreateConditional(CallOfTheWild.Helpers.CreateConditionsCheckerOr( CallOfTheWild.Common.createContextConditionCasterHasFact(greater_feint), CallOfTheWild.Common.createContextConditionCasterHasFact(improved_two_weapon_feint)),
