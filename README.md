@@ -11,12 +11,7 @@ It also adds soft cover mechanics (can be disabled in your_game_folder/Mods/Prop
 - Gang Up
 - Enfilading Fire
 - Friendly Fire Maneuvers
-- Improved Feint
-- Greater Feint
-- Ranged Feint
-- Swordplay Style and Swordplay Upset
 - Wild Flanking
-- Two-Weapon Feint and Improved Two-Weapon Feint
 - Quick Dirty Trick
 - Dirty Fighting
 - Improved Outflank
@@ -41,7 +36,7 @@ Other changes:
 - Divine Hunter paladin aura of clear sight is replaced with aura of care as per pnp rules.
 
 It is not compatible with Closer To Tabletop mod, but it can replace it without breaking your saves.
-It requires at least Call of the Wild 1.90.
+It requires at least Call of the Wild 1.132.
 
 Install
 - Download and install Unity Mod Manager﻿﻿ 0.13.0 or later
