@@ -36,16 +36,6 @@ namespace ProperFlanking20
         static public BlueprintFeature friendly_fire_maneuvers;
         static public BlueprintFeature low_profile;
 
-        static public BlueprintFeature improved_feint;
-        static public BlueprintAbility improved_feint_ability;
-        static public BlueprintFeature greater_feint;
-        static public BlueprintFeature ranged_feint;
-        static public BlueprintFeature two_weapon_feint;
-        static public BlueprintFeature improved_two_weapon_feint;
-
-        static public BlueprintFeature swordplay_style;
-        static public BlueprintActivatableAbility swordplay_style_ability;
-        static public BlueprintFeature swordplay_upset;
         static public BlueprintFeature wild_flanking;
 
         static public BlueprintFeature quick_dirty_trick;
@@ -69,10 +59,6 @@ namespace ProperFlanking20
             createGangUp();
             createFriendlyFireManeuvers();
             createEnfiladingFire();
-
-            createFeintFeats();
-
-            createSwordplayStyle();
 
             createWildFlanking();
             createManeuverAsAttack();
@@ -112,11 +98,11 @@ namespace ProperFlanking20
                                                             CallOfTheWild.NewFeats.felling_smash.AssetGuid,
                                                             quick_dirty_trick.AssetGuid,
                                                             //also allow to work for feint
-                                                            improved_feint.AssetGuid,
-                                                            greater_feint.AssetGuid,
-                                                            ranged_feint.AssetGuid,
-                                                            two_weapon_feint.AssetGuid,
-                                                            improved_two_weapon_feint.AssetGuid
+                                                            CallOfTheWild.NewFeats.improved_feint.AssetGuid,
+                                                            CallOfTheWild.NewFeats.greater_feint.AssetGuid,
+                                                            CallOfTheWild.NewFeats.ranged_feint.AssetGuid,
+                                                            CallOfTheWild.NewFeats.two_weapon_feint.AssetGuid,
+                                                            CallOfTheWild.NewFeats.improved_two_weapon_feint.AssetGuid
                                                           };
 
             var dirty_fighting_prereq = CallOfTheWild.Helpers.PrerequisiteFeature(dirty_fighting);
@@ -124,15 +110,31 @@ namespace ProperFlanking20
             {
                 var f = library.Get<BlueprintFeature>(guid);
                 var stat_reqs = f.GetComponents<PrerequisiteStatValue>().Where(p => (p.Stat == StatType.Dexterity || p.Stat == StatType.Intelligence) && p.Value <= 13).ToArray();
+                var comp_reqs = f.GetComponents<CallOfTheWild.PrerequisiteMechanics.CompoundPrerequisites>().Where(p => p.any && p.prerequisites.Any(pp =>
+                {
+                    var ps = pp as PrerequisiteStatValue;
+                    if (ps == null)
+                    {
+                        return false;
+                    }
+                    return (ps.Stat == StatType.Dexterity || ps.Stat == StatType.Intelligence) && ps.Value <= 13;
+                })
+                ).ToArray();
+
                 var feat_reqs = f.GetComponents<PrerequisiteFeature>().Where(p => p.Feature == improved_unarmed_strike || p.Feature == combat_expertise).ToArray();
                 foreach (var sr in stat_reqs)
                 {
                     f.ReplaceComponent(sr, CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.PrerequsiteOrAlternative>(pa => { pa.base_prerequsite = sr; pa.alternative_prerequsite = dirty_fighting_prereq; pa.Group = sr.Group; }));
                 }
 
+                foreach (var cp in comp_reqs)
+                {
+                    f.ReplaceComponent(cp, CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.CompoundPrerequisites>(pa => { pa.prerequisites = cp.prerequisites.AddToArray(CallOfTheWild.Helpers.PrerequisiteFeature(dirty_fighting)); pa.any = true; }));
+                }
+
                 foreach (var fr in feat_reqs)
                 {
-                    f.ReplaceComponent(fr, CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.PrerequsiteOrAlternative>(pa => { pa.base_prerequsite = fr; pa.alternative_prerequsite = dirty_fighting_prereq; pa.Group = fr.Group; }));
+                    f.ReplaceComponent(fr, CallOfTheWild.Helpers.PrerequisiteFeaturesFromList(new BlueprintFeature[] { fr.Feature, dirty_fighting}, any: fr.Group == Prerequisite.GroupType.Any));
                 }
             }
         }
@@ -222,8 +224,15 @@ namespace ProperFlanking20
                                                                     "",
                                                                     dirty_trick.Icon,
                                                                     FeatureGroup.Feat,
+                                                                    CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.CompoundPrerequisites>(cp =>
+                                                                    {
+                                                                        cp.any = true;
+                                                                        cp.prerequisites = new Prerequisite[] { CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
+                                                                                                                CallOfTheWild.Helpers.PrerequisiteFeature(CallOfTheWild.Archetypes.SageCounselor.cunning_fist[0])
+                                                                                                              };
+                                                                    }
+                                                                    ),
                                                                     CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 6),
-                                                                    CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
                                                                     CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise),
                                                                     CallOfTheWild.Helpers.PrerequisiteFeature(dirty_trick)
                                                                     );
@@ -364,273 +373,6 @@ namespace ProperFlanking20
             library.AddCombatFeats(wild_flanking);
             CallOfTheWild.Common.addTemworkFeats(wild_flanking);
         }
-
-
-        static void createSwordplayStyle()
-        {
-            var combat_expertise_buff = library.Get<BlueprintBuff>("e81cd772a7311554090e413ea28ceea1");
-            var fight_defensively_buff = library.Get<BlueprintBuff>("6ffd93355fb3bcf4592a5d976b1d32a9");
-
-            var combat_expertise = library.Get<BlueprintFeature>("4c44724ffa8844f4d9bedb5bb27d144a");
-            var icon = CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/SwordplayStyle.png");
-            var buff = CallOfTheWild.Helpers.CreateBuff("SwordplayStyleEffectBuff",
-                                                        "Swordplay Style",
-                                                        "While using this style, wielding  a weapon from heavy or light blades fighter weapon group, and fighting defensively or using either the total defense action or the Combat Expertise feat, you gain a +1 shield bonus to your Armor Class. In addition, you do not take the penalty on melee attacks from Combat Expertise on the first attack roll you make each turn. You still take the penalty on additional attacks, including attacks of opportunity.",
-                                                        "",
-                                                        icon,
-                                                        null,
-                                                        CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.ACBonusIfHasFacts>(a =>
-                                                                                                                                    {
-                                                                                                                                        a.Bonus = 1;
-                                                                                                                                        a.Descriptor = ModifierDescriptor.Shield;
-                                                                                                                                        a.CheckedFacts = new Kingmaker.Blueprints.Facts.BlueprintUnitFact[] { fight_defensively_buff, combat_expertise_buff };
-                                                                                                                                    }
-                                                                                                                                    ),
-                                                        CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.AttackBonusOnAttackInitiationIfHasFact>(a =>
-                                                                                                                                                       {
-                                                                                                                                                           a.CheckedFact = combat_expertise_buff;
-                                                                                                                                                           a.Bonus = CallOfTheWild.Helpers.CreateContextValue(AbilityRankType.Default);
-                                                                                                                                                           a.OnlyFirstAttack = true;
-                                                                                                                                                           a.Descriptor = ModifierDescriptor.UntypedStackable;
-                                                                                                                                                           a.WeaponAttackTypes = new AttackType[] { AttackType.Melee, AttackType.Touch, AttackType.Ranged, AttackType.RangedTouch };
-                                                                                                                                                       }
-                                                                                                                                                       ),
-                                                        CallOfTheWild.Helpers.CreateContextRankConfig(baseValueType: ContextRankBaseValueType.CustomProperty,
-                                                                                                      progression: ContextRankProgression.AsIs, stepLevel: 1, min: 0,
-                                                                                                      customProperty: library.Get<BlueprintUnitProperty>("8a63b06d20838954e97eb444f805ec89")) //combat expertise custom property
-                                                       );
-
-            WeaponCategory[] categories = new WeaponCategory[] {WeaponCategory.BastardSword, WeaponCategory.Dagger, WeaponCategory.DoubleSword, WeaponCategory.DuelingSword, WeaponCategory.ElvenCurvedBlade,
-                                                                WeaponCategory.Estoc, WeaponCategory.Falcata, WeaponCategory.Falchion, WeaponCategory.Greatsword, WeaponCategory.Kama, WeaponCategory.Kukri,
-                                                                WeaponCategory.Longsword, WeaponCategory.Rapier, WeaponCategory.Sai, WeaponCategory.Scimitar, WeaponCategory.Shortsword,
-                                                               WeaponCategory.Starknife, WeaponCategory.Scythe, WeaponCategory.Sickle};
-
-            swordplay_style_ability = CallOfTheWild.Helpers.CreateActivatableAbility("SwordplayStyleActivatableAbility",
-                                                                                     buff.Name,
-                                                                                     buff.Description,
-                                                                                     "",
-                                                                                     buff.Icon,
-                                                                                     buff,
-                                                                                     AbilityActivationType.Immediately,
-                                                                                     Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
-                                                                                     null,
-                                                                                     CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.ActivatableAbilityMainWeaponCategoryAllowed>(a => a.categories = categories)
-                                                                                     );
-            swordplay_style_ability.Group = ActivatableAbilityGroup.CombatStyle;
-
-            swordplay_style = Common.ActivatableAbilityToFeature(swordplay_style_ability, false);
-            swordplay_style.Groups = new FeatureGroup[] { FeatureGroup.Feat, FeatureGroup.CombatFeat, FeatureGroup.StyleFeat };
-            swordplay_style.AddComponents(CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise),
-                                          CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 3)
-                                          );
-
-            var weapon_focus = library.Get<BlueprintParametrizedFeature>("1e1f627d26ad36f43bbd26cc2bf8ac7e");
-            foreach (var c in categories)
-            {
-                swordplay_style.AddComponent(CallOfTheWild.Common.createPrerequisiteParametrizedFeatureWeapon(weapon_focus, c, any: true));
-            }
-            
-            swordplay_upset = CallOfTheWild.Helpers.CreateFeature("SwordplayUpsetFeature",
-                                                                  "Swordplay Upset",
-                                                                  "While using Swordplay Style, you can attempt a feint against an opponent that makes a melee attack against you and misses.",
-                                                                  "",
-                                                                  CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/SwordplayUpset.png"),
-                                                                  FeatureGroup.Feat,
-                                                                  CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 5),
-                                                                  CallOfTheWild.Helpers.PrerequisiteFeature(swordplay_style),
-                                                                  CallOfTheWild.Helpers.PrerequisiteFeature(improved_feint)
-                                                                  );
-            swordplay_upset.Groups = swordplay_upset.Groups.AddToArray(FeatureGroup.CombatFeat, FeatureGroup.StyleFeat);
-            var feint_action = CallOfTheWild.Helpers.CreateConditional(Common.createContextConditionHasFacts(false, improved_feint_ability.GetComponent<AbilityTargetHasFact>().CheckedFacts),
-                                                                       null,
-                                                                       improved_feint_ability.GetComponent<AbilityEffectRunAction>().Actions.Actions
-                                                                      );
-
-            buff.AddComponent(CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.ActionOnNearMissIfHasFact>(a =>
-                                                                                                                {
-                                                                                                                    a.checked_fact = swordplay_upset;
-                                                                                                                    a.Action = CallOfTheWild.Helpers.CreateActionList(feint_action);
-                                                                                                                    a.HitAndArmorDifference = 1000;
-                                                                                                                    a.MeleeOnly = true;
-                                                                                                                    a.OnAttacker = true;
-                                                                                                                }
-                                                                                                                )
-                            );
-            library.AddCombatFeats(swordplay_style, swordplay_upset);
-
-            CallOfTheWild.Warpriest.sacred_fist_syle_feat_selection.AllFeatures = CallOfTheWild.Warpriest.sacred_fist_syle_feat_selection.AllFeatures.AddToArray(swordplay_style, swordplay_upset);
-            CallOfTheWild.Archetypes.Ninja.style_master.AllFeatures = CallOfTheWild.Archetypes.Ninja.style_master.AllFeatures.AddToArray(swordplay_style, swordplay_upset);
-        }
-
-
-        static void createFeintFeats()
-        {
-            var combat_expertise = library.Get<BlueprintFeature>("4c44724ffa8844f4d9bedb5bb27d144a");
-            ranged_feint = CallOfTheWild.Helpers.CreateFeature("RangedFeintFeature",
-                                                               "Ranged Feint",
-                                                               "You can feint with a ranged weapon by throwing a thrown weapon or firing one arrow, bolt, bullet, or other piece of ammunition; this feint takes the same action as normal to feint, but depending on your weapon, you might have to reload or draw another weapon afterward. When you successfully use a ranged feint, you deny that enemy its Dexterity bonus to AC against your ranged attacks as well as your melee attacks for the same duration as normal. If your feints normally deny a foe its Dexterity bonus to AC against attacks other than your own, this applies only against others’ melee attacks.",
-                                                               "",
-                                                               null,
-                                                               FeatureGroup.Feat,
-                                                               CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 2),
-                                                               CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.SkillPersuasion, 2)
-                                                               );
-            ranged_feint.Groups = ranged_feint.Groups.AddToArray(FeatureGroup.CombatFeat);
-
-            greater_feint = CallOfTheWild.Helpers.CreateFeature("GreaterFeintFeature",
-                                                               "Greater Feint",
-                                                               "Whenever you use feint to cause an opponent to lose his Dexterity bonus, he loses that bonus until the beginning of your next turn, in addition to losing his Dexterity bonus against your next attack.",
-                                                               "",
-                                                               null,
-                                                               FeatureGroup.Feat,
-                                                               CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 6),
-                                                               CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
-                                                               CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise)
-                                                               );
-            greater_feint.Groups = greater_feint.Groups.AddToArray(FeatureGroup.CombatFeat);
-
-            var buff = CallOfTheWild.Helpers.CreateBuff("FeintBuff",
-                                                        "Feint",
-                                                        "Your opponent is consedered flat-footed against your next melee attack.",
-                                                        "",
-                                                        CallOfTheWild.LoadIcons.Image2Sprite.Create(@"AbilityIcons/Feint.png"),
-                                                        null,
-                                                        CallOfTheWild.Helpers.Create<NewMechanics.FlatFootedAgainstCaster>(f => { f.remove_after_attack = true; f.ranged_allowed_fact = ranged_feint; })
-                                                        );
-
-            var greater_buff = CallOfTheWild.Helpers.CreateBuff("GreaterFeintBuff",
-                                            "Greater Feint",
-                                            "Your opponent is consedered flat-footed against melee attacks.",
-                                            "",
-                                            CallOfTheWild.LoadIcons.Image2Sprite.Create(@"AbilityIcons/Feint.png"),
-                                            null,
-                                            CallOfTheWild.Helpers.Create<NewMechanics.FlatFootedAgainstAttacType>(f => f.allowed_attack_types = new AttackType[] { AttackType.Melee, AttackType.Touch }),
-                                            CallOfTheWild.Helpers.Create<NewMechanics.FlatFootedAgainstCaster>(f => { f.remove_after_attack = false; f.ranged_allowed_fact = ranged_feint; })
-                                            );
-
-            var action = CallOfTheWild.Helpers.CreateConditional(CallOfTheWild.Common.createContextConditionCasterHasFact(greater_feint),
-                                                                CallOfTheWild.Common.createContextActionApplyBuff(greater_buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 6),
-                                                                CallOfTheWild.Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 6)
-                                                                );
-            var action_list = CallOfTheWild.Helpers.CreateActionList(action);
-
-            var vermin = library.Get<BlueprintFeature>("09478937695300944a179530664e42ec");
-            var construct = library.Get<BlueprintFeature>("fd389783027d63343b4a5634bd81645f");
-            var aberration = library.Get<BlueprintFeature>("3bec99efd9a363242a6c8d9957b75e91");
-            var plant = library.Get<BlueprintFeature>("706e61781d692a042b35941f14bc41c5");
-            improved_feint_ability = CallOfTheWild.Helpers.CreateAbility("ImprovedFeintAbility",
-                                                                         "Feint",
-                                                                         "You can feint as a move action. To feint, make a Bluff skill check. The DC of this check is equal to 10 + your opponent’s base attack bonus + your opponent’s Wisdom modifier. If successful, the next melee attack you make against the target does not allow him to use his Dexterity bonus to AC (if any). This attack must be made on or before your next turn.\n"
-                                                                         + "When feinting against a non - humanoid DC increases by 4. Against a creature of animal Intelligence (1 or 2), by 8. Against a creature lacking an Intelligence score, it’s impossible. Feinting in combat does not provoke attacks of opportunity.",
-                                                                         "",
-                                                                         buff.Icon,
-                                                                         AbilityType.Special,
-                                                                         Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Move,
-                                                                         AbilityRange.Weapon,
-                                                                         "Your next attack or until end of your next turn",
-                                                                         "",
-                                                                         CallOfTheWild.Helpers.CreateRunActions(CallOfTheWild.Helpers.Create<NewMechanics.ContextFeintSkillCheck>(c => c.Success = action_list)),
-                                                                         CallOfTheWild.Helpers.Create<NewMechanics.AbilityCasterMainWeaponIsMeleeUnlessHasFact>(a => a.ranged_allowed_fact = ranged_feint),
-                                                                         CallOfTheWild.Common.createAbilityTargetHasFact(true, vermin, construct, aberration, plant)
-                                                                         );
-            improved_feint_ability.setMiscAbilityParametersSingleTargetRangedHarmful(works_on_allies: true,
-                                                                                     animation: Kingmaker.Visual.Animation.Kingmaker.Actions.UnitAnimationActionCastSpell.CastAnimationStyle.Special);
-            
-            improved_feint = CallOfTheWild.Helpers.CreateFeature("ImprovedFeintFeature",
-                                                   "Improved Feint",
-                                                   improved_feint_ability.Description,
-                                                   "",
-                                                   null,
-                                                   FeatureGroup.Feat,
-                                                   CallOfTheWild.Helpers.CreateAddFact(improved_feint_ability),
-                                                   CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
-                                                   CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise)
-                                                   );
-
-            improved_feint.Groups = improved_feint.Groups.AddToArray(FeatureGroup.CombatFeat);
-
-            greater_feint.AddComponent(improved_feint.PrerequisiteFeature());
-            ranged_feint.AddComponent(improved_feint.PrerequisiteFeature());
-
-            library.AddCombatFeats(improved_feint, greater_feint, ranged_feint);
-
-            //two weapon feint
-            var two_weapon_fighting = library.Get<BlueprintFeature>("ac8aaf29054f5b74eb18f2af950e752d");
-            var improved_two_weapon_fighting = library.Get<BlueprintFeature>("9af88f3ed8a017b45a6837eab7437629");
-            improved_two_weapon_feint = CallOfTheWild.Helpers.CreateFeature("ImprovedTwoWeaponFeintFeature",
-                                                   "Improved Two-Weapon Feint",
-                                                   "While using Two-Weapon Fighting to make melee attacks, you can forgo your first primary-hand melee attack to make a Bluff check to feint an opponent. If you successfully feint, that opponent is denied his Dexterity bonus to AC until the end of your turn.",
-                                                   "",
-                                                   CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/TwoWeaponFeintImproved.png"),
-                                                   FeatureGroup.Feat,
-                                                   CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Dexterity, 15, any: true),
-                                                   CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.CompoundPrerequisite>(p =>
-                                                                      {
-                                                                          p.prerequisite1 = CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Strength, 15);
-                                                                          p.prerequisite2 = CallOfTheWild.Helpers.PrerequisiteFeature(CallOfTheWild.NewFeats.prodigious_two_weapon_fighting);
-                                                                          p.Group = Prerequisite.GroupType.Any;
-                                                                      }
-                                                                      ),
-                                                   CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
-                                                   CallOfTheWild.Helpers.PrerequisiteFeature(two_weapon_fighting),
-                                                   CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise)
-                                                   );
-
-            if (!CallOfTheWild.Main.settings.balance_fixes)
-            {
-                improved_two_weapon_feint.AddComponent(CallOfTheWild.Helpers.PrerequisiteFeature(improved_two_weapon_fighting));
-            }
-            improved_two_weapon_feint.Groups = improved_two_weapon_feint.Groups.AddToArray(FeatureGroup.CombatFeat);
-
-            var twf_action = CallOfTheWild.Helpers.CreateConditional(CallOfTheWild.Helpers.CreateConditionsCheckerOr( CallOfTheWild.Common.createContextConditionCasterHasFact(greater_feint), CallOfTheWild.Common.createContextConditionCasterHasFact(improved_two_weapon_feint)),
-                                                                    CallOfTheWild.Common.createContextActionApplyBuff(greater_buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 6),
-                                                                    CallOfTheWild.Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, duration_seconds: 6)
-                                                                    );
-            var twf_feint_action = CallOfTheWild.Helpers.Create<NewMechanics.ContextFeintSkillCheck>(c => c.Success = CallOfTheWild.Helpers.CreateActionList(twf_action));
-            var twf_feint_action_list = CallOfTheWild.Helpers.CreateActionList(twf_feint_action);
-            var twf_feint_buff = CallOfTheWild.Helpers.CreateBuff("TwoWeaponFeintBuff",
-                                                                  "Two Weapon Feint",
-                                                                  "While using Two-Weapon Fighting to make melee attacks, you can forgo your first primary-hand melee attack to make a Bluff check to feint an opponent.",
-                                                                  "",
-                                                                  CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/TwoWeaponFeint.png"),
-                                                                  null,
-                                                                  CallOfTheWild.Helpers.Create<CallOfTheWild.AttackReplacementMechanics.ReplaceAttackWithActionOnFullAttack>(f => f.action = twf_feint_action_list)
-                                                                  );
-
-            var twf_feint_ability = CallOfTheWild.Helpers.CreateActivatableAbility("TwoWeaponFeintActivatableAbility",
-                                                                                   twf_feint_buff.Name,
-                                                                                   twf_feint_buff.Description,
-                                                                                   "",
-                                                                                   twf_feint_buff.Icon,
-                                                                                   twf_feint_buff,
-                                                                                   AbilityActivationType.Immediately,
-                                                                                   Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
-                                                                                   null,
-                                                                                   CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.TwoWeaponFightingRestriction>());
-            twf_feint_ability.DeactivateImmediately = true;
-            twf_feint_ability.Group = CallOfTheWild.ActivatableAbilityGroupExtension.AttackReplacement.ToActivatableAbilityGroup();
-            twf_feint_ability.IsOnByDefault = true;
-
-            two_weapon_feint = CallOfTheWild.Common.ActivatableAbilityToFeature(twf_feint_ability, false);
-            two_weapon_feint.AddComponents(CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Dexterity, 15, any: true),
-                                           CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.CompoundPrerequisite>(p =>
-                                                                {
-                                                                    p.prerequisite1 = CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Strength, 15);
-                                                                    p.prerequisite2 = CallOfTheWild.Helpers.PrerequisiteFeature(CallOfTheWild.NewFeats.prodigious_two_weapon_fighting);
-                                                                    p.Group = Prerequisite.GroupType.Any;
-                                                                }
-                                                                ),
-                                           CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
-                                           CallOfTheWild.Helpers.PrerequisiteFeature(two_weapon_fighting),
-                                           CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise)
-                                           );
-            two_weapon_feint.Groups = new FeatureGroup[] { FeatureGroup.Feat, FeatureGroup.CombatFeat };
-
-            improved_two_weapon_feint.AddComponent(CallOfTheWild.Helpers.PrerequisiteFeature(two_weapon_feint));
-            library.AddCombatFeats(two_weapon_feint, improved_two_weapon_feint);
-        }
-
-
 
 
         static void createLowProfile()
