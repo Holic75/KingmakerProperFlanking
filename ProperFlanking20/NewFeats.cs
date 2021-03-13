@@ -110,15 +110,31 @@ namespace ProperFlanking20
             {
                 var f = library.Get<BlueprintFeature>(guid);
                 var stat_reqs = f.GetComponents<PrerequisiteStatValue>().Where(p => (p.Stat == StatType.Dexterity || p.Stat == StatType.Intelligence) && p.Value <= 13).ToArray();
+                var comp_reqs = f.GetComponents<CallOfTheWild.PrerequisiteMechanics.CompoundPrerequisites>().Where(p => p.any && p.prerequisites.Any(pp =>
+                {
+                    var ps = pp as PrerequisiteStatValue;
+                    if (ps == null)
+                    {
+                        return false;
+                    }
+                    return (ps.Stat == StatType.Dexterity || ps.Stat == StatType.Intelligence) && ps.Value <= 13;
+                })
+                ).ToArray();
+
                 var feat_reqs = f.GetComponents<PrerequisiteFeature>().Where(p => p.Feature == improved_unarmed_strike || p.Feature == combat_expertise).ToArray();
                 foreach (var sr in stat_reqs)
                 {
                     f.ReplaceComponent(sr, CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.PrerequsiteOrAlternative>(pa => { pa.base_prerequsite = sr; pa.alternative_prerequsite = dirty_fighting_prereq; pa.Group = sr.Group; }));
                 }
 
+                foreach (var cp in comp_reqs)
+                {
+                    f.ReplaceComponent(cp, CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.CompoundPrerequisites>(pa => { pa.prerequisites = cp.prerequisites.AddToArray(CallOfTheWild.Helpers.PrerequisiteFeature(dirty_fighting)); pa.any = true; }));
+                }
+
                 foreach (var fr in feat_reqs)
                 {
-                    f.ReplaceComponent(fr, CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.PrerequsiteOrAlternative>(pa => { pa.base_prerequsite = fr; pa.alternative_prerequsite = dirty_fighting_prereq; pa.Group = fr.Group; }));
+                    f.ReplaceComponent(fr, CallOfTheWild.Helpers.PrerequisiteFeaturesFromList(new BlueprintFeature[] { fr.Feature, dirty_fighting}, any: fr.Group == Prerequisite.GroupType.Any));
                 }
             }
         }
@@ -208,8 +224,15 @@ namespace ProperFlanking20
                                                                     "",
                                                                     dirty_trick.Icon,
                                                                     FeatureGroup.Feat,
+                                                                    CallOfTheWild.Helpers.Create<CallOfTheWild.PrerequisiteMechanics.CompoundPrerequisites>(cp =>
+                                                                    {
+                                                                        cp.any = true;
+                                                                        cp.prerequisites = new Prerequisite[] { CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
+                                                                                                                CallOfTheWild.Helpers.PrerequisiteFeature(CallOfTheWild.Archetypes.SageCounselor.cunning_fist[0])
+                                                                                                              };
+                                                                    }
+                                                                    ),
                                                                     CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.BaseAttackBonus, 6),
-                                                                    CallOfTheWild.Helpers.PrerequisiteStatValue(StatType.Intelligence, 13),
                                                                     CallOfTheWild.Helpers.PrerequisiteFeature(combat_expertise),
                                                                     CallOfTheWild.Helpers.PrerequisiteFeature(dirty_trick)
                                                                     );
