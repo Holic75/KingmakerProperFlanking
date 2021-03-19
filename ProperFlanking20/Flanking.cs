@@ -190,9 +190,18 @@ namespace ProperFlanking20
             if (evt.Weapon == null || !evt.Weapon.Blueprint.IsMelee)
                 return false;
 
+            var bonus = __instance.Bonus.Calculate(__instance.Fact.MaybeContext);
             if (evt.Target.isFlankedByAttacker(__instance.Owner.Unit))
             {
-                evt.AddTemporaryModifier(evt.Initiator.Stats.AdditionalAttackBonus.AddModifier(__instance.Bonus, (GameLogicComponent)__instance, __instance.Descriptor));
+                evt.AddTemporaryModifier(evt.Initiator.Stats.AdditionalAttackBonus.AddModifier(bonus, (GameLogicComponent)__instance, __instance.Descriptor));
+            }
+            else if (__instance.apply_to_flatfooted)
+            {
+                var rule = Rulebook.Trigger(new RuleCheckTargetFlatFooted(evt.Initiator, evt.Target));
+                if (rule.IsFlatFooted)
+                {
+                    evt.AddTemporaryModifier(evt.Initiator.Stats.AdditionalAttackBonus.AddModifier(bonus, (GameLogicComponent)__instance, __instance.Descriptor));
+                }
             }
             return false;
         }

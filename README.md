@@ -36,7 +36,7 @@ Other changes:
 - Divine Hunter paladin aura of clear sight is replaced with aura of care as per pnp rules.
 
 It is not compatible with Closer To Tabletop mod, but it can replace it without breaking your saves.
-It requires at least Call of the Wild 1.132.
+It requires at least Call of the Wild 1.133.
 
 Install
 - Download and install Unity Mod Manager﻿﻿ 0.13.0 or later
