@@ -1,4 +1,5 @@
 {
   "soft_cover_ac_bonus": 4,
-  "partial_soft_cover_ac_bonus": 2
+  "partial_soft_cover_ac_bonus": 2,
+  "reach_weapons_dead_zone": true
 }

@@ -23,6 +23,7 @@ namespace ProperFlanking20
         {
             internal int soft_cover_ac_bonus { get; }
             internal int partial_soft_cover_ac_bonus { get; }
+            internal bool reach_weapons_dead_zone { get; }
 
             internal Settings()
             {
@@ -33,6 +34,7 @@ namespace ProperFlanking20
                     JObject jo = (JObject)JToken.ReadFrom(reader);
                     soft_cover_ac_bonus = (int)jo["soft_cover_ac_bonus"];
                     partial_soft_cover_ac_bonus = (int)jo["partial_soft_cover_ac_bonus"];
+                    reach_weapons_dead_zone = (bool)jo["reach_weapons_dead_zone"];
                 }
             }
         }

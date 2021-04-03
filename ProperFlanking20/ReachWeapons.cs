@@ -45,6 +45,10 @@ namespace ProperFlanking20.ReachWeapons
     {
         static void Postfix(UnitEntityData unit, UnitEntityData enemy, WeaponSlot hand, ref bool __result)
         {
+            if (!Main.settings.reach_weapons_dead_zone)
+            {
+                return;
+            }
             var weapon = hand.Weapon;
             if (weapon == null)
             {
@@ -91,8 +95,10 @@ namespace ProperFlanking20.ReachWeapons
     {
         static void Postfix(UnitCommand __instance, ref Vector3 __result)
         {
-
-
+            if (!Main.settings.reach_weapons_dead_zone)
+            {
+                return;
+            }
             var attack_command = __instance as UnitAttack;
             if (attack_command == null || attack_command.PlannedAttack == null)
             {
