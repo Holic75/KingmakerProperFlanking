@@ -1,4 +1,5 @@
-﻿using Kingmaker.Blueprints;
+﻿using CallOfTheWild;
+using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Facts;
 using Kingmaker.Items;
 using Kingmaker.Items.Slots;
@@ -60,6 +61,7 @@ namespace ProperFlanking20.QuickDraw
     [Harmony12.HarmonyPatch("HandleEquipmentSlotUpdated", Harmony12.MethodType.Normal)]
     class UnitViewHandsEquipment_HandleEquipmentSlotUpdated_Patch
     {
+        static readonly FastInvoke ChangeEquipmentWithoutAnimation = CallOfTheWild.Helpers.CreateInvoker<UnitViewHandsEquipment>("ChangeEquipmentWithoutAnimation", new Type[] { });
         static bool Prefix(UnitViewHandsEquipment __instance, HandSlot slot, ItemEntity previousItem)
         {
             var tr = Harmony12.Traverse.Create(__instance);
@@ -73,7 +75,7 @@ namespace ProperFlanking20.QuickDraw
             if (__instance.Owner.Ensure<UnitPartQuickDraw>().active()
                  && __instance.InCombat && (__instance.Owner.Descriptor.State.CanAct || __instance.IsDollRoom) && slot.Active)
             {
-                tr.Method("ChangeEquipmentWithoutAnimation").GetValue();
+                ChangeEquipmentWithoutAnimation(__instance);
                 return false;
             }
 
@@ -86,6 +88,7 @@ namespace ProperFlanking20.QuickDraw
     [Harmony12.HarmonyPatch("HandleEquipmentSetChanged", Harmony12.MethodType.Normal)]
     class UnitViewHandsEquipment_HandleEquipmentSetChanged_Patch
     {
+        static readonly FastInvoke UpdateActiveWeaponSetImmediately = CallOfTheWild.Helpers.CreateInvoker<UnitViewHandsEquipment>("UpdateActiveWeaponSetImmediately", new Type[] { });
         static bool Prefix(UnitViewHandsEquipment __instance)
         {
             var tr = Harmony12.Traverse.Create(__instance);
@@ -98,10 +101,17 @@ namespace ProperFlanking20.QuickDraw
             if (__instance.Owner.Ensure<UnitPartQuickDraw>().active()
                  && __instance.InCombat && (__instance.Owner.Descriptor.State.CanAct || __instance.IsDollRoom))
             {
-                tr.Method("UpdateActiveWeaponSetImmediately").GetValue();
+                // 
+                if (__instance.IsDollRoom)
+                {
+                    __instance.StartCombatChangeAnimation();
+                }
+                else
+                {
+                    UpdateActiveWeaponSetImmediately(__instance);
+                }
                 return false;
             }
-
             return true;
         }
     }
