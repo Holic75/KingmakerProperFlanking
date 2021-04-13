@@ -1,4 +1,5 @@
 ﻿using Kingmaker.Blueprints.Root;
+using Kingmaker.Enums;
 using Kingmaker.Items;
 using Kingmaker.RuleSystem;
 using Kingmaker.RuleSystem.Rules;
@@ -62,6 +63,7 @@ namespace ProperFlanking20.ManeuverAsAttack
         public bool only_full_attack = false;
         public bool only_first_attack = false;
         public bool only_charge = false;
+        public WeaponCategory[] weapon_categories = new WeaponCategory[0];
 
         public override bool maybeReplaceAttackWithAction(RuleAttackWithWeapon attack_rule)
         {
@@ -75,6 +77,10 @@ namespace ProperFlanking20.ManeuverAsAttack
                 return false;
             }
 
+            if (!weapon_categories.Empty() && !weapon_categories.Contains(attack_rule.Weapon.Blueprint.Category))
+            {
+                return false;
+            }
 
             if (!attack_rule.IsCharge && only_charge)
             {
@@ -92,7 +98,7 @@ namespace ProperFlanking20.ManeuverAsAttack
             }
 
             //Main.logger.Log("First Conditions Ok");
-            if (maneuver == CombatManeuver.Trip)
+            if (maneuver == CombatManeuver.Trip ||  maneuver == (CombatManeuver)CallOfTheWild.CombatManeuverTypeExtender.AwesomeBlow)
             {
                 UnitState state = attack_rule.Target.Descriptor.State;
                 // same checks as in UnitProneController, if this is true (and the unit is not in a cutscene), state.Prone.Active will be true on the next tick and we also don't want to trip again.

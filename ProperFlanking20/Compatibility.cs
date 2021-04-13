@@ -3,8 +3,11 @@ using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Enums;
 using Kingmaker.RuleSystem;
+using Kingmaker.UnitLogic.Abilities.Components;
+using Kingmaker.UnitLogic.ActivatableAbilities;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 using Kingmaker.UnitLogic.FactLogic;
+using Kingmaker.UnitLogic.Mechanics.Actions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +26,54 @@ namespace ProperFlanking20
             fixArrowSongMinstrel();
             fixSharpenedAccuracy();
             fixSpiritualWeapons();
-            createTraits();         
+            createTraits();
+            fixBrawlerImprovedAwesomeBlow();
+        }
+
+
+        static void fixBrawlerImprovedAwesomeBlow()
+        {
+            var ability = Brawler.awesome_blow_ability;
+            var action = ability.GetComponent<AbilityEffectRunAction>().Actions;
+            var maneuver_type = (action.Actions[0] as ContextActionCombatManeuver).Type;
+            var buff = CallOfTheWild.Helpers.CreateBuff(ability.name + "ToggleBuff",
+                                                        ability.Name + " (Attack Replacement)",
+                                                        $"When performing full attack action, if you can replace an attack with {ability.Name} combat maneuver.",
+                                                        "",
+                                                        ability.Icon,
+                                                        null,
+                                                        CallOfTheWild.Helpers.Create<ManeuverAsAttack.AttackReplacementWithCombatManeuver>(a => 
+                                                                                                                {
+                                                                                                                    a.maneuver = maneuver_type;
+                                                                                                                    a.only_first_attack = false;
+                                                                                                                    a.only_full_attack = true;
+                                                                                                                    a.weapon_categories = new WeaponCategory[] {WeaponCategory.UnarmedStrike,
+                                                                                                                                                                WeaponCategory.PunchingDagger,
+                                                                                                                                                                WeaponCategory.SpikedHeavyShield,
+                                                                                                                                                                WeaponCategory.SpikedLightShield,
+                                                                                                                                                                WeaponCategory.WeaponLightShield,
+                                                                                                                                                                WeaponCategory.WeaponHeavyShield
+                                                                                                                                                               };
+                                                                                                                }
+                                                                                                            )
+                                                        );
+
+            var toggle = CallOfTheWild.Helpers.CreateActivatableAbility(ability.name + "ToggleAbility",
+                                                                        buff.Name,
+                                                                        buff.Description,
+                                                                        "",
+                                                                        buff.Icon,
+                                                                        buff,
+                                                                        AbilityActivationType.Immediately,
+                                                                        Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
+                                                                        null,
+                                                                        CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.PrimaryHandMeleeWeaponRestriction>());
+            toggle.Group = CallOfTheWild.ActivatableAbilityGroupExtension.AttackReplacement.ToActivatableAbilityGroup();
+            toggle.DeactivateImmediately = true;
+            toggle.IsOnByDefault = true;
+
+            Brawler.awesome_blow_improved.AddComponent(CallOfTheWild.Helpers.CreateAddFact(toggle));
+            Brawler.awesome_blow_improved.SetDescription("At 20th level, the brawler can use her awesome blow ability as an attack rather than as a standard action. She may use it on creatures of any size.");
         }
 
 
@@ -89,10 +139,10 @@ namespace ProperFlanking20
             foreach (var b in buffs)
             {
                 b.AddComponent(CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverToCasterWithFact>(n =>
-                {
-                    n.fact = CallOfTheWild.Archetypes.ArrowsongMinstrel.precise_minstrel;
-                    n.attack_types = new AttackType[] { AttackType.Ranged };
-                }
+                                                                                                    {
+                                                                                                        n.fact = CallOfTheWild.Archetypes.ArrowsongMinstrel.precise_minstrel;
+                                                                                                        n.attack_types = new AttackType[] { AttackType.Ranged };
+                                                                                                    }
                                                                                                  )
                               );
             }
