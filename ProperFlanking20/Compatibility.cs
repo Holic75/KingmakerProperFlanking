@@ -38,7 +38,7 @@ namespace ProperFlanking20
             var maneuver_type = (action.Actions[0] as ContextActionCombatManeuver).Type;
             var buff = CallOfTheWild.Helpers.CreateBuff(ability.name + "ToggleBuff",
                                                         ability.Name + " (Attack Replacement)",
-                                                        $"When performing full attack action, if you can replace an attack with {ability.Name} combat maneuver.",
+                                                        $"When performing standard or full attack action, you can replace any attack with {ability.Name} combat maneuver.",
                                                         "",
                                                         ability.Icon,
                                                         null,
@@ -46,7 +46,7 @@ namespace ProperFlanking20
                                                                                                                 {
                                                                                                                     a.maneuver = maneuver_type;
                                                                                                                     a.only_first_attack = false;
-                                                                                                                    a.only_full_attack = true;
+                                                                                                                    a.only_full_attack = false;
                                                                                                                     a.weapon_categories = new WeaponCategory[] {WeaponCategory.UnarmedStrike,
                                                                                                                                                                 WeaponCategory.PunchingDagger,
                                                                                                                                                                 WeaponCategory.SpikedHeavyShield,
@@ -74,6 +74,16 @@ namespace ProperFlanking20
 
             Brawler.awesome_blow_improved.AddComponent(CallOfTheWild.Helpers.CreateAddFact(toggle));
             Brawler.awesome_blow_improved.SetDescription("At 20th level, the brawler can use her awesome blow ability as an attack rather than as a standard action. She may use it on creatures of any size.");
+
+            var apply_buff = CallOfTheWild.Common.createContextActionApplyBuffToCaster(NewFeats.maneuver_as_attack_buff, CallOfTheWild.Helpers.CreateContextDuration(1), dispellable: false);
+            var remove_buff = CallOfTheWild.Common.createContextActionOnContextCaster(CallOfTheWild.Common.createContextActionRemoveBuffFromCaster(NewFeats.maneuver_as_attack_buff));
+
+            ability.ReplaceComponent<AbilityEffectRunAction>(a => a.Actions = CallOfTheWild.Helpers.CreateActionList(CallOfTheWild.Helpers.CreateConditional(CallOfTheWild.Common.createContextConditionCasterHasFact(Brawler.awesome_blow_improved),
+                                                                                                                                                             apply_buff
+                                                                                                                                                             ),
+                                                                                                                     a.Actions.Actions[0],
+                                                                                                                     remove_buff)
+                                                                                                                     );
         }
 
 
