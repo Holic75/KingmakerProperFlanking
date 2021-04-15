@@ -8,6 +8,8 @@ using Kingmaker.UnitLogic.ActivatableAbilities;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 using Kingmaker.UnitLogic.FactLogic;
 using Kingmaker.UnitLogic.Mechanics.Actions;
+using Kingmaker.UnitLogic.Mechanics.Conditions;
+using Kingmaker.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +30,24 @@ namespace ProperFlanking20
             fixSpiritualWeapons();
             createTraits();
             fixBrawlerImprovedAwesomeBlow();
+            fixSnakeFeint();
+        }
+
+
+        static void fixSnakeFeint()
+        {
+            var buff = CallOfTheWild.Helpers.CreateBuff("SnakeFeint11Buff",
+                                                           "",
+                                                           "",
+                                                           "",
+                                                           null,
+                                                           null,
+                                                           CallOfTheWild.Helpers.Create<FlankingSpecial.AlwaysFlankedByCaster>()
+                                                           );
+            buff.SetBuffFlags(BuffFlags.HiddenInUi);
+            CallOfTheWild.Brawler.snake_feint[1].HideInUI = false;
+            CallOfTheWild.Brawler.snake_feint[1].HideInCharacterSheetAndLevelUp = false;
+            CallOfTheWild.Brawler.snake_feint[1].AddComponent(Common.createAuraEffectFeatureComponentCustom(buff, 15.Feet(), CallOfTheWild.Helpers.CreateConditionsCheckerAnd(CallOfTheWild.Helpers.Create<ContextConditionIsEnemy>())));
         }
 
 

@@ -500,7 +500,7 @@ namespace ProperFlanking20
                 return false;
             }
 
-            if ((unit.Get<CallOfTheWild.FlankingMechanics.UnitPartAlwaysFlanked>()?.active()).GetValueOrDefault() 
+            if ((unit.Get<CallOfTheWild.FlankingMechanics.UnitPartAlwaysFlanked>()?.active(attacker)).GetValueOrDefault() 
                 && attacker.CombatState.IsEngage(unit))
             {
                 return true;
@@ -532,8 +532,10 @@ namespace ProperFlanking20
                 return false;
             }
 
-            if ((unit.Get<CallOfTheWild.FlankingMechanics.UnitPartAlwaysFlanked>()?.active()).GetValueOrDefault()
-                 && attacker.CombatState.IsEngage(unit) && partner.CombatState.IsEngage(unit))
+            if ((unit.Get<CallOfTheWild.FlankingMechanics.UnitPartAlwaysFlanked>()?.active(attacker)).GetValueOrDefault()
+                 && attacker.CombatState.IsEngage(unit) 
+                 && (unit.Get<CallOfTheWild.FlankingMechanics.UnitPartAlwaysFlanked>()?.active(partner)).GetValueOrDefault()
+                 && partner.CombatState.IsEngage(unit))
             {
                 return true;
             }
