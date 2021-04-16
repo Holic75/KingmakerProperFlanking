@@ -6,6 +6,7 @@ using Kingmaker.Enums;
 using Kingmaker.Items;
 using Kingmaker.RuleSystem;
 using Kingmaker.RuleSystem.Rules;
+using Kingmaker.UnitLogic;
 using Kingmaker.UnitLogic.Buffs.Components;
 using Kingmaker.Utility;
 using System;
@@ -168,7 +169,8 @@ namespace ProperFlanking20.CombatManeuverBonus
         {
             return (maneuver == CombatManeuver.Trip || maneuver == CombatManeuver.Disarm || maneuver == CombatManeuver.SunderArmor || maneuver == CombatManeuver.BullRush)
                    || ((maneuver == CombatManeuver.DirtyTrickBlind || maneuver == CombatManeuver.DirtyTrickEntangle || maneuver == CombatManeuver.DirtyTrickSickened)
-                      && unit.Descriptor.Progression.Features.HasFact(NewFeats.quick_dirty_trick));
+                      && unit.Descriptor.Progression.Features.HasFact(NewFeats.quick_dirty_trick))
+                   || (maneuver == (CombatManeuver)CallOfTheWild.CombatManeuverTypeExtender.AwesomeBlow && unit.Descriptor.HasFact(CallOfTheWild.Brawler.awesome_blow_improved));
         }
     }
 

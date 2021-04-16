@@ -55,7 +55,7 @@ namespace ProperFlanking20
     {
         static bool Prefix(RuleCalculateDamage __instance, RulebookEventContext context)
         {
-            if (UnitPartConcealment.Calculate(__instance.Initiator, __instance.Target, false) != Concealment.None)
+            if (UnitPartConcealment.Calculate(__instance.Initiator, __instance.Target, false) == Concealment.Total)
             {//disable precision damage if target has concelement
                 __instance.ParentRule.DisablePrecisionDamage = true;
             }
@@ -98,6 +98,16 @@ namespace ProperFlanking20
     [Harmony12.HarmonyPatch("OnTrigger", Harmony12.MethodType.Normal)]
     class RuleAttackRoll__OnTrigger__BaseFix
     {
+        static bool Prefix(RuleAttackRoll __instance, RulebookEventContext context)
+        {
+            if (UnitPartConcealment.Calculate(__instance.Initiator, __instance.Target, false) == Concealment.Total)
+            {//disable sneak attack if target has concealement
+                __instance.ImmuneToSneakAttack = true;
+            }
+
+            return true;
+        }
+
         static IEnumerable<Harmony12.CodeInstruction> Transpiler(IEnumerable<Harmony12.CodeInstruction> instructions)
         {
             List<Harmony12.CodeInstruction> codes = new List<Harmony12.CodeInstruction>();
@@ -490,7 +500,7 @@ namespace ProperFlanking20
                 return false;
             }
 
-            if ((unit.Get<CallOfTheWild.FlankingMechanics.UnitPartAlwaysFlanked>()?.active()).GetValueOrDefault() 
+            if ((unit.Get<CallOfTheWild.FlankingMechanics.UnitPartAlwaysFlanked>()?.active(attacker)).GetValueOrDefault() 
                 && attacker.CombatState.IsEngage(unit))
             {
                 return true;
@@ -522,8 +532,10 @@ namespace ProperFlanking20
                 return false;
             }
 
-            if ((unit.Get<CallOfTheWild.FlankingMechanics.UnitPartAlwaysFlanked>()?.active()).GetValueOrDefault()
-                 && attacker.CombatState.IsEngage(unit) && partner.CombatState.IsEngage(unit))
+            if ((unit.Get<CallOfTheWild.FlankingMechanics.UnitPartAlwaysFlanked>()?.active(attacker)).GetValueOrDefault()
+                 && attacker.CombatState.IsEngage(unit) 
+                 && (unit.Get<CallOfTheWild.FlankingMechanics.UnitPartAlwaysFlanked>()?.active(partner)).GetValueOrDefault()
+                 && partner.CombatState.IsEngage(unit))
             {
                 return true;
             }

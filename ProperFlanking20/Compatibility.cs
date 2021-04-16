@@ -3,8 +3,13 @@ using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Classes;
 using Kingmaker.Enums;
 using Kingmaker.RuleSystem;
+using Kingmaker.UnitLogic.Abilities.Components;
+using Kingmaker.UnitLogic.ActivatableAbilities;
 using Kingmaker.UnitLogic.Buffs.Blueprints;
 using Kingmaker.UnitLogic.FactLogic;
+using Kingmaker.UnitLogic.Mechanics.Actions;
+using Kingmaker.UnitLogic.Mechanics.Conditions;
+using Kingmaker.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +28,82 @@ namespace ProperFlanking20
             fixArrowSongMinstrel();
             fixSharpenedAccuracy();
             fixSpiritualWeapons();
-            createTraits();         
+            createTraits();
+            fixBrawlerImprovedAwesomeBlow();
+            fixSnakeFeint();
+        }
+
+
+        static void fixSnakeFeint()
+        {
+            var buff = CallOfTheWild.Helpers.CreateBuff("SnakeFeint11Buff",
+                                                           "",
+                                                           "",
+                                                           "",
+                                                           null,
+                                                           null,
+                                                           CallOfTheWild.Helpers.Create<FlankingSpecial.AlwaysFlankedByCaster>()
+                                                           );
+            buff.SetBuffFlags(BuffFlags.HiddenInUi);
+            CallOfTheWild.Brawler.snake_feint[1].HideInUI = false;
+            CallOfTheWild.Brawler.snake_feint[1].HideInCharacterSheetAndLevelUp = false;
+            CallOfTheWild.Brawler.snake_feint[1].AddComponent(Common.createAuraEffectFeatureComponentCustom(buff, 15.Feet(), CallOfTheWild.Helpers.CreateConditionsCheckerAnd(CallOfTheWild.Helpers.Create<ContextConditionIsEnemy>())));
+        }
+
+
+        static void fixBrawlerImprovedAwesomeBlow()
+        {
+            var ability = Brawler.awesome_blow_ability;
+            var action = ability.GetComponent<AbilityEffectRunAction>().Actions;
+            var maneuver_type = (action.Actions[0] as ContextActionCombatManeuver).Type;
+            var buff = CallOfTheWild.Helpers.CreateBuff(ability.name + "ToggleBuff",
+                                                        ability.Name + " (Attack Replacement)",
+                                                        $"When performing standard or full attack action, you can replace any attack with {ability.Name} combat maneuver.",
+                                                        "",
+                                                        ability.Icon,
+                                                        null,
+                                                        CallOfTheWild.Helpers.Create<ManeuverAsAttack.AttackReplacementWithCombatManeuver>(a => 
+                                                                                                                {
+                                                                                                                    a.maneuver = maneuver_type;
+                                                                                                                    a.only_first_attack = false;
+                                                                                                                    a.only_full_attack = false;
+                                                                                                                    a.weapon_categories = new WeaponCategory[] {WeaponCategory.UnarmedStrike,
+                                                                                                                                                                WeaponCategory.PunchingDagger,
+                                                                                                                                                                WeaponCategory.SpikedHeavyShield,
+                                                                                                                                                                WeaponCategory.SpikedLightShield,
+                                                                                                                                                                WeaponCategory.WeaponLightShield,
+                                                                                                                                                                WeaponCategory.WeaponHeavyShield
+                                                                                                                                                               };
+                                                                                                                }
+                                                                                                            )
+                                                        );
+
+            var toggle = CallOfTheWild.Helpers.CreateActivatableAbility(ability.name + "ToggleAbility",
+                                                                        buff.Name,
+                                                                        buff.Description,
+                                                                        "",
+                                                                        buff.Icon,
+                                                                        buff,
+                                                                        AbilityActivationType.Immediately,
+                                                                        Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
+                                                                        null,
+                                                                        CallOfTheWild.Helpers.Create<CallOfTheWild.NewMechanics.PrimaryHandMeleeWeaponRestriction>());
+            toggle.Group = CallOfTheWild.ActivatableAbilityGroupExtension.AttackReplacement.ToActivatableAbilityGroup();
+            toggle.DeactivateImmediately = true;
+            toggle.IsOnByDefault = true;
+
+            Brawler.awesome_blow_improved.AddComponent(CallOfTheWild.Helpers.CreateAddFact(toggle));
+            Brawler.awesome_blow_improved.SetDescription("At 20th level, the brawler can use her awesome blow ability as an attack rather than as a standard action. She may use it on creatures of any size.");
+
+            var apply_buff = CallOfTheWild.Common.createContextActionApplyBuffToCaster(NewFeats.maneuver_as_attack_buff, CallOfTheWild.Helpers.CreateContextDuration(1), dispellable: false);
+            var remove_buff = CallOfTheWild.Common.createContextActionOnContextCaster(CallOfTheWild.Common.createContextActionRemoveBuffFromCaster(NewFeats.maneuver_as_attack_buff));
+
+            ability.ReplaceComponent<AbilityEffectRunAction>(a => a.Actions = CallOfTheWild.Helpers.CreateActionList(CallOfTheWild.Helpers.CreateConditional(CallOfTheWild.Common.createContextConditionCasterHasFact(Brawler.awesome_blow_improved),
+                                                                                                                                                             apply_buff
+                                                                                                                                                             ),
+                                                                                                                     a.Actions.Actions[0],
+                                                                                                                     remove_buff)
+                                                                                                                     );
         }
 
 
@@ -89,10 +169,10 @@ namespace ProperFlanking20
             foreach (var b in buffs)
             {
                 b.AddComponent(CallOfTheWild.Helpers.Create<CoverSpecial.NoCoverToCasterWithFact>(n =>
-                {
-                    n.fact = CallOfTheWild.Archetypes.ArrowsongMinstrel.precise_minstrel;
-                    n.attack_types = new AttackType[] { AttackType.Ranged };
-                }
+                                                                                                    {
+                                                                                                        n.fact = CallOfTheWild.Archetypes.ArrowsongMinstrel.precise_minstrel;
+                                                                                                        n.attack_types = new AttackType[] { AttackType.Ranged };
+                                                                                                    }
                                                                                                  )
                               );
             }

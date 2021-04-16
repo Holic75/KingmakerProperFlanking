@@ -118,4 +118,15 @@ namespace ProperFlanking20.FlankingSpecial
             return isFlanking(target) && target.CombatState.EngagedBy.Contains(partner);
         }
     }
+
+    //caster always flank independently of his position as long as target is engaged by another ally
+    public class AlwaysFlankedByCaster: CallOfTheWild.FlankingMechanics.IAlwaysFlanked
+    {
+        public override bool worksFor(UnitEntityData attacker)
+        {
+            return (attacker == this.Fact.MaybeContext.MaybeCaster)
+                   && (this.Fact.MaybeContext?.MaybeCaster?.CombatState.IsEngage(this.Owner.Unit)).GetValueOrDefault()
+                   && this.Owner.Unit.CombatState.EngagedBy.Count > 1;
+        }
+    }
 }
