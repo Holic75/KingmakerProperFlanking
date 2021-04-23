@@ -103,7 +103,8 @@ namespace ProperFlanking20.ManeuverAsAttack
                 UnitState state = attack_rule.Target.Descriptor.State;
                 // same checks as in UnitProneController, if this is true (and the unit is not in a cutscene), state.Prone.Active will be true on the next tick and we also don't want to trip again.
                 if (state.Prone.Active || state.Prone.ShouldBeActive || !state.IsConscious || state.HasCondition(UnitCondition.Prone) || state.HasCondition(UnitCondition.Sleeping) || state.HasCondition(UnitCondition.Unconscious)
-                    || !attack_rule.Target.CanBeKnockedOff())
+                    || !attack_rule.Target.CanBeKnockedOff()
+                    || attack_rule.Target.Descriptor.HasFact(CallOfTheWild.Common.incorporeal))
                 {
                     return false;
                 }
@@ -146,7 +147,7 @@ namespace ProperFlanking20.ManeuverAsAttack
             }
             else if (maneuver == CombatManeuver.BullRush)
             {
-                //no checks should always work ?
+                //no checks, should always work ?
             }
             else
             {
