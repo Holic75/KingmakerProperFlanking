@@ -124,7 +124,7 @@ namespace ProperFlanking20.FlankingSpecial
     {
         public override bool worksFor(UnitEntityData attacker)
         {
-            return (attacker == this.Fact.MaybeContext.MaybeCaster)
+            return (attacker == this.Fact.MaybeContext?.MaybeCaster)
                    && (this.Fact.MaybeContext?.MaybeCaster?.CombatState.IsEngage(this.Owner.Unit)).GetValueOrDefault()
                    && this.Owner.Unit.CombatState.EngagedBy.Count > 1;
         }
