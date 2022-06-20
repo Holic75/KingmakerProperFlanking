@@ -313,7 +313,8 @@ namespace ProperFlanking20
             var icon = CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/WildFlanking.png");
             wild_flanking = CallOfTheWild.Helpers.CreateFeature("WildFlankingFeature",
                                                                 "Wild Flanking",
-                                                                "When you are flanking an opponent with an ally who also possesses this feat, you can throw yourself into your attacks in such a way that your opponent takes extra damage, at the risk of these attacks striking your ally as well. When you choose to use this feat, check the results of your attack roll against both your opponent’s AC and your ally’s AC. If you hit your opponent, you deal bonus damage as though you were using Power Attack. If you hit your ally, the ally takes no damage from your attack except this bonus damage. It is possible to hit both your enemy and your abettor with one attack. Extra damage from this feat stacks with Power Attack.",
+                                                                "When you are flanking an opponent with an ally who also possesses this feat, you can throw yourself into your attacks in such a way that your opponent takes extra damage, at the risk of these attacks striking your ally as well. When you choose to use this feat, check the results of your attack roll against both your opponent’s AC and your ally’s AC. If you hit your opponent, you deal bonus damage as though you were using Power Attack. If you hit your ally, the ally takes no damage from your attack except this bonus damage. It is possible to hit both your enemy and your abettor with one attack. Extra damage from this feat stacks with Power Attack."
+                                                                +"\nIf more than one ally is sharing this teamwork feat with you, the one with most Hit Points will be considered.",
                                                                 "",
                                                                 icon,
                                                                 FeatureGroup.Feat,
@@ -322,53 +323,32 @@ namespace ProperFlanking20
                                                                );
 
             var buff = CallOfTheWild.Helpers.CreateBuff("WildFlankingBuff",
-                                                          wild_flanking.Name + " Partner",
+                                                          wild_flanking.Name,
                                                           wild_flanking.Description,
                                                           "",
                                                           wild_flanking.Icon,
-                                                          null,
-                                                          CallOfTheWild.Helpers.Create<UniqueBuff>());
-            buff.Stacking = StackingType.Stack;
-            var apply_buff = Common.createContextActionApplyBuff(buff, CallOfTheWild.Helpers.CreateContextDuration(), dispellable: false, is_permanent: true);
-            var ability = CallOfTheWild.Helpers.CreateAbility("WildFlankingAbility",
-                                                        "Select " + wild_flanking.Name + " Partner",
-                                                        wild_flanking.Description,
-                                                        "",
-                                                        wild_flanking.Icon,
-                                                        AbilityType.Special,
-                                                        Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
-                                                        AbilityRange.Close,
-                                                        "",
-                                                        "",
-                                                        CallOfTheWild.Helpers.CreateRunActions(apply_buff),
-                                                        CallOfTheWild.Helpers.Create<CallOfTheWild.TeamworkMechanics.AbilityTargetHasFactOrCasterHasSoloTactics>(a => a.fact = wild_flanking)
-                                                        );
-            ability.setMiscAbilityParametersSingleTargetRangedFriendly();
+                                                          null);
 
-            var ability_remove = CallOfTheWild.Helpers.CreateAbility("WildFlankingRemoveAbility",
-                                            "Unselect " + wild_flanking.Name + " Partner",
-                                            wild_flanking.Description,
-                                            "",
-                                             CallOfTheWild.LoadIcons.Image2Sprite.Create(@"FeatIcons/WildFlankingDeactivate.png"),
-                                            AbilityType.Special,
-                                            Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
-                                            AbilityRange.Personal,
-                                            "",
-                                            "",
-                                            CallOfTheWild.Helpers.CreateRunActions(CallOfTheWild.Helpers.Create<CallOfTheWild.BuffMechanics.RemoveUniqueBuff>(r => r.buff = buff))
-                                            );
-            ability_remove.setMiscAbilityParametersSingleTargetRangedFriendly();
-            var wrapper = Common.createVariantWrapper("WildFlankingBase", "", ability, ability_remove);
-            wrapper.SetName(wild_flanking.Name);
-           
-            wild_flanking.AddComponents(CallOfTheWild.Helpers.CreateAddFact(wrapper),
-                                        CallOfTheWild.Helpers.Create<NewMechanics.WildFlanking>(w =>
-                                                                                                {
-                                                                                                    w.GreaterPowerAttackBlueprint = library.Get<BlueprintFeature>("1b058a5ce1de415449a0f105c55b5f8b"); //2h fighter power attack
-                                                                                                    w.wild_flanking_mark = buff;
-                                                                                                }
-                                                                                                )
-                                        );
+            var toggle = CallOfTheWild.Helpers.CreateActivatableAbility("WildFlankingAbility",
+                                                                        wild_flanking.Name,
+                                                                        wild_flanking.Description,
+                                                                        "",
+                                                                        wild_flanking.Icon,
+                                                                        buff,
+                                                                        AbilityActivationType.Immediately,
+                                                                        Kingmaker.UnitLogic.Commands.Base.UnitCommand.CommandType.Free,
+                                                                        null);
+
+            wild_flanking.AddComponents(CallOfTheWild.Helpers.CreateAddFact(toggle));
+
+            buff.AddComponents(CallOfTheWild.Helpers.Create<NewMechanics.WildFlanking>(w =>
+                                {
+                                    w.GreaterPowerAttackBlueprint = library.Get<BlueprintFeature>("1b058a5ce1de415449a0f105c55b5f8b"); //2h fighter power attack
+                                    w.wild_flanking_mark = wild_flanking;
+                                }
+                                )
+                                );
+
             wild_flanking.Groups = wild_flanking.Groups.AddToArray(FeatureGroup.CombatFeat, FeatureGroup.TeamworkFeat);
             library.AddCombatFeats(wild_flanking);
             CallOfTheWild.Common.addTemworkFeats(wild_flanking);
