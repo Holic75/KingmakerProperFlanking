@@ -184,14 +184,23 @@ namespace ProperFlanking20.NewMechanics
                 unit = null;
             }
 
+            int current_hp = 0;
             foreach (var u in evt.Target.CombatState.EngagedBy)
             {
-                if (u != evt.Initiator && u.Buffs.HasFact(wild_flanking_mark) && evt.Target.isFlankedByAttackerWith(evt.Initiator, u))
+                if (u != evt.Initiator 
+                    && (u.Buffs.HasFact(wild_flanking_mark) || evt.Initiator.Descriptor.State.Features.SoloTactics)
+                    && evt.Target.isFlankedByAttackerWith(evt.Initiator, u))
                 {
-                    unit = u;
-                    damage = getPowerAttackBonus(this.Owner.Unit, evt.Weapon);
-                    break;
+                    if (unit.Stats.HitPoints.ModifiedValue > current_hp)
+                    {
+                        current_hp = unit.Stats.HitPoints.ModifiedValue;
+                        unit = u;
+                    }
                 }
+            }
+            if (unit != null)
+            {
+                damage = getPowerAttackBonus(this.Owner.Unit, evt.Weapon);
             }
         }
 
